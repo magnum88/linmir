@@ -1,4 +1,3 @@
-<img src="http://90.116.148.62/moodle/pluginfile.php/154/mod_page/content/3/logo_linmir.jpg" border="0">
 # LinMIR
 UNE NOUVELLE MOUTURE EST EN PREPARATION Version 4.0
 
