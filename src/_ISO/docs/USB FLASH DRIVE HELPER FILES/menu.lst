@@ -1,0 +1,6 @@
+clear
+pause --wait=3 Booting from Easy2Boot USB Helper Flash Drive...
+find --set-root /_ISO/e2b/grub/menu.lst
+chainloader /grldr
+boot
+

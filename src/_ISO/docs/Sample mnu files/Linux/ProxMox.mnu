@@ -1,0 +1,7 @@
+# Copy ISO to same folder as .mnu file (e.g. \_ISO\MAINMENU)
+# FAT32 E2B only - see  http://rmprepusb.blogspot.co.uk/2014/03/add-proxmox-isos-to-easy2boot.html  for NTFS E2B USB drives
+
+title ProxMox Installer ISO \n Use fdisk -l to find 4th partition\n mount /dev/sdb4 /mnt\n chroot /mnt sbin/unconfigured.sh
+set ISO=$HOME$/proxmox-ve_3.2-1933730b-2.iso
+/%grub%/QRUN.g4b %ISO%
+boot

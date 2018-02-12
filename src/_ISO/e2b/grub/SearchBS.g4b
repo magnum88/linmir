@@ -1,0 +1,83 @@
+!BAT
+if "%1"=="FF" goto :FF
+if "%1"=="" goto :EOF
+
+:: Requires wenv in %grub% folder
+
+:: Usage: SearchBS.g4b [memorystart+memoryrange] [string]
+::        where memorystart and memoryrange is in units of 512 bytes
+::
+:: Returns: GOTSTR=1 if found match, OFFSET is offset address, (md)0x3000+1 contains string found
+::
+::  e.g. SearchBS.g4b 0x680+0x80 CPU
+::       SearchBS.g4b 0x700+0x80 "cpu\ is\ present"
+::       SearchBS.g4b 0x780+0x80 cpu\ is\ present
+
+::  0x680 = D000:0 in memory and is often use for storing DMI BIOS strings
+::  0x700 = E000:0 in memory and is used for DMI string as well a BIOS code and workspace
+::  0x780 = F000:0 in memory and is usually the BIOS code but may also contain fixed strings
+
+::  0x680+0x180 will search all BIOS area from D000:0 to end of BIOS area (FFFF:F)
+::  0x680+0x80  will seach the 64K segment from D000:0 only
+::  0x700+0x100 will search 128K from E000:0
+
+:: This grub4dos batch file displays all BIOS strings matching the specified string
+:: Case Insensitive - if one or more matches found  GOTSTR=1
+
+:: so we don't get invaild argument if no matches
+errorcheck on
+debug 1
+set GOTSTR=
+set SLOC=%1
+:: get location of strings from D000:0 to F000:FFFF in BIOS and DMI area
+cat --locatei=%2 (md)%SLOC% | set a=
+:: limit to 400 chars to reduce length of the for /f line below 512 chars!
+set a=%a:~0,400%
+if "%a%"=="" goto :EOF
+:: parse the list and get first 17 locations into %i to %z - call this batch file again (%0) with FF as the first parameter so that it jumps to :FF
+/%grub%/WENV for /f "delims= " %i in ( "%a%" ) do exec %0 FF %i %j %k %l %m %n %o %p %q %r %s %t %u %v %w %x %y
+
+# return offset address of last string found - string will be at (md)0x3000+1
+set OFFSET=%A%
+
+set a=
+set A=
+set z=
+set SLOC=
+goto :EOF
+
+:: ============ SUBROUTINE =====
+
+:FF
+
+::debug 3
+:: %2 %3 etc will have the first 17 locations
+::echo @F 2=%2 3=%3 4=%4 5=%5 6=%6 7=%7 8=%8 9=%9
+errorcheck off
+set z=
+if "%2"=="" goto :EOF
+set z=%2
+set z=%z:~0,5%
+if %z:~-2,1%"=="" set z=%z:~,-2%
+set /A A=0x%z%+0 > nul
+if "%A%"=="0x0" goto :EOF
+if "%A%"=="" goto :EOF
+errorcheck on
+:: now put the string at location %A% into memory
+::cat --length=50 --skip=%A% (md)%SLOC% 
+cat --length=50 --skip=%A% (md)%SLOC% > (md)0x3000+1
+:: remove line feeds, carriage returns, etc.
+cat --locate=\x0a --replace=\x20 (md)0x3000+1 > nul
+cat --locate=\x0d --replace=\x20 (md)0x3000+1 > nul
+:: ensure end of string is marked
+echo -e -n \x0 >> (md)0x3000+1
+:: now display the modified string on the display
+echo -n @(md)%SLOC% OFFSET=%A%  ==> 
+cat (md)0x3000+1
+:: throw a line
+echo  
+:: set success - found a match!
+set GOTSTR=1
+:: shift %3 to %2 and loop until no more left
+shift
+goto :FF

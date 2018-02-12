@@ -1,0 +1,213 @@
+﻿# Copy this file to \_ISO\MAINMENU to test different fonts
+
+title unifont.hex.gz
+font
+font /%grub%/unifont.hex.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title BIOS font
+font
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title cp850.uni.gz
+font
+font /_ISO/docs/fonts/cp850.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title flori.uni.gz
+font
+font /_ISO/docs/fonts/flori.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title donna.uni.gz
+font
+font /_ISO/docs/fonts/donna.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title orator_caps.uni.gz
+font
+font /_ISO/docs/fonts/orator_caps.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title sans2.uni.gz
+font
+font /_ISO/docs/fonts/sans2.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title Sansf1.uni.gz
+font
+font /_ISO/docs/fonts/Sansf1.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title sans_bold.uni.gz
+font
+font /_ISO/docs/fonts/sans_bold.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title smallfont.uni.gz
+font
+font /_ISO/docs/fonts/smallfont.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title terminal.uni.gz
+font
+font /_ISO/docs/fonts/terminal.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title terminus.uni.gz
+font
+font /_ISO/docs/fonts/terminus.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+
+title 28STD.uni.gz
+font
+font /_ISO/docs/Fonts/28STD.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title ANTIQUE.uni.gz
+font
+font /_ISO/docs/Fonts/ANTIQUE.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title APL.uni.gz
+font
+font /_ISO/docs/Fonts/APL.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title BROADWAY.uni.gz
+font
+font /_ISO/docs/Fonts/BROADWAY.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title COURIER.uni.gz
+font
+font /_ISO/docs/Fonts/COURIER.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title GREEK.uni.gz
+font
+font /_ISO/docs/Fonts/GREEK.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title HISQUASH.uni.gz
+font
+font /_ISO/docs/Fonts/HISQUASH.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title HISTD.uni.gz
+font
+font /_ISO/docs/Fonts/HISTD.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title HITHIN.uni.gz
+font
+font /_ISO/docs/Fonts/HITHIN.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title IBM.uni.gz
+font
+font /_ISO/docs/Fonts/IBM.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title LITE.uni.gz
+font
+font /_ISO/docs/Fonts/LITE.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title MEDIEVAL.uni.gz
+font
+font /_ISO/docs/Fonts/MEDIEVAL.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title ROMAN.uni.gz
+font
+font /_ISO/docs/Fonts/ROMAN.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title SANS.uni.gz
+font
+font /_ISO/docs/Fonts/SANS.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title SANS2.uni.gz
+font
+font /_ISO/docs/Fonts/SANS2.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title SCRIPT.uni.gz
+font
+font /_ISO/docs/Fonts/SCRIPT.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title SQUASHED.uni.gz
+font
+font /_ISO/docs/Fonts/STANDARD.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title STANDARD.uni.gz
+font
+font /_ISO/docs/Fonts/THIN.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title ART.uni.gz
+font
+font /_ISO/docs/Fonts/ART.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title DECORATE.uni.gz
+font
+font /_ISO/docs/Fonts/DECORATE.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title READABL7.uni.gz
+font
+font /_ISO/docs/Fonts/READABL7.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title READABL8.uni.gz
+font
+font /_ISO/docs/Fonts/READABL8.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+title WIGGLY.uni.gz
+font
+font /_ISO/docs/Fonts/WIGGLY.uni.gz
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xa000+0x50
+
+

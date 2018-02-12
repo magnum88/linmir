@@ -1,0 +1,306 @@
+﻿# ITALIANO (IT)  v1.00 FZ 2014-11-24
+#
+# NON MODIFICARE QUESTO FILE !!! Vedere 'Modifica della lingua' a pagina http://www.easy2boot.com/configuring-e2b/changing-the-e2b-preset-text/	
+#
+# Convenzione: $$ STRM per stringhe di file .mnu, $$ strt per i file .txt, $$ STRB per i file batch .g4b, $$ STRh per .hdr file $$ STRL per i file .lst
+# Nota: $$ stringhe STR sono case sensitive
+#
+# I caratteri speciali non si devono cambiare:
+#   \ n è un ritorno a capo (nuova linea)  
+#    $[0401] definisce un colore del testo e il colore di sfondo
+#    %....% sono variabili utilizzate dal GRUB4DOS
+#    if '[Y]/N' è necessario utilizzare la lettera N per No - se '[N],Y' è necessario utilizzare la lettera Y per Sì
+#
+#    ^ in .stringhe MNU e .txt vengono utilizzati per specificare un tasto di scelta rapida
+#    dove ci sono due stringhe quasi identici, uno (STRxGxx) sarà per un menu GFX di avvio che non consente tasti - esempio STRhGF7
+#    Se non si utilizza GFX Boot allora non c'è bisogno di cambiare \ tradurre le stringhe GFX
+#
+#  se si utilizza a doppio byte i caratteri non-ASCII UTF-8, mantenere tutte le stringhe della domanda (esempio. $$STRbxx) più breve possibile o si può ottenere un errore se troppo lungo
+
+#                  --------- INTESTAZIONI DEL MENU -----
+#
+# I titoli devono essere compresi tra due \x20 e di lunghezza compresa tra 58 e 78 caratteri - ma non più di 78 o si otterràuna linea a portafoglio se è in modalità 640x480
+#                     1         2         3         4         5         6         7         8
+#         \x202345678901234567890123456789012345678901234567890123456789012345678901234567890\x20
+#                                                                     XXXXXXXXXXXXXXXXXXXXX  <- testo deve finire in questa zona!
+#
+# Voci di menu (spazi iniziali partono dal bordo sinistro del menu)
+# I titoli dovrebbero finire qui  >>>>                                                    \x20
+
+$$STRm004=Menu Boot di Windows                                                       \x20      
+$$STRm019=Menu DOS                                                                   \x20
+$$STRm017=Menu AntiVirus                                                             \x20
+$$STRm021=Menu Linux                                                                 \x20
+$$STRm023=Menu Backup                                                                \x20
+$$STRm025=Utility Menu                                                               \x20
+$$STRm027=Menu WinPE                                                                 \x20
+$$STRm033=Togliere Password Account di WIndows                                       \x20
+$$STRm013=Utility - Menu Test della ram                                              \x20
+$$STRm1BL=Backup - Menu Linux                                                        \x20
+$$STRhAUT=Menu DIRECT BOOT (AUTO)                                                    \x20
+$$STRlWIN=Installa Windows da una immagine ISO                                       \x20
+$$STRhVIN=Installa Windows Vista                                                     \x20
+$$STRh2K8=Installa Server 2008 R2                                                    \x20
+$$STRhW7I=Installa Windows 7                                                         \x20 
+$$STRhW8I=Installa Windows 8                                                         \x20
+$$STRhW12=Installa Server 2012                                                       \x20
+
+
+#                        --------- VOCI DEL MENU (.mnu) -------------------
+$$STRm016=^Ctrl+A Menu ANTIVIRUS              [Ctrl+A]\n AntiVirus utility
+$$STRm022=^Ctrl+B Menu BACKUP                 [Ctrl+B]\n Backup menu
+$$STRm018=^Ctrl+O Menu DOS                    [Ctrl+O]\n MS-DOS and FreeDOS utility
+$$STRm020=^Ctrl+L Menu LINUX                  [Ctrl+L]\n Linux ISOs, etc.
+$$STRm003=^Ctrl+W Menu WINDOWS boot           [ctrl+W]\n Menu Windows Boot 
+$$STRm026=^Ctrl+P Menu WINPE                  [Ctrl+P]\n  WinPE's Bootable
+$$STRm0WI=^Ctrl+I Menu WINDOWS installa       [Ctrl+I] (%CALL% presenti)\n Installa Windows nell' Hard Disk usando una file ISO.
+$$STRmGWI=Menu Installazione di Windows\n Installa Windows nell' Hard Disk usando una file ISO.
+$$STRm024=^Ctrl+U Menu UTILITY                [Ctrl+U]\n Memtest, etc.
+
+# ZZSubMenuWin.mnu
+# Usa solo se GFX si trova a MyE2B.cfg E ASTRINGS se non risolve
+$$STRmGAT=Menu Boot diretto   (\\_ISO\\AUTO)
+# Usato solo se ASTRINGS = 1 si trova in posto di un menu di impostazione MyE2B.cfg HDRAUTO e non GFX
+$$STRmAUT=^Ctrl+D Menu Boot diretto           [Ctrl+D] (\\_ISO\\AUTO)\n Avviare qualsiasi file nella directory \\_ISO\\AUTO nella cartella o in una sotto directory.
+
+# Backup_linux.mnu
+$$STRm0BL=Menu Backup Linux \n Linux Menu Backup.
+
+# ZZBackTo_Backup.mnu
+$$STRm0BU=Torna al menu dei Backup    \n Ritorna al menu Utility
+# GFX menu
+$$STRm1BU=Torna al menu dei Backup\n Ritorna al menu Utility
+
+# ZZBackTo_Utilis.mnu
+$$STRm005=^Ctrl+F8 Torna al menu delle Utility [Ctrl+F8]\n Ritorna al menu Utility
+# GFX menu
+$$STRmG05=Torna al menu delle Utility\n Ritorna al menu Utility
+
+# Utility memtest
+$$STRm012=^Ctrl+M Menu TEST della memoria     [Ctrl+M]\n Utilità di sistema di test di memoria
+# GFX menu
+$$STRmG12=Menu TEST della memoria \n Utilità di sistema di test di memoria
+
+$$STRm014=Passa a Grub4dos v0.4.6 (per il drive USB)\n Carica grub4dos v0.4.6.\n Quindi sarà possibile installare il grub4dos USB driver.\n Utilizzare il driver USB se si dispone di un BIOS bacato.
+$$STRm015=Installa Grub4dos per i driver USB \n Sostituisce il codice di avvio USB BIOS. \ N Utilizzare se il BIOS ha un cattivo codice USB. \ N esempio Se si verificano errori di avvio di un drive USB>137GB.
+
+
+# chkpci mnu
+$$STRm007=Mostra tutti gli ID di sistema PCI\n Visualizza tutti gli ID PCI
+$$STRm008=Mostra Controller memoria di massa PCI ID\n di visualizzazione ID del controller del disco PCI
+$$STRm009=Elenco voci corrispondenti XP DriverPack.ini\n Verifica quanto verrà utilizzato il driver XP a 32 bit
+$$STRm010=Elenco voci corrispondenti Win2K DriverPack.ini\n Verifica a quanto sarà utilizzato driver a 32 bit Windows 2000
+$$STRm011=Elenco voci corrispondenti Win2K3 DriverPack.ini\n Verifica a quanto sarà utilizzato driver a 32 bit Windows 2003
+
+$$STRm0FD=Avviare FreeDos dall'immagine del dischetto nel mese di giugno\n FreeDos partire dalla immagine del dischetto
+
+# \_ISO\UTILITIES_MEMTEST\MNU\Memtest86-51.mnu
+$$STRmm02=Passmark Memtest86 \n Test della Memoria\n http://www.memtest86.com
+$$STRmm03=Passmark Memtest86 (Passo uno) \n Test della Memoria\n http://www.memtest86.com
+$$STRmm04=Passmark Memtest86 (Boot Trace attivo)\n Test della Memoria\n http://www.memtest86.com
+$$STRmm05=Passmark Memtest86 (Avviare solo una CPU)\n Test della Memoria\n http://www.memtest86.com
+	
+
+#  ----- .hdr Files -----
+
+$$STRh0F7=^F7 Avvio dal disco rigido      [F7]\n Avviare dal hard interno del computer (HDD0).
+$$STRhGF7=Avvio dal disco rigido\n  Avviare dal hard interno del computer  (HDD0).
+
+# MENU PRINCIPALE only
+$$STRh0F8=^F8 Ricarica il Menu principale [F8]\n Visualizzare il menu principale
+# Menu GFX 
+$$STRhGF8=Ricarica il Menu principale\n Aggiorna il Menu principale
+
+
+# Menu GFX
+$$STRhGBM=Ritorna al Menu Principale\n Ritorna al Menu Principale
+$$STRh1BM=^F8 Ritorna al Menu Principale  [F8]\n Ritorna al Menu Principale
+
+# F9
+# Menu GFX
+$$STRhGRB=Riavvia \n Riavvia il sistema.
+$$STRh1RB=^F9 Riavvia                     [F9] \n Riavvia il sistema.
+#F10
+# Menu GFX 
+$$STRhG10=Spegni il programma multiboot\n Spegni il programma multiboot.
+$$STRh110=^F10 Spegnere                    [F10]              \n Spegni il programma multiboot.
+
+# Menu GFX
+$$STRhGMW=Ritorna all'elenco dei sustemi operativi\n Ritorna all'elenco dei sustemi operativi
+$$STRh1MW=^Ctrl+I Ritorna all'elenco dei sustemi operativi [Ctrl+I] \n Ritorna all'elenco dei sustemi operativi
+
+#FASTLOAD
+$$STRhMFL=Aggiornare il MENU FASTLoad memorizzati nella cache\ n Eseguire questa opzione se è stato modificato il contenuto della chiavetta USB.\n O rinominare \FASTLOAD.YES in \FASTLOAD.NO per disattivare\n la voce FastLoad feature.
+
+#Menu default
+$$STRh0MD=Impostazione del menu e il tempo di attesa\n È possibile configurare il menu e impostare il timeout prima di una voce se il menu non viene eseguito automaticamente.
+$$STRh1MD=Impostare la voce di menu di default tra  (0-99) : 
+$$STRh2MD=Impostare il timeout in secondi tra  (0=off) :  
+
+
+# ---- menuWinInstall.lst ----
+
+$$STRl0x1=^Alt+1 Installa XP - Step 1 [Alt+1]\n Ricordarsi di selezionare un driver AHCI (se necessario) \n il driver FiraDisk e WinVBlock (utilizzando F6)!\n È necessario riavviare Easy2Boot e successivamenteed eseguire lo STEP 2.
+# GFX menu
+$$STRl1x1=Installa XP - Step 1\n Ricordarsi di selezionare un driver AHCI (se necessario) \n il driver FiraDisk e WinVBlock (utilizzando F6)!\n È necessario riavviare Easy2Boot e successivamenteed eseguire lo STEP 2.
+
+$$STRl0x2=^Alt+2 Installa XP - Step 2 [Alt+2] (512MB+ sistemi)\n 2° fase di setup (più affidabili).\n Ciò completerà l'installazione e riavviare dal disco rigido.\n Si richiede almeno 512 MB di RAM per contenere il file ISO.
+# GFX menu
+$$STRl1x2=Installa XP - Step 2 (512MB+ sistemi)\n 2° fase di installazione (più affidabili).\n Ciò completerà l'installazione e riavviare dal disco rigido.\n Si richiede almeno 512 MB di RAM per contenere il file ISO.
+
+$$STRl0x3=^Alt+3 Installa XP - Step 2 [Alt+3] (bassa RAM)\n Faster - utilizzare questo step se non è sufficiente la memoria di sistema  se è minore di (<512MB). \n Diretto map ISO per WinVBlock. Non funziona su tutti i sistemi\n sistemi, ad esempio basate su CPU Atom.
+# GFX menu
+$$STRl1x3=Installa XP - Step 2 (Sistemi a bassa RAM)\n Faster - utilizzare questo step se non è sufficiente la memoria di sistema  se è minore di (<512MB). \n Diretto map ISO per WinVBlock. Non funziona su tutti i sistemi\n ad esempio basate su CPU Atom.
+
+$$STRl0PE=^X Installa XP usando WinPE    [X]\n Installa Windows XP nel tuo hard disk utilizzando WinPE.\n Avrete anche bisogno di un file ISO WinPE ISO o una Installazione di Windows\n (WinPE v2/3/4 o di una immagine ISO di Windows Vista o successive).
+# GFX menu
+$$STRl1PE=Installa XP usando WinPE\n Installa Windows XP nel tuo hard disk utilizzando.\n Avrete anche bisogno di un file ISO WinPE ISO o una Installazione di Windows\n (WinPE v2/3/4 o di una immagine ISO di Windows Vista o successive).
+
+$$STRl0LD=^L Lista Disk Ctrl PCI IDs     [L]\n Prendere nota degli ID PCI quotate e quindi con questi ultimi\n i TXTSETUP.OEM voci (vedi Tutorial 30).
+# GFX menu
+$$STRl1LD=Lista Disk Controller PCI IDs\n Prendere nota degli ID PCI quotate e quindi con questi ultimi\n i TXTSETUP.OEM voci (vedi Tutorial 30)
+
+$$STRl0IV=^V Installa Vista              [V] (%CV% presenti)\n Installa Windows Vista da una immagine ISO.
+# Menu GFX
+$$STRl1IV=Installa Vista\n Installa Windows Vista da una immagine ISO.
+
+$$STRl0I7=^7 Installa Windows 7          [7] (%C7% presenti)\n Installa Windows 7 da una immagine ISO.
+# GFX menu
+$$STRl1I7=Installa Windows 7\n Installa Windows 7 da una immagine ISO.
+
+$$STRl082=^R Installa Server 2008 R2     [R] (%C28% presenti)\n Installa Server 2008 R2 da una immagine ISO.
+# GFX menu
+$$STRl182=Installa Server 2008 R2\n Installa Server 2008 R2 da una immagine ISO.
+
+$$STRl0I8=^8 Installa Windows 8          [8] (%C8% presenti)\n Installa Windows 8 da una immagine ISO.
+# Menu GFX 
+$$STRl1I8=Installa Windows 8\n Installa Windows 8 da una immagine ISO.
+
+$$STRl012=^S Installa Server 2012        [S] (%C12% presenti)\n Installa Windows 2012 da una immagine ISO.
+# Menu GFX 
+$$STRl112=Installa Server 2012\n Installa Windows 2012 da una immagine ISO.
+
+# \_ISO\UtilityTest\
+$$STRt001=Memtest86+ \n Test della Memoria
+$$STRmmbp=Measure BIOS USB Performance\n This accesses a file directory entry multiple times.\n It emulates how Easy2Boot looks for files during start up.\n 100 Accesses should take less than 20 seconds.
+
+
+
+
+#               --------- STRINGA IN GRUB4DOS file batch (.g4b) -----------
+#XPStep1.g4b
+$$STRb001=INSTALLA XP - STEP 1\n====================\n\n$[0104]IMPORTANT: You must boot from USB drive again and run STEP 2 after this!\n
+$$STRb002=64-bit XP ISO detected!\nYou will need to press F6 to load 64-bit Firadisk driver
+$$STRb003=ISO rilevato esempio DIWindows %OSTYPE% (use 'XP', '2K3' or '2K' in ISO il nome del file se non corretto)
+$$STRb004=Se questo non è corretto, si prega di digitare xp 2k o 2k3 ora : 
+$$STRb005=Cercherà Windows %OSTYPE% drivers only
+$$STRb006=DPMS2 Opzione a (solo 32-bit)\n=============================\n1=SRS Driver+FiraDisk            - default=FiraDisk  + OEM drivers\n2=SRS Driver+FiraDisk+WinVBlock  - default=FiraDisk  + OEM drivers
+$$STRb007=3=SRS Driver+WinVBlock+FiraDisk  - default=WinVBlock + OEM drivers (>512MB only)
+$$STRb008=Auto-Detect SATA/AHCI/RAID 32-bit Driver di archiviazione di massa ([Y=2]/N/1/2/3) : 
+$$STRb009=Auto-Detect SATA/AHCI/RAID 32-bit Driver di archiviazione di massa ([Y=2]/N/1/2) : 
+$$STRb010=$[0104]NOTA: Se l'avvio da USB-HDD, alla domanda successiva rispondere di sì ....
+$$STRb011=Carica XP ISO in memoria (consigliato) ([Y]/N) : 
+$$STRb012=Carica XP ISO in memoria (consigliato) (premere Y se il boot da USB-HDD o se dia problemi di crash BSOD) (Y/[N]) : 
+$$STRb013=Si prega di scegliere un file per l'installazione per renderlo automatico ...
+$$STRb014=È necessario premere F6 quando richiesto,\n quindi premere S per selezionare WinVBlock (32-bit) Driver,\n quindi premere S per selezionare FiraDisk (32-bit) driver,\n quindi premere S per selezionare il driver AHCI (se presente)\n
+$$STRb015=È necessario premere F6 quando richiesto,\n quindi premere S per selezionare WinVBlock (64-bit) Driver,\n quindi premere S per selezionare FiraDisk (64-bit) driver,\n quindi premere S per selezionare il driver AHCI (se presente)\n
+$$STRb016=\nEsempio:\nNetbook con CPU Atom  = WinVBlock+ICH7R/DH\nDQ67 series 6 = FiraDisk+Desktop\\Workstation\\Server Express
+$$STRb017=Ora premere [Invio], quindi premere F6 quando richiesto da XP Setup e caricare i driver ..
+$$STRb018=Tip: If FiraDisk dà problemi, riavviare e provare Opzione 3 (WinVBlock).\n Se avete ancora problemi, utilizzare l'opzione 2, ma premere F6 e aggiungere tutti i driver elencati dall'installazione XP.\n
+$$STRb019=$[0104]NOTA BENE: È necessario utilizzare uno dei 'Install XP - STEP 2' opzioni dopo il riavvio (512MB+ è più sicuro).
+$$STRb020=$[0104]NOTA BENE: WinVBlock (opzione 3) è adatto solo per i sistemi con più di 512MB di memoria \ nUsa solo il 'Install XP - FASE 2 (512 MB + sistemi)' opzione sul successivo riavvio.\n
+$$STRb021= SPAZIO=Pausa, ENTER=Inizia ora - AVVIAMENTO IN 5 SECONDI ...
+$$STRb022=Verrà utilizzato alcuni file di installazione automatica
+$$STRb023=$[0104]ERRORE: WINNT variabile non è stata impostata correttamente in %MFOLDER%/%CHOSEN%.AUTO!\nPer favore usa\n!BAT\nSET WINNT=12345678.SIF\n\n 
+$$STRb024=$[0102]NOTE: XP ISO userà %WINNT% come WINNT.SIF file
+$$STRb025=$[0104]DPMS opzione non disponibile (file DriverPack non presente)!
+$$STRb026=$[0104]Mancante /%grub%/dpms/DRIVERPACK.INI file\nRinominare il file DriverPack_MassStorage_wnt5_x86-32.ini a DrivePack.ini. 
+$$STRb027=$[0102]NOTA: XP ISO userà %WINNT% come WINNT.SIF file
+$$STRb028=$[0104]ATTENZIONE: variabili WINNT non è stata impostata correttamente in %MFOLDER%/%ISO%.AUTO!\nSi prega di utilizzare \n!BAT\nSET WINNT=12345678.SIF\n\n
+$$STRb029=$[0102]%WINNT%.CMD sarà chiamato dopo l'installazione
+$$STRb030=$[0102]INFORMAZIONE: Dimensione memoria
+
+
+#XPStep2.g4b
+$$STRbx21=INSTALLA XP - STEP 2\n====================
+$$STRbx22=caricamento %ISO% in memoria - si prega di attendere ...
+
+#XPStep2LowRam.g4b
+$$STRbLR1=INSTALLA XP - FASE 2 LowRAM (utilizzare solo per basse sistemi RAM<512MB)\n=========================================================================
+$$STRbLR2=$[0104]NON RIMUOVERE IL DRIVE USB! - Riavvio dal disco rigido ...
+
+# XPWINNT.g4b
+$$STRT001=Selezionare un file di Windows XP ISO\n=====================================
+$$STRT002=ORA SCEGLI UN WINPE 'Helper' ISO\n================================\nWe need to temporarily boot to WinPE in order to run WINNT32.EXE\nSi prega di specificare un WinPE o Windows Installare ISO (deve essere Vista o versione successiva, a 32 bit)
+$$STRT003=Qual è la cartella WinPE ISO a (1-10, Esc = Abort)? :
+$$STRT004=ORA SCEGLI UN WinPE 'Helper' ISO\n================================\nFrom %PEPATH%
+$$STRT005=HARD DISK PARTITION SIZE\n========================\n\nEasy2Boot can wipe the hard disk and create a new partition\nor can format una partizione esistente\si può installare su una partizione esistente.
+$$STRTA05=\nPer ora impostare una dimensione predefinita.\nVi verrà chiesto se si desidera formattare il disco rigido in seguito ...
+$$STRTB05=Default Disk 0 1 ° dimensione della partizione in MB (0=MAX, ESC=Abort) :  
+$$STRT006=SCEGLIERE UN FILE UNATTEND.TXT\n==============================\nDa %MYPATH%
+
+# RunVista.g4b
+$$STRbV01=Selezionare un file di installazione automatica.XML file\n========================================================
+$$STRbV02=Usa i file di Easy2Boot XML 
+$$STRbV03=$[0104]ATTENZIONE: Per installare Windows da una chiavetta USB nell' Hard disk, sarà anche necessario per E2B Assistente USB Flash Drive.\n Se non lo fai, si ottiene il seguente messaggio 'il dispositivo del driver di DVD non è presente. \ NPlease leggere il Easy2Boot tutorial per ulteriori dettagli.\nPer favore vedere il tutorial di Easy2Boot Tutorial per tutti i dettagli.
+$$STRbV04=Premi C della tastiera per continuare o premi  [Enter] per ritornare : 
+$$STRbV05=$[0104]IL FILE READER USB MA NON WINHELPER.USB AutoUnattend.xml! 
+
+# RunWin8.g4b
+$$STRb801=Selezionare il file Unattend.XML file\n=====================================\nNote: Il vostro file XML deve contenere una chiave adeguata\n      e che verrà eseguito LOADISO (vedi esempio).\n\n    Opzione 0 consente di selezionare un codice Product Key.
+$$STRb802=SCEGLIERE LA KEY (usate un disco file .xml Easy2Boot)
+$$STRb803=Selezionare un file che contiene la Product Key\n===============================================
+$$STRb805=Inserire la key (seriale) personale
+$$STRb806=$[0104]Product Keys must be in      AAAAA-BBBBB-CCCCC-DDDDD-EEEEE   format (29 characters)
+$$STRb807=Inserisci il tuo seriale personale che è formato da 5 gruppi : 
+$$STRb8rp=Premere un tasto qualsiasi per Windows Repair...\n
+
+
+# PickAFile.g4b
+$$STRbp01=Si prega di selezionare (ESC=Annulla)... 
+$$STRbp02=$[0102]utilizzando solo questo file presente...
+$$STRbp03=Scegliere un numero
+
+$$STRPKEY=Premere un tasto qualsiasi per continuare...
+
+#QRUN.g4b
+$$STRberr=$[0104]ERROR: %ISOC% NON è contiguo (o è danneggiato o mancante)!\nPer favore utilizza RMPrepUSB - CTRL+F2 o eseguire WinContig.exe per deframmentare tutti i file.
+$$STRbpt1=$[0104] ATTENZIONE: QUESTO PARTIZIONE DEL DRIVE E2B stanno per essere sovrascritti!\n   C'è un piccolo rischio di perdere tutti i file del drive E2B.\n   È stato fatto un backup del MBR..\n
+$$STRbpt2=$[0104]   è possibile ripristinare le partizioni E2B originali di Windows\n   utilizzando lo script '\\e2b\\RestoreE2B.cmd' (andare su www.easy2boot.com per i dettagli).\n
+$$STRbpt3=\nPer l'avvio in UEFI, riavviare e selezionare l'opzione di avvio UEFI:xxxx\nPer tornare a Easy2Boot, l'avvio in non-UEFI (modalità legacy o CSM)\nand selezionare l'opzione di menu Easy2Boot
+$$STRbpt4=Per sostituire le partizioni E2B scegliere ([Y]/N) : 
+
+$$STRmc64=  --- 64-bit CPU  (%TMEM%MB) ---
+$$STRmc32=  --- 32-bit CPU  (%TMEM%MB) ---
+
+$$STRmFS1=\x05 CACHED MENU (FASTLOAD) \x05\n Use Rebuild Main Menu to update this menu\n so that any recent changes will take affect.
+$$STRhMFD=Disattivato FASTLOAD\n The Main Menu will not be cached.
+$$STRhMFE=Attivato FASTLOAD\n Il menu principale verrà memorizzata nella cache.\n Tutti i futuri stivali utilizzerà il menu di cache.
+
+$$STRhelp=^F1 Aiuto                       [F1] \n Aiuto o usa Easy2Boot
+$$STRhelG=Aiuto\n Aiuto o usa Easy2Boot
+
+$$STRl010=^T Installa Windows 10         [T] (%C10% presenti)\n Installa Windows 10 da una immagine ISO.
+# Menu GFX
+$$STRl110=Installa Windows 10\n Installa Windows 10 da una immagine ISO.
+
+# Voci del Menu GFX 
+$$STRmG16=Menu ANTIVIRUS\n AntiVirus utility
+$$STRmG22=Menu BACKUP\n Backup utility
+$$STRmG18=Menu DOS\n MS-DOS e FreeDOS utility
+$$STRmG20=Menu LINUX\n Linux ISOs
+$$STRmG03=Menu WINDOWS BOOT\n Menu Boot di Windows
+$$STRmG26=Menu WINPE\n Bootable WinPE e Windows
+$$STRmG24=Menu UTILITY\n Utility della memoria
+
+
+$$STRmg14=Grub4dos v0.4.5c\n Load grub4dos v0.4.5.\n Try if problems with 0.4.6 version.
+
+$$STRbsug=CHANGE FILE EXTENSION?\n======================\n\nTip: To avoid this prompt, do not use .iso as the file extension.\n     Instead use .isodefault (or set NOSUG=1)\n\n$[0x0e]Type Y quickly to use %SUGJE%\n
+$$STRbsuf=Use %SUGJE% file extension? (Y/[N]) : 
+
+$$STRl600=^6 Installa Server 2016        [6] (%C16% presenti)\n Installa Windows Server 2016 da una immagine ISO.
+$$STR16G0=Installa Server 2016\n Installa Windows Server 2016 da una immagine ISO.
+$$STRhS16=Installa Server 2016                                                        \x20
+
+$$STRmldk=List BIOS Disks\n List the partitions detected by grub4dos and the BIOS

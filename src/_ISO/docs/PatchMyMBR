@@ -1,0 +1,17 @@
+!BAT
+#patch MBR to disable messages
+#Max locate string length=16 bytes
+#Do not exceed original string length
+#End of string is a 0 byte (\0)
+
+cat --locate="Try (hd0,0 )" --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="EXT2: " --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="NTFS5: " --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="FAT32: " --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="FAT16: " --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="FAT12: " --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="non-MS: " --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="skip " --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="Extended: " --number=1 --replace=\0\0 (hd0)+20 > nul
+cat --locate="invalid or null" --number=1 --replace=\0\0 (hd0)+20 > nul
+

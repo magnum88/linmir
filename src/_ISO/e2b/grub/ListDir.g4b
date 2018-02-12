@@ -1,0 +1,26 @@
+!BAT
+# usage: ListDir.g4b   where %DIR% is path
+# displays files and folders in that directory
+
+if not exist DIR goto :EOF
+
+debug 1
+echo eeeeeeeeeeeeeee > (md)0x300+1
+echo eeeeeeeeeeeeeee > (md)0x320+1
+
+pager on
+errorcheck off
+# show entries in separate lines
+echo -e $[0104]%DIR% (grub4dos):
+ls %DIR% > (md)0x300+10
+cat --locate="\\ " --replace="\\&" (md)0x300+10 > nul
+cat --locate=\x20 --replace=\x0A (md)0x300+10 > nul
+cat --locate="\\&" --replace="\\ " (md)0x300+10 > nul
+cat (md)0x300+10
+echo -e \n
+
+echo -e $[0104]...
+set /p A=
+set A=
+pager off
+

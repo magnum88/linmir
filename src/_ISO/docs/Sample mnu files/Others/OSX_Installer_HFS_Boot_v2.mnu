@@ -1,0 +1,18 @@
+# Note: The .hFSptn file extension is supported by E2B - this menu is only for demonstration purposes if you want to use a .mnu file
+# Use this menu to boot from an HFS partition image - e.g. OS X Installer
+# 1 Make a single partition MBR HFS USB Flash drive for OS X Installer using UniBeast under a Mac OS - the partition should be JUST big enough for the files to fit
+# See http://www.tonymacx86.com/445-unibeast-install-os-x-yosemite-any-supported-intel-based-pc.html
+# 2 Use RMPrepUSB - Drive -> File  (start=P1) to make an image of the HFS partition - e.g. filename OSX_Installer.HFSPTN
+# 3 Copy this .mnu file and the OSX_Installer.HFSPTN file to the E2B \_ISO\MAINMENU\MNU drive (or other 3rd level folder - e.g. \_ISO\BACKUP\OSX)
+# 4 You can change the name of the .HFSPTN file and edit this menu to use a different filename for HFS
+
+iftitle [if exist $HOME$/OSX_Installer.HFSPTN] OS X Installer\n Boot from a HFS partition image.\n IMPORTANT: This will create a new partition 4 entry\n which you will be prompted to delete when you reboot E2B.
+
+set HFS=$HOME$/OSX_Installer.HFSPTN
+
+if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (md)0xa000+0x50
+if "%E2BDEV%"=="" set E2BDEV=hd0 && pause E2BDEV forced to hd0!
+partnew (%E2BDEV%,3) 0xAF %HFS% || echo && echo -e ERROR: %HFS% is not contiguous or is BAD!\nPlease fix using RMPrepUSB-CTRL+F2. && pause Press a key... && configfile (md)0xa000+0x50
+rootnoverify (%E2BDEV%,3) > nul
+chainloader (%E2BDEV%,3)+1 > nul
+boot

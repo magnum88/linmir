@@ -1,0 +1,22 @@
+
+iftitle [if exist (bd)/_ISO/Windows/XP/WINPE_INST.TAG if %CXP%>=1]  \n
+root () > nul && /%grub%/configX.g4b (bd)/%grub%/menuWinInstall.lst
+boot
+
+iftitle [if exist (bd)/_ISO/Windows/XP/WINPE_INST.TAG && if %CXP%>=1 && if "%GFX%"==""] $$STRl0PE
+set MYPATH=/_ISO/Windows/XP
+set WMYPATH=\\_ISO\\Windows\\XP
+set MFOLDER=/_ISO/WINDOWS/XP
+debug 1
+clear
+/%grub%/XPWINNT.g4b
+boot
+
+iftitle [if exist (bd)/_ISO/Windows/XP/WINPE_INST.TAG && if %CXP%>=1 && if not "%GFX%"==""] $$STRl1PE
+set MYPATH=/_ISO/Windows/XP
+set WMYPATH=\\_ISO\\Windows\\XP
+set MFOLDER=/_ISO/WINDOWS/XP
+debug 1
+clear
+/%grub%/XPWINNT.g4b
+boot

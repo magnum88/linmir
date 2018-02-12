@@ -1,0 +1,1 @@
+iftitle [calc *0x417 & 0x40] Magia 5 Live DVD KDE4 64-bit\n Only display if CAPS LOCK is on

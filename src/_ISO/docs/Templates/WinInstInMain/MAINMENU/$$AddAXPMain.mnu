@@ -1,0 +1,35 @@
+## XP ISOs
+
+iftitle [if %CXP%>=1]  \n
+root () > nul && /%grub%/configX.g4b (bd)/%grub%/menuWinInstall.lst
+boot
+
+iftitle [if %CXP%>=1 && if "%GFX%"==""] $$STRl0x1
+set MFOLDER=/_ISO/WINDOWS/XP
+/%grub%/XPStep1.g4b
+boot
+
+iftitle [if %CXP%>=1 && if not "%GFX%"==""] $$STRl1x1
+set MFOLDER=/_ISO/WINDOWS/XP
+/%grub%/XPStep1.g4b
+boot
+
+iftitle [if %CXP%>=1 && if "%GFX%"==""] $$STRl0x2
+set MFOLDER=/_ISO/WINDOWS/XP
+/%grub%/XPStep2.g4b
+boot
+
+iftitle [if %CXP%>=1 && if not "%GFX%"==""] $$STRl1x2
+set MFOLDER=/_ISO/WINDOWS/XP
+/%grub%/XPStep2.g4b
+boot
+
+iftitle [if %CXP%>=1 && if "%GFX%"==""] $$STRl0x3
+set MFOLDER=/_ISO/WINDOWS/XP
+/%grub%/XPStep2LowRam.g4b
+boot
+
+iftitle [if %CXP%>=1 && if not "%GFX%"==""] $$STRl1x3
+set MFOLDER=/_ISO/WINDOWS/XP
+/%grub%/XPStep2LowRam.g4b
+boot

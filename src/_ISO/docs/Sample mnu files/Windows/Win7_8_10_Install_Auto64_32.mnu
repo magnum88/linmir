@@ -1,0 +1,30 @@
+# Win8 menu can also be used for Win10
+
+title Install Windows 8 (32 or 64-bit) \n Auto-detects based on CPU type
+# suppress return to Windows Install menu
+set NOWMENU=1
+set MFOLDER=/_ISO/WINDOWS/WIN8
+set ISO=Win832.iso
+checkrange 2,3 is64bit && set ISO=Win864.iso
+pause WILL BOOT %ISO% - press a key to continue...
+set XML=
+# Specify XML file in MFOLDER folder (e.g. Win8\ has\ spaces\ in\ name.xml)
+# OR to choose XML or Product Key do not set XML variable
+# set XML=%MFOLDER%/NO\ KEY\ (choose\ a\ version\ to\ install).xml
+/%grub%/RunWin8.g4b %MFOLDER% %XML%
+boot
+
+
+title Install Windows 7 (32 or 64-bit) \n Auto-detects based on CPU type
+# suppress return to Windows Install menu
+set NOWMENU=1
+set MFOLDER=/_ISO/WINDOWS/WIN7
+set ISO=Win732.iso
+checkrange 2,3 is64bit && set ISO=Win764.iso
+pause WILL BOOT %ISO% - press a key to continue...
+set XML=
+# Specify XML file in MFOLDER folder (e.g. Win8\ has\ spaces\ in\ name.xml)
+# OR to choose XML or Product Key do not set XML variable
+# set XML=%MFOLDER%/NO\ KEY\ (choose\ a\ version\ to\ install).xml
+/%grub%/RunVista.g4b %MFOLDER% %XML%
+boot

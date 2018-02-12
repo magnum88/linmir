@@ -1,0 +1,647 @@
+﻿!BAT
+#set NTBOOT=%~f0
+# set NTBOOT folder name to \_ISO\e2b\grub\DPMS\NTBOOT
+set NTBOOT=%~dp0DPMS/%~n0
+#pause NTBOOT=%NTBOOT% %~n0 %~p0
+setlocal 
+debug 0
+clear
+pager off
+set ISO_TYPE=
+set ISO_INST=
+set NTPATH=
+root (bd) > nul
+echo
+echo NTBOOT by chenall/527104427 2014-08-24,$[0101] http://chenall.net
+if "%~1"=="" && goto :NTBOOT_HELP
+goto %~1 || goto :NTBOOT_HELP
+
+:WIMBOOT
+set bootmgr=
+shift
+if "%~1"=="" && goto :NTBOOT_HELP
+call :AUTO_CONFIG WIMBOOT WIM=%*
+if not exist bootmgr && set bootmgr=(3)/bootmgr
+map --mem %NTBOOT%.MOD/NTBOOT.NT6 (3)
+map --rehook
+kernel %NTBOOT%.MOD/wimboot
+initrd @bootmgr=%bootmgr% @bcd=(3)/bcd @boot.sdi=(3)/boot/boot.sdi @boot.wim=%wimboot%
+boot
+goto :exit
+
+:WIMBOOT.WIM
+set wimboot=%~f1
+exit
+
+:WIMBOOT.NTLDR
+:WIMBOOT.BOOTMGR
+set bootmgr=%~f1
+exit
+
+:WIMBOOT.E820
+:FIRADISK.E820
+:WINVBLK.E820
+:VBOOT.E820
+:PE1.E820
+if "%~1"=="" && exit
+call Fn.15 "%~1" "0" && set /a e820=%~1 && call if /i "%e820^%"=="0" && exit
+checkrange 0:-1 calc %e820% || exit
+map --e820cycles=%~1 && map --rehook
+exit
+
+:e820
+shift 1
+set e820=%~1
+if not exist e820 && goto :NTBOOT_HELP
+call Fn.15 "%~1" "0" && set /a e820=%~1 && call if /i "%e820^%"=="0" && goto :NTBOOT_HELP
+checkrange 0:-1 calc %e820% || goto :NTBOOT_HELP
+map --e820cycles=%e820% && map --rehook && shift 1
+set e820= && goto %~1 || goto :NTBOOT_HELP
+
+:menu
+echo %~f0 > (md)0x20000+1
+cat %NTBOOT%.MOD/setf0 > (md)0x20002+1 || echo -n
+configfile %NTBOOT%.LST/MENU.LST
+exit
+
+:: Detect the next file. Using call :CHECK_FILE %FILE1% %FILE2% like the situation will be used
+:CHECK_NEXT_FILE
+set tmp=%~2
+if not exist tmp && goto :input_file
+shift
+if "%~0"=="%~1" && goto :CHECK_NEXT_FILE
+:: Check / Find Files
+:CHECK_FILE
+echo -e Checking file $[0107]%~1 ...
+set file=%~1
+set tmp=%~pnx1
+cat --length=0 %~1 > nul && root %~d1 > nul ! cat --length=0 %~pnx1 > nul || find --set-root cat --length=0 %~pnx1 > nul || goto :CHECK_NEXT_FILE
+goto :eof
+
+:input_file
+:: Get a file of user input,
+echo
+echo File not found or not support: $[0105]%file%
+echo 
+echo -e Please enter a new path to the file: $[0104]%~x1
+set file=
+set /p:5 file=NTBOOT>
+if not exist file goto :exit
+echo -n > (md)0x28150+28
+echo %file% > (md)0x28150+28
+cat (md)0x28150+28 | set tmp=
+if not exist tmp && goto :input_file
+set tmp=%~x1
+set tmp=%tmp:~0,3%
+call Fn.11 "%file%" "%tmp%" || goto :input_file
+echo
+command %NTBOOT%.MOD/EMPPATH file="%file%"
+call :CHECK_FILE %file%
+exit
+
+:: ------- NT5   NT6   PE1 ------
+
+:NT5
+:NT6
+:PE1
+:: Load required modules (diskid, fat, infile, slic, wenv)
+insmod %NTBOOT%.MOD/NTBOOT.MOD || call :error Missing module NTBOOT.MOD...
+:: Map NTBOOT boot image
+set /u file=NTBOOT.%~1
+map --mem %NTBOOT%.MOD/%file% (rd) || call :error Missing module %file%...
+
+:NTBOOT_START
+:: Set the default path WINDOWS
+if not exist WinDir set WinDir=WINDOWS
+set boot_cfg=
+shift
+set file=%~1
+set tmp=/%WinDir%
+:: If no additional parameters or parameter is a disk partition
+if not exist file && goto %~0.HDD
+if "%~d1"=="%~1" && goto %~0.HDD
+:: These are NT5 or NT6 hard disk
+if /i "%~0"=="pe1" && set PDIR=WXPE && goto :PE1_BOOT
+command %NTBOOT%.MOD/EMPPATH file="%file%"
+call :CHECK_FILE %file%
+:: Specify the startup file
+set NTLDR=
+if /i "%~2"=="ntldr" || if /i "%~2"=="bootmgr" || goto %~0%~x1_BOOT
+set NTLDR=%~3 ;; shift /2 ;; shift /2
+:: Go to start corresponding category, such as NT5.IMG_BOOT, NT6.WIM_BOOT, NT6.VHD_BOOT
+goto %~0%~x1_BOOT
+
+:NT5.HDD
+echo -e Searching NT5.X on Hard Disk(/%WinDir%)
+if exist file && root %~1 ! find --set-root --devices=h /%WinDir%/system32/ntoskrnl.exe cat --locate=\0\x35\0\x2E /%WinDir%/system32/version.dll
+goto :NT5_BOOT
+
+:NT6.HDD
+echo -e Searching NT6.X on Hard Disk(/%WinDir%)
+if exist file && root %~1 ! find --set-root --devices=h /%WinDir%/system32/winload.exe
+goto :NT6_BOOT
+
+:ISO_INST64
+set ISO_TYPE=amd64
+:ISO_INST
+shift 1
+:: The following command creates a blank floppy (fd0)
+::echo > (md)0x200+2
+::write --offset=0xb (md)0x200+3 \x00\x02\x01\x01\x00\x01\x70\x00\x10\x00\xfd\x01\x00\x08\x00\x01
+::write 0x401FE 0xAA55
+::write 0x40200 0xfffffe
+::map --mem (md)0x200+2 (fd0)
+map --status=0 || map --mem %NTBOOT%.IMG/EMPTY.IMG (0) && map --rehook
+:: Converted to uppercase
+set /u boot=%~1.IMG
+set boot=%NTBOOT%.IMG/%boot%
+:: Automatically loads the appropriate driver floppies to (fd1)
+map --mem %boot% (fd1) || call :Error Missing Module %boot%...
+:: If you specify a floppy, then it will be specified by the user instead of the mirror
+set boot=cdrom
+set ISO_INST=%~1
+goto :%~1
+
+
+:::: AUTO_CONFIG :: automatic parameter configuration interfaces ::::::::::::::::::::::::::::::::::::::: :::::::::
+:: You can automatically configure the startup parameters FIRADISK or VBOOT and after expansion can also set other parameters.
+:: Call the method: call: AUTO_CONFIG VBOOT | FIRADISK [options ...]
+:: Where options depending on the type of configuration and different, but there is a parameter is the same boot
+:: Note: In addition to the outer boot and opt parameters other parameters should be type=FILE, such as cdrom=/cd/xp.iso or like harddisk=(hd0,0)/test.img
+:AUTO_CONFIG
+set ISO_INST=%~1
+:AUTO_CONFIG_LOOP
+shift
+shift
+
+::
+:: After two shift.%~0 ~2% was before, that is, before the 1% to 3%
+:: Example: call: AUTO_CONFIG VBOOT harddisk=/test/test.vhd
+:: No prior shift %~0 is :AUTO_CONFIG, two shift would remove the previous two parameters, into a harddisk.
+
+if "%~1"=="" && exit
+:: If the argument is boot, the boot parameter settings.
+if /i "%~0"=="boot" && set boot=%~1 && goto :AUTO_CONFIG_LOOP
+:: If the argument is opt/addons, file finder does not call detection
+set file=%~1
+if /i "%~0"=="opt" || if /i "%~0"=="addons" || if /i "%~0"=="e820" || call :AUTO_CONFIG_FILE
+if /i "%~x1"==".iso" && call Fn.11 "%~n1" "64" && set ISO_TYPE=amd64 && echo -e %ISO_INST%: ISO_TYPE = amd64
+:: Call different functions depending on the parameters, like FIRADISK.HARDDISK
+echo -e %ISO_INST%: %~0=%file%
+call :%ISO_INST%.%~0 %file%
+:: Next parameter
+goto :AUTO_CONFIG_LOOP
+
+:AUTO_CONFIG_FILE
+command %NTBOOT%.MOD/EMPPATH file="%file%"
+call :CHECK_FILE %file%
+goto :eof
+
+:WINVBLK
+call :AUTO_CONFIG %*
+goto :WINVBLK_BOOT
+
+:WINVBLK.CDROM
+map %~1 (0xCD) || map --mem %~1 (0xCD)
+exit
+
+:WINVBLK.FLOPPY
+map --mem %~1 (fd0)
+exit
+
+:WINVBLK.HARDDISK
+map %~1 (hd0) || map --heads=255 --sectors-per-track=63 %~1 (hd0)
+map (hd0) (hd)
+map --harddrives=1
+exit
+
+:FIRADISK.@HARDDISK
+:WINVBLK.@HARDDISK
+map --mem --heads=0 --sectors-per-track=0 %~1 (hd0)
+map (hd0) (hd)
+map --harddrives=1
+exit
+
+:FIRADISK.@CDROM
+:WINVBLK.@CDROM
+map --mem %~1 (0xCD)
+exit
+
+:FIRADISK.#HARDDISK
+:WINVBLK.#HARDDISK
+map --mem --top --heads=0 --sectors-per-track=0 %~1 (hd0)
+map (hd0) (hd)
+map --harddrives=1
+exit
+
+:FIRADISK.#CDROM
+:WINVBLK.#CDROM
+map --mem --top %~1 (0xCD)
+exit
+
+
+:FIRADISK
+:: Use memory address 0x40000 10 sectors at the beginning of storage FIRADISK parameters.
+::echo -n > (md)0x210+1
+set fira.opt=
+call :AUTO_CONFIG %*
+:: If the value of the memory address 0x40020 non-zero, then there is written arguments.
+::read 0x40020 && map --mem (md)0x200+16 (99)
+::echo -e \" >> (md)0x210+1
+map --hook
+if not exist fira.opt && goto :FIRADISK_BOOT
+cat --locate=###### --number=1 (fd1)/%ISO_TYPE%/TXTSETUP.OEM > nul || call :error firadisk.img file error..
+set offset=%?%
+write --offset=%offset% (fd1)/%ISO_TYPE%/TXTSETUP.OEM value=Parameters,StartOptions,REG_SZ,"%fira.opt%"\r\n
+cat --skip=%offset% --locate=/ --replace=\\ (fd1)/%ISO_TYPE%/TXTSETUP.OEM
+goto :FIRADISK_BOOT
+
+:FIRADISK_BOOT
+:WINVBLK_BOOT
+map --rehook
+:: After guarantee (fd1) position by the details: http://bbs.wuyou.com/viewthread.php?tid=203313
+::保证(fd1)的位置靠后.详情:http://bbs.wuyou.com/viewthread.php?tid=203313
+call :SwapFloppy || echo -n
+if exist BOOT && %BOOT%
+if /i "%boot%"=="cdrom" && chainloader (0xCD) && boot
+if /i "%boot%"=="harddisk" && chainloader (hd0)+1 && boot
+if /i "%boot%"=="floppy" && chainloader (fd0)+1 && boot
+exit
+
+:: Floppy rearrangement
+:SwapFloppy
+map --status=0 || map --status=1 || exit
+setlocal
+:: A disc FIRADISK / WINVBLOCK, no B disc
+map --status=1 |; cat --length=0 (0)/txtsetup.oem || exit ! cat --length=0 (0)/firadisk.inf && exit ! cat --length=0 (0)/winvblk.inf && exit
+::A盘空，B盘SRS。
+map --status=1 |; map (0)+1 (1) && map --mem %NTBOOT%.IMG/EMPTY.IMG (0) && map --rehook ! exit
+::A盘SRS，无B盘。
+map --status=0 |; cat --length=0 (1)/txtsetup.oem && map (1)+1 (0) && map --unmap=1 && map --rehook && exit ! exit
+::A盘SRS，B盘FIRADISK/WINVBLOCK。
+map --status=1 || exit
+ls (1)/ > nul || map --unmap=1 && map --rehook && exit
+cat --length=0 (1)/firadisk.inf |; cat --length=0 (0)/firadisk.inf && map (0) (1) && map (1) (0) && map --rehook ! echo -n
+cat --length=0 (1)/winvblk.inf |; cat --length=0 (0)/winvblk.inf && map (0) (1) && map (1) (0) && map --rehook ! echo -n
+:: B disc firadisk install the system, the starting address A disk emulation memory must be higher than the B plate, otherwise you will be prompted to insert A tray
+:: B disc winvblok install the system, the starting address A disk emulation memory must be lower than the B plate, otherwise you will be prompted to insert A tray
+::http://bbs.wuyou.com/forum.php?mod=viewthread&tid=203313&extra=&page=1
+map --status=1 || exit
+set /a addr1=%?% > nul
+map --status=0 || exit
+set /a addr0=%?% > nul
+if %addr0%>=%addr1% && set fdn=0 ! set fdn=1
+if %fdn%==0 && cat --length=0 (1)/firadisk.inf && exit ! if %fdn%==1 && cat --length=0 (1)/winvblk.inf && exit
+map (%fdn%)+1 (rd) && map --mem (rd)+1 (%fdn%) && map --rehook ! echo -n
+endlocal
+exit
+
+:: FIRADISK parameter automatic setting, you can set CDROM, FLOPPY, HARDDISK other parameters
+:FIRADISK.CDROM
+:: Priority direct mapping, try memory mapping failed.
+set fira.opt=cdrom,vmem=find:%~pnx1;%fira.opt%
+map %~1 (0xCD) || map --mem %~1 (0xCD)
+exit
+
+:FIRADISK.FLOPPY
+map --mem %~1 (fd0)
+exit
+
+:FIRADISK.HARDDISK
+map %~1 (hd0) || map --heads=255 --sectors-per-track=63 %~1 (hd0)
+map (hd0) (hd)
+set fira.opt=disk,vmem=find:%~pnx1;%fira.opt%
+exit
+
+:FIRADISK.OPT
+set fira.opt=%~1;%fira.opt%
+exit
+
+:: These are FIRADISK parameter automatic setting
+
+:VBOOT
+if not exist (0xfd)/vbootldr && map --mem %NTBOOT%.MOD/VBOOT.ISO (0xfd) || call :Error Missing Module VBOOT...
+map --hook && echo VBOOT module loaded successfully.
+echo -n vboot  > (0xfd)/vboot/grub/grub.cfg
+if exist ISO_INST goto :VBOOT_INST
+shift
+:::::::::: Non ISO_INST is the default boot disk for the harddisk ::::::::::::::::::::
+:::::::::: Call AUTO_CONFIG to configure the startup parameters VBOOT of :::::::::::::::::
+set boot=harddisk
+call :AUTO_CONFIG vboot harddisk=%*
+goto :VBOOT_BOOT
+
+:: Use VBOOT to install the system, the first mapping VBOOT.IMG
+:VBOOT_INST
+call :AUTO_CONFIG %*
+goto :VBOOT_BOOT
+
+:::: Following for VBOOT startup parameter autoconfiguration ::::::: do not understand, do not change, otherwise it will fail to start ::::::::
+:VBOOT.CDROM
+:VBOOT.HARDDISK
+:VBOOT.FLOPPY
+::VBOOT.TAKE_SNAPSHOT //
+uuid ()
+:: VBOOT stupid, must be lowercase. .
+set /l UUID=%?%
+set /l tmp=%~x0
+echo -e -n %tmp:~1%=(UUID=%UUID%)"%~pnx1"  >> (0xfd)/vboot/grub/grub.cfg
+exit
+
+:VBOOT.OPT
+echo -e -n %~1  >> (0xfd)/vboot/grub/grub.cfg
+exit
+:::: More content is automatically configured to boot parameter VBOOT the :::::::
+
+:VBOOT_BOOT
+echo -e boot=%boot%\nboot >> (0xfd)/vboot/grub/grub.cfg
+if exist BOOT && %BOOT%
+::map --unmap=11
+::map --rehook
+::call :SwapFloppy
+kernel (0xfd)/vbootldr
+boot
+exit 90
+
+:NT6.VHDXNT6_BOOT
+:NT6.VHDNT6_BOOT
+:NT6.VHDX_BOOT
+:NT6.VHD_BOOT
+:: Fixed usage, this floppy corresponding BCD file only. Hereinafter
+set boot_cfg=:BCD_CFG_VHD#WIM b VHD
+goto :NT6_BOOT
+
+
+:NT6.WIMNT6_BOOT
+:NT6.WIM_BOOT
+set boot_cfg=:BCD_CFG_VHD#WIM a WIM
+goto :NT6_BOOT
+
+:NT5.IMG_BOOT
+:NT5.IMGNT5_BOOT
+:NT5.IMGXP_BOOT
+set boot_cfg=:NT5_RAM_CFG
+goto :NT5_BOOT
+
+::put a path into the ARC format
+:GET_ARC_PATH
+checkrange 0:1 read 0x82a0 && goto :FD_ARC
+::checkrange 0x9E:0xFF read 0x82a0 && goto :CD_ARC
+:HD_ARC
+DISKID ret=0x60000 || goto :CD_ARC
+set /a R=*0x60000>>24&0xFF
+set /a P=*0x60000>>16&0xFF
+echo multi(0)disk(0)rdisk(%R%)partition(%P%)%tmp% > (md)0x3000+4
+:SET_ARC_PATH
+:: Replace GRUB4DOS path / to WINDOWS path \
+cat --locate=/ --replace=\\ (md)0x3000+4
+cat (md)0x3000+4 | set ARC_PATH=
+goto :eof
+
+:FD_ARC
+set /a R=*0x82A0&0xFF
+echo multi(0)disk(0)fdisk(%R%)%tmp% > (md)0x3000+4
+:: If (fdx, y) in the form of maps into (fdx)
+checkrange 0xFFFFFF00 read 0x829b || map +1 ()
+goto :SET_ARC_PATH
+
+:CD_ARC
+set /a R=*0x82A0&0xFF
+echo multi(0)disk(0)cdrom(%R%)%tmp% > (md)0x3000+4
+goto :SET_ARC_PATH
+
+:NATIVE_CFG
+echo cd ?:%~pnx1 > (rd)/NATIVE.CFG
+cat --locate=/ --replace=\\ --length=256 (rd)/NATIVE.CFG
+exit
+
+:PE1_BOOT
+###### The following three lines are provided to the core of the PE ###################### NATIVE use
+echo -e @echo off\r\ncd ?:%~p1\r\ncd ?:%~pnx1 > (rd)/NATIVE.CFG
+################################################################
+cat --locate=/ --replace=\\ --length=256 (rd)/NATIVE.CFG
+if /i "%file%"=="%~x1" && set file=/boot/imgs/boot%~1
+:PE1.OPTIONS
+if /i "%~2"=="PDIR" && set PDIR=%~3
+if /i "%~2"=="OPTIONS" && set option=%~3
+if /i "%~2"=="NTPATH" && set NTPATH=%~3
+if /i "%~2"=="NTLDR" && set NTLDR=%~3
+if /i "%~2"=="bootmgr" && set NTLDR=%~3
+if /i "%~2"=="Addons" && call :Addons %~3 pe
+if /i "%~2"=="e820" && call :PE1.E820 %~3
+shift 2
+shift 2
+if not "%~2"=="" goto :PE1.OPTIONS
+command %NTBOOT%.MOD/EMPPATH file="%file%"
+call :CHECK_FILE %file% %file:~0,-1%_
+if not exist NTPATH && set NTPATH=%tmp%
+call :NATIVE_CFG %NTPATH%
+:: If the ISO format to add a parameter / rdexportascd
+if /i "%tmp:~-3,2%"=="is" && set option=/rdexportascd %option%
+if /i "%tmp:~-3%"=="wim" && set option=%option% /rdimageoffset=8192 /rdimagelength=3161088
+if /i "%tmp:~-6%"=="wimpe1" && set option=%option% /rdimageoffset=8192 /rdimagelength=3161088
+call :GET_ARC_PATH
+echo -e [SetupData]\r\nBootDevice="ramdisk(0)" > (rd)/BOOT.INI
+echo BootPath=\%PDIR%\SYSTEM32\  >> (rd)/BOOT.INI
+echo OsLoadOptions="/minint /fastdetect %option% /rdpath=%ARC_PATH%" >> (rd)/BOOT.INI
+:: Eliminate extra blank characters, otherwise it will fail to start
+cat --locate=\0 --replace=; (rd)/BOOT.INI
+: Modify the default path
+if /i not %PDIR%=="I386" && write --offset=0x2A4FB (rd)/SETUPLDR.BIN %PDIR%
+:: Modify the default file name WINNT.SIF
+write --offset=0x2a432 (rd)/SETUPLDR.BIN BOOT.INI\0
+if /i "%DEBUG%"=="on" && cat (rd)/BOOT.INI && checkrange 0x11b pause --test-key && goto :exit
+if not exist NTLDR set NTLDR=(0xfd)/SETUPLDR.BIN
+set BOOTDEV=(0xfd)
+goto :BOOT
+
+:: ----------- BOOT -----------
+
+:BOOT
+if exist BOOT && %BOOT%
+map --mem (rd)+1 %BOOTDEV%
+::map --unmap=11
+map --rehook
+call :SwapFloppy || echo -n
+command %NTBOOT%.MOD/EMPPATH NTLDR="%NTLDR%"
+call :CHECK_FILE %NTLDR%
+chainloader %NTLDR%
+root %BOOTDEV%
+boot
+exit
+
+:BCD_CFG_VHD#WIM
+:: Specific statement of the BCD corresponding floppy disk, modify the default startup items
+write --offset=0x343C (rd)/BOOT/BCD %~1
+write --offset=0x35DC (rd)/BOOT/BCD %~1
+:: Undisclosed function. The value of the ASCII string variable using UNICODE encoding into memory location 0x40000. Encoding \xH1\0\XH2\0 .....
+WENV get tmp=0x40000
+::Replace characters in the path / is \
+cat --locate=\\x2F --replace=\\x5C (md)0x200+3
+:: Specific statement of the BCD corresponding floppy disk, modify the file path
+cat --locate=\\%~2_ --number=2 (rd)/BOOT/BCD | call :BCD_CFG_PATH=
+exit
+
+:BCD_CFG_PATH
+WENV call write --offset=0x%~1 (rd)/BOOT/BCD *0x40000$
+WENV call write --offset=0x%~2 (rd)/BOOT/BCD *0x40000$
+exit
+
+:NT5_RAM_CFG
+set default=ramdisk(0)/%WinDir%
+echo %default%="ramdisk" #fastdetect #noguiboot %opt% #rdpath=%ARC_PATH% >> (rd)/BOOT.INI
+exit
+
+:NT5_HDD_CFG
+set default=%ARC_PATH%
+echo %default%="NT5" #fastdetect %opt% #NoExecute=AlwaysOff #PAE  >> (rd)/BOOT.INI
+exit
+
+:Debug
+debug %~1
+exit
+
+:NT5_BOOT
+if not exist NTLDR && set NTLDR=(0xfd)/NTLDR
+set /a cur_drv=*0x82A0&0x7F
+set /a cur_pri=*0x829C>>16&0xFFFF
+clear
+echo
+echo -e $[0105]  Will Boot NT5.X From $[0102](hd%cur_drv%,%cur_pri%)$[0106]%tmp%
+echo
+echo -e $[0105]  boot: $[0102]%NTLDR%
+echo
+#echo -e $[0101]  Press $[1103]Esc$[0101] to quit!
+#debug 1 && checkrange 0x11b pause --wait=3 --test-key && call :Debug 0 && goto :exit
+debug 0
+call :GET_ARC_PATH
+shift 1
+set opt=%*
+echo [operating systems] > (rd)/BOOT.INI
+if exist boot_cfg && call %boot_cfg% ! call :NT5_HDD_CFG
+echo [boot loader] >> (rd)/BOOT.INI
+echo timeout=0 >> (rd)/BOOT.INI
+echo default=%default% >> (rd)/BOOT.INI
+::Replace / with \
+cat --locate=/ --replace=\\ (rd)/BOOT.INI
+:: Replaceable parameters, the parameters of the previous write / are using # replace
+cat --locate=# --replace=/ (rd)/BOOT.INI
+:: Eliminate null character (replaced;)
+cat --locate=\0 --replace=; (rd)/BOOT.INI
+if /i "%DEBUG%"=="on" && cat (rd)/BOOT.INI && checkrange 0x11b pause --test-key && goto :exit
+set BOOTDEV=(0xfd)
+goto :BOOT
+
+:NT6_NO_CONFIG
+set /a offset=0x%~1+0x14
+write --offset=%offset% (rd)/BOOT/BCD \0
+exit
+
+:NT6_BOOT
+if not exist NTLDR && set NTLDR=(fd0)/BOOTMGR
+:: Additional parameters
+if /i "%~2"=="NODETECTHAL" && cat --locate=26000010 (rd)/BOOT/BCD | call :NT6_NO_CONFIG= && shift 2 && goto :NT6_BOOT
+if /i "%~2"=="BOOTMGR" &; set NTLDR=%~3 &; shift /2 &; shift /2 &; goto :NT6_BOOT
+if /i "%~2"=="NTLDR" &; set NTLDR=%~3 &; shift /2 &; shift /2 &; goto :NT6_BOOT
+::shift 2
+::if not "%~2"=="" goto :PE1.OPTIONS
+:: Get the current disk number
+set /a cur_drv=*0x82A0&0x7F
+set /a cur_pri=*0x829C>>16&0xFFFF
+clear
+echo
+echo -e $[0105]  Will Boot NT6.X From $[0102](hd%cur_drv%,%cur_pri%)$[0106]%tmp%
+echo
+echo -e $[0105]  boot: $[0102]%NTLDR%
+echo
+#echo -e $[0101]  Press $[1103]Esc$[0101] to quit!
+#debug 1 && checkrange 0x11b pause --wait=3 --test-key && call :Debug 0 && goto :exit
+#debug 0
+if exist boot_cfg && call %boot_cfg%
+
+root ()
+checkrange 0xee read 0x8334 && goto :NT6_GPT
+:: Get MBR signature
+dd if=(hd%cur_drv%)+1 of=(md) bs=1 count=4 skip=0x1b8 seek=0x60000
+:: Gets the current partition offset
+cat --length=0 ()-1
+dd if=(md) of=(md) bs=1 count=8 skip=0x8290 seek=0x60004
+:: Modify MBR signature
+cat --locate=\x53\xB7\x53\xB7 --replace=*0x60000 --hex=4 (rd)/BOOT/BCD
+cat --locate=\0\x7E\0\0 --replace=*0x60004 --hex=8 (rd)/BOOT/BCD
+goto :NT6_REAL_BOOT
+
+
+
+:NT6_GPT
+:: GPT hard disk GUID
+write 0x60000 0
+dd if=(hd%cur_drv%)1+1 of=(md) bs=1 count=16 skip=56 seek=0x60004
+cat --locate=\1\0\0\0\x53\xB7\x53\xB7 --replace=*0x60000 --hex=20 (rd)/BOOT/BCD
+:: GPT GUID Partition
+set /a offset=%cur_pri%<<3+1
+dd if=(hd%cur_drv%)2+32 of=(md)0x300+1 bs=16 count=1 skip=%offset%
+cat --locate=\0\x7E\0\0 --replace=*0x60000 --hex=16 (rd)/BOOT/BCD
+
+:NT6_REAL_BOOT
+if /i not "%WinDir%"=="windows" && call :CHG_NT6_WINDIR
+if /i "%DEBUG%"=="on" && call :NT6_DEBUG
+if exist ()/boot/slic.bin || find --set-root /boot/slic.bin || echo -n
+if exist ()/boot/slic.bin && SLIC ()/boot/slic.bin 
+set BOOTDEV=(0)
+goto :BOOT
+
+:NT6_DEBUG
+find --set-root --devices=h /ntboot_bcd || call :error DEBUG: Missing file /ntboot_bcd.
+dd if=(rd)/BOOT/BCD of=()/ntboot_bcd
+exit
+
+:CHG_NT6_WINDIR
+:: The following are the tests which replace BCD WINDOWS directory, I do not know whether he is not used properly.
+WENV get WinDir=0x60000
+WENV call write --offset=0x3F76 (rd)/BOOT/BCD *0x60000$
+set tmp=%WinDir%\system32\winload.exe
+WENV get tmp=0x60000
+WENV call write --offset=0x39A6 (rd)/BOOT/BCD *0x60000$
+exit
+
+:error
+pause Error: %*
+:exit
+root %NTBOOT%
+root ()
+exit 1
+
+:FIRADISK.Addons
+:WINVBLK.Addons
+:VBOOT.Addons
+:Addons
+setlocal
+set addons=%*
+call Fn.11 "(/" "%addons:~0,1%" || set addons=%NTBOOT%.MOD/%addons%
+%addons% || echo -n
+endlocal
+exit
+
+:NTBOOT_HELP
+echo
+echo Usage:
+echo $[0102]	NTBOOT $[0107]NT5$[0105]|$[0107]NT6$[0105][=$[0107]root$[0105]|$[0107]file$[0105]]
+echo
+echo $[0102]	NTBOOT $[0105]PE1=file [PDIR=pdir] [OPTIONS=options] [ADDONS=cmd]
+echo
+echo $[0102]	NTBOOT $[0105]WIMBOOT=file BOOTMGR=file E820=N
+echo
+echo $[0102]	NTBOOT $[0105]VBOOT=file [options...]
+echo
+echo $[0102]	NTBOOT $[0105]E820=n [options...]
+echo
+echo $[0102]	NTBOOT $[0107]ISO_INST$[0105]|$[0107]ISO_INST64$[0105]=[$[0107]firadisk$[0105]|$[0107]vboot$[0105]|$[0107]winvblk$[0105]] $[0106][options...]
+echo
+echo $[0106]	options: [[@]CDROM=iso_file] [FLOPPY=srs_img] [[@]HARDDISK=hdd_img] 
+echo $[0106]		 [BOOT=cdrom|floppy|harddisk] [ADDONS=cmd] [...]
+echo $[0106]		 "@" will map image to RAM(used for firadisk/winvblk only).
+echo $[0106]		 "#" will map image to top of RAM(firadisk/winvblk only).
+echo
+pause > nul
+exit 2

@@ -1,0 +1,16 @@
+# Check the CRC32 value of a payload file and run it if it is correct
+
+iftitle [if exist /_ISO/UTILITIES_MEMTEST/MEMTEST.IMG.gz] Check and run a payload \n Get CRC32 value and run if correct
+set ISO=/_ISO/UTILITIES_MEMTEST/MEMTEST.IMG.gz
+# expected CRC32 must start with 0x
+set EXP_CRC=0x1340BECC
+
+echo Calculating CRC32 of %ISO% - please wait...
+crc32 %ISO% > nul
+set /A CRC=%@retval% & 0xFFFFFFFF > nul
+pause --wait=3 %ISO% - EXPECTED CRC32=%EXP_CRC%, ACTUAL CRC32=%CRC%
+if not %EXP_CRC%==%CRC% pause ERROR: CRC is not correct (%CRC% vs %EXP_CRC%)
+if not %EXP_CRC%==%CRC% configfile (md)0x3000+0x50
+/%grub%/QRUN.g4b %ISO%
+boot
+

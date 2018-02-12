@@ -1,0 +1,22 @@
+
+# Place this .mnu file and "GXP SP3 2016 By Computer Media.iso" in \_ISO\MAINMENU\MNU (or any normal menu subfolder at 3rd level deep)
+
+title Install GXP SP3 2016 By Computer Media.iso - Step 1\n Remember to select an AHCI driver (if required) \n AND FiraDisk AND WinVBlock drivers (using F6)!\n You must reboot to Easy2Boot again and run STEP 2 afterwards.
+set XPISO=GXP\ SP3\ 2016\ By\ Computer\ Media.iso
+set MFOLDER=$HOME$
+map (hd0) (hd1)
+map (hd1) (hd0)
+/%grub%/QRUN.g4b force.isomemwinv %MFOLDER%/%XPISO%
+boot
+
+title Install GXP SP3 2016 By Computer Media.iso - Step 2 (512MB+ systems)\n 2nd phase of setup (most reliable).\n This will complete the install and reboot from the hard disk.\n It requires at least 512MB of RAM to hold the ISO file.
+set XPISO=GXP\ SP3\ 2016\ By\ Computer\ Media.iso
+set MFOLDER=$HOME$
+/%grub%/XPStep2.g4b
+boot
+
+title Install GXP SP3 2016 By Computer Media.iso - Step 2 (Low RAM systems)\n Faster - use this if not enough system memory (<512MB). \n Direct ISO map for WinVBlock. Does not work on all\n systems, e.g. some Atom CPU based systems.
+set XPISO=GXP\ SP3\ 2016\ By\ Computer\ Media.iso
+set MFOLDER=$HOME$
+/%grub%/XPStep2LowRam.g4b
+boot

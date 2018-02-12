@@ -1,0 +1,36 @@
+# archbang liveCD + persistence for  /home/live files and system files
+# create ext2 file called arch-rw-010316 with volume label of arch-rw using RMPrepUSB - Create ext2 FS
+
+iftitle [if exist $HOME$/archbang-010316-x86_64.iso] ArchBang x86_64 or i686 (Persistent)\n Uses ext2 file
+set ISO=$HOME$/archbang-010316-x86_64.iso
+# specify ext2 file (full path)
+set PER=/arch-rw-010316
+# specify volume name of ext2 file - e.g. arch-rw
+set cow=cow_label=arch-rw
+
+if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (bd)/menu.lst
+if "%E2BDEV%"=="" set E2BDEV=hd0 && pause E2BDEV forced to hd0!
+#enable parttype output
+debug 1
+# make empty table entry in 3rd position in ptn table
+parttype (%E2BDEV%,2) | set check=
+debug off
+set check=%check:~-5,4%
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0 0 0
+if not "%check%"=="0x00" echo WARNING: PTN TABLE 3 ON %E2BDEV% IS ALREADY IN USE - PERSISTENCE WILL NOT WORK! && pause
+debug 1
+if not exist %PER% echo WARNING: %PER% persistence file not found! && pause
+errorcheck off
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0x0 %PER%
+errorcheck on
+#map ptn 4 to ISO
+partnew (%E2BDEV%,3) 0x0 %ISO%
+map %ISO% (0xff)
+map --hook
+root (0xff)
+if exist /arch/boot/i686/vmlinuz set cpu=i686
+if exist /arch/boot/x86_64/vmlinuz set cpu=x86_64
+#note: archisobasedir is not needed - archisobasedir=arch 
+kernel /arch/boot/%cpu%/vmlinuz archisolabel=ARCHBANG %cow% quiet
+initrd /arch/boot/intel_ucode.img /arch/boot/%cpu%/archiso.img
+boot

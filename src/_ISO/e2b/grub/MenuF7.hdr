@@ -1,0 +1,10 @@
+﻿
+iftitle [if not "%GFX%"==""] $$STRhGF7
+if not exist CD map (hd0) (hd1) && map (hd1) (hd0) && map --hook
+chainloader (hd0)+1
+rootnoverify (hd0)
+
+iftitle [if "%GFX%"==""] $$STRh0F7
+if not exist CD map (hd0) (hd1) && map (hd1) (hd0) && map --hook
+chainloader (hd0)+1
+rootnoverify (hd0)

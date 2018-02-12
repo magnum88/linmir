@@ -1,0 +1,14 @@
+# Assumes the VHD contains \cmldr and cmdcons  (thanks to Tom P.)
+# Ref: http://diddy.boot-land.net/grub4dos/files/boot.htm
+
+iftitle [if exist $HOME$/XP_Recovery_Console.vhd] XP Recovery Console (VHD)\n Boot to XP Recovery Console
+map --mem /%grub%/winvblock.img.gz (fd0)
+map --mem $HOME$/XP_Recovery_Console.vhd (hd0)
+map --hook 
+root (hd0,0)
+chainloader /cmldr
+# step 1. Write 4 chars "cmdc" at 0000:7C03
+write 0x7C03 0x63646D63
+# step 2. Write 3 chars "ons" and an ending null at 0000:7C07
+write 0x7C07 0x00736E6F
+boot

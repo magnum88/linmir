@@ -1,0 +1,20 @@
+!BAT
+# grub4dos can have only 60 variables defined (512 bytes max per value)
+# set *   will clear all variables
+
+setlocal
+
+set n=1
+:LOOP
+if "%n%"=="600" goto :end
+set AAA%n%=FFF
+echo -e !BAT\nset B=%^AAA%n%%% > (md)0x3000+1
+#cat (md)0x3000+1
+call (md)0x3000+1
+if not "%B%"=="FFF" echo Approx. %n% Variables left! && exit
+set /a n=%n%+1  > nul
+goto :LOOP
+
+endlocal
+exit
+

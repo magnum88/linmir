@@ -1,0 +1,20 @@
+# This menu allows you to pick any partition in the system and apply the AntiPanda fix
+
+iftitle [if exist /%grub%/AntiPanda.g4b] Unprotect AUTORUN.INF - choose partition (FAT+NTFS)\n Un-protect the \AUTORUN.INF file on any partition.\n Use if Panda Vaccine or some other AV program\n has protected the AUTORUN.INF file.
+errorcheck off
+# allow find to display
+debug 1
+clear
+echo
+echo Partition list:
+find
+echo
+set P=
+set /p P=Enter a partition - e.g. (hd0,0) : 
+if "%P%"=="" configfile (md)0xa000+0x8000
+echo
+if not "%P:~-1,1%"==")" pause --wait=5  BAD INPUT: please use (hdx,y) format! && configfile (md)0xa000+0x8000
+if not "%P:~0,3%"=="(hd" pause --wait=5 BAD INPUT: please use lower case (hdx,y) format! && configfile (md)0xa000+0x8000
+if exist /%grub%/AntiPanda.g4b call  /%grub%/AntiPanda.g4b %P%
+pause Press a key to reload the Main menu...
+configfile (md)0xa000+0x8000 || configfile /menu.lst

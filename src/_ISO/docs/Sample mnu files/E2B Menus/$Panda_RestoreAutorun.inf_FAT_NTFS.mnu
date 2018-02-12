@@ -1,0 +1,5 @@
+iftitle [if exist /%grub%/AntiPanda.g4b] Unprotect AUTORUN.INF (FAT+NTFS)\n Un-protect the \AUTORUN.INF file on (hd0,0) and (hd0,1).\n Use if Panda Vaccine or some other AV program\n has protected the AUTORUN.INF file.
+errorcheck off
+call  /%grub%/AntiPanda.g4b
+pause Press a key to reload the Main menu...
+configfile (md)0xa000+0x80 || configfile /menu.lst

@@ -1,0 +1,12 @@
+Sprache verwenden die noch nicht in E2B integriert ist!
+
+1. Kopiere den Ordner \_ISO\e2b\grub\ENG und benenne ihn um - z.B. in \_ISO\e2b\grub\FRED
+2. Editiere die STRINGS.TXT im neuen Ordner
+3. In der Datei \_ISO\MyE2B.cfg (Kopie von \_ISO\Sample_MyE2B.cfg) suchst du dann die Zeile "set LANG=XYZ", entfernst die Raute(n) und das Leerzeichen, ersetzt XYZ durch FRED und änderst ggf. "HELPTEXT footer", etc. wie du es haben willst.
+4. Wenn du den Text der Datei \_ISO\e2b\grub\Menu.lst  ändern willst, kopiere sie erst in deinen Ordner \_ISO\e2b\grub\FRED\Menu.lst
+
+Randnotiz: Falls die Datei /_ISO/STRINGS.txt existiert, wird diese immer genutzt und die Einstellungen für "LANG" in der MyE2B.cfg werden ignoriert.
+	     
+Nähere Informationen findest du unter
+http://www.easy2boot.com/configuring-e2b/changing-the-e2b-preset-text/
+oder http://www.frettts-freeware.de/easy2boot.html

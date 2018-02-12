@@ -1,0 +1,41 @@
+!BAT
+setkey
+setkey greater bar
+
+setkey less backslash
+#setkey less numbersign
+
+setkey doublequote at
+
+setkey ampersand caret
+#setkey ampersand percent 
+
+setkey slash ampersand
+setkey parenleft asterisk
+setkey parenright parenleft
+setkey equal parenright
+setkey question underscore
+setkey backslash minus
+setkey z y
+setkey Z Y
+setkey y z
+setkey Y Z
+setkey plus bracketright
+setkey asterisk braceright
+setkey semicolon less
+setkey colon greater
+setkey minus slash
+setkey underscore question
+setkey caret backquote
+setkey quote equal
+setkey backquote plus
+setkey bracketleft semicolon
+setkey braceleft colon
+setkey bracketright quote
+setkey braceright doublequote
+setkey bar bracketleft
+setkey at braceleft
+setkey numbersign backslash
+setkey percent caret
+echo GERMAN KBD MAP  %redir%
+

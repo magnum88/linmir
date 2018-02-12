@@ -1,0 +1,25 @@
+!BAT
+::Espanol
+setkey
+setkey slash ampersand
+setkey ampersand caret
+setkey caret braceleft
+setkey asterisk braceright
+setkey parenleft asterisk
+setkey parenright parenleft
+setkey minus slash
+setkey equal parenright
+setkey quote minus
+setkey underscore question
+setkey question underscore
+setkey braceleft quote
+setkey braceright backslash
+setkey colon greater
+setkey greater bar
+setkey doublequote at
+setkey backslash backquote
+setkey less backslash
+setkey semicolon less
+setkey plus colon
+setkey at semicolon
+echo SPANISH KBD MAPPED  %redir%

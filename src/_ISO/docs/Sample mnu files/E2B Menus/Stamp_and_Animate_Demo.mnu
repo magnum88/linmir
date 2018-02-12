@@ -1,0 +1,45 @@
+iftitle [if not exist GFX] Stamp and Animate the Menu\n Test Stamps and Animation
+
+
+# Specify stamps to ovewrite the wallpaper. Format: set STAMPn=x=y (filespec)
+set STAMP1=0x80=584=0 /_ISO/docs/Templates/Animate/easy2boot_stamp.bmp
+set STAMP2=0x80=680=160 /_ISO/docs/Templates/Animate/E2B.bmp
+set STAMP3=0x00=680=260 /_ISO/docs/Templates/Animate/E2B.bmp
+set STAMP4=0x00=680=360 /_ISO/docs/Templates/Animate/E2B.bmp
+
+
+# ANIMATE - displays a sequence - first file must be end in 01.xxx (can be compressed bitmap using gzip or LZMA) - must use .bmp or .jpg as extension
+# trans=transparent, infinite=animate on menu or add 1-15 for number of cycles, disable playing menu type=0x0
+# 18 delay units = 1 second, x and y in pixels, last = last frame number in sequence 01-99.xxx
+# display sequence on menu (with transparent background)
+set trans=0x80 && set infinite=0x10
+
+set /A type=%infinite% + %trans% > nul
+# play sequence 3 times immediately
+###set /A type=%trans% + 3 > nul
+set delay=0x3
+set last=09
+set x=650
+set y=40
+# use (bd) for boot drive or (hd0,0), so that if root drive changes it continues to load from correct drive.
+# if images are inside a disk image, specify (fd3)
+set FILE=(fd3)/frame_0001.bmp
+set ANIMATE=%type%=%delay%=%last%=%x%=%y% %FILE%
+set trans= && set infinite= && set delay= && set type= && set last= && set y= && set x= && set FILE=
+
+# If using a floppy disk image (fd3), we must specify the image file
+# The floppy disk image is loaded into memory and so the animation is faster and does not constantly access the disk
+# ANIMFD3 if a floppy disk image file containing the files - it is mapped to fd3 by E2B
+set ANIMFD3=/_ISO/docs/Templates/Animate/E2B_GIF.ima
+
+debug 0
+if exist ANIMATE map --mem --read-only %ANIMFD3% (fd3)
+if exist ANIMATE map --hook
+if exist STAMP1 splashimage --offset=%STAMP1% > nul
+if exist STAMP2 splashimage --offset=%STAMP2% > nul
+if exist STAMP3 splashimage --offset=%STAMP3% > nul
+if exist STAMP4 splashimage --offset=%STAMP4% > nul
+if exist ANIMATE splashimage --animated=%ANIMATE% > nul
+errorcheck off
+# abort by loading non-existent menu
+configfile /xxx

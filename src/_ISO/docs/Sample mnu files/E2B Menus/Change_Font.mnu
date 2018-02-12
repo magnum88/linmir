@@ -1,0 +1,15 @@
+# revision 2 for E2B v1.78+
+title Change Font\n Choose a new character font
+set CHOSEN=
+call /%grub%/PickaFile.g4b /_ISO/docs/Fonts .gz
+if "%CHOSEN%"=="" configfile (md)0xa000+0x50
+clear
+set FONT=%CHOSEN%
+errorcheck off
+##font && font /_ISO/docs/Fonts/%CHOSEN%
+font --font-high=16 /_ISO/docs/Fonts/%CHOSEN% || font  /_ISO/docs/Fonts/%CHOSEN%
+set FONT=
+set CHOSEN=
+set STR=
+
+configfile (md)0xa000+0x50

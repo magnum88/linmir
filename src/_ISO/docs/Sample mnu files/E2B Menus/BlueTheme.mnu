@@ -1,0 +1,14 @@
+﻿# WARNING: This overwrites \_ISO\MyE2B.cfg which must be present!
+
+iftitle [if exist /_ISO/MyE2B.cfg] Blue Theme\n Change to the Blue Theme
+set CHOSEN=blue.cfg
+echo
+echo Overwriting \_ISO\MyE2B.cfg file with \_ISO\docs\MyThemes\%CHOSEN%...
+# fill (rd) with 0's , 0x82d0 is rd-base mem address, Fn24 is memset - fill memory  <addr> <string> <size>
+#OLD map (md)0x300+200 (rd) > nul ;; read 0x82d0 > nul ;; call Fn.24  %@retval% 0x20  102400 > nul 
+call Fn.24  0x60000 0x20  102400 > nul ;; map (md)0x300+200 (rd) > nul
+dd if=(rd)+1 of=()/_ISO/MYE2B.cfg > nul
+if exist ()/_ISO/docs/MyThemes/%CHOSEN% dd if=()/_ISO/docs/MyThemes/%CHOSEN% of=()/_ISO/MyE2B.cfg > nul
+if exist ()/_ISO/docs/MyThemes/%CHOSEN% chainloader /grldr
+boot
+

@@ -1,0 +1,8 @@
+# For details of how to add HitManPro to E2B
+# Search for instructions at http://rmprepusb.blogspot.co.uk/
+
+title HitManPro \n Choose option 3 for a Windows XP system
+map /KickstartSidekick.ISO (0xff)
+map --hook
+root (0xff)
+chainloader (0xff)

@@ -1,0 +1,20 @@
+!BAT
+# gets user input characters into %input% variable
+# if ECHO=* then echo *'s, if ECHO=Y then echos characters, else silent
+
+#checkkey 0xFF if no key, 0xD if CR, ESC=27
+call Fn.20  ;; set /A key=%@retval%&0xff > nul ;; if /i not "%key%"=="0xFF" call Fn.19
+write 0x60000 0 > nul
+
+#get key until ESC or CR
+:loop
+call Fn.19 ;; set /A key=%@retval%&0xff > nul ;; call Fn.2 %key% >> (md)0x300+1
+if %key%==0x1B goto :fin
+if %key%==0x0D goto :fin
+if "%ECHO%"=="*" call Fn.2 0x2a 
+if /i "%ECHO%"=="Y" call Fn.2 %key%
+goto :loop
+
+:fin
+cat (md)0x300+1 | set input=
+set key=

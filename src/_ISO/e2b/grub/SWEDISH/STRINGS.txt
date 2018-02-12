@@ -1,0 +1,235 @@
+﻿# SWEDISH (SE) v0.99 2015/10/14 [David Stankiewicz]
+#
+#
+#
+# REDIGERA INTE DENNA FIL!!! Se "Ändra språk" sidan på http://www.easy2boot.com/configuring-e2b/changing-the-e2b-preset-text/
+#
+# Konvention: $$STRM för .mnu fil strängar, $$STRT för .txt-filer, $$STRB för .g4b batch-filer, $$STRh för .hdr fil $$STrl för .lst filer
+# Observera: $$STR strängar är skiftlägeskänsliga
+#
+# Specialtecken du inte ska ändra:
+#    \n är en ny rad
+#    $[0401] definierar en textfärg och bakgrundsfärg
+#    %....% Är variabler som används av grub4dos
+#    Om "[J]/N 'då måste du använda bokstaven N för Nej - om '[N],Y' då måste du använda bokstaven Y för Ja
+#
+#    ^ I .mnu och .txt strängar används för att ange ett kortkommando
+#    Där det finns två nästan identiska strängar, en (STRxGxx) kommer att vara för en GFX Boot meny som inte tillåter snabbtangenter - t.ex. STRhGF7
+#    Om du inte använder GFX Boot då du behöver inte ändra \ översätta GFX strängar
+#
+#    Om du använder UTF-8 double-byte icke-ASCII-tecken, hålla eventuella frågesträngar (t.ex. $$STRbxx) så korta som möjligt eller så kan du få ett felmeddelande om alltför länge
+
+
+#                  --------- MENYRUBRIKER -----
+#
+# Rubriker måste vara mellan två \x20 och mellan 58 och 78 tecken långt - men inte mer än 78 eller kommer att få linje wrapover om i 640x480-läge
+#                     1         2         3         4         5         6         7         8
+#         \x202345678901234567890123456789012345678901234567890123456789012345678901234567890\x20
+#                                                                     XXXXXXXXXXXXXXXXXXXXX  <- text måste sluta på detta område!
+#
+# Meny rubriker (inledande blanksteg startar från vänstra kanten av menyn)
+# Rubriker ska sluta här     >>>>                                                         \x20
+$$STRm004=Windows Boot Meny                                                          \x20
+$$STRm019=DOS Meny                                                                   \x20
+$$STRm017=AntiVirus Meny                                                             \x20
+$$STRm021=Linux Meny                                                                 \x20
+$$STRm023=Backup Meny                                                                \x20
+$$STRm025=Verktygs Meny                                                              \x20
+$$STRm027=WinPE Meny                                                                 \x20
+$$STRm013=Verktyg - Minnestestare Meny                                               \x20
+$$STRhAUT=DIREKT BOOT Meny (AUTO)                                                    \x20
+$$STRlWIN=INSTALLERA WINDOWS FRÅN EN ISO                                             \x20
+$$STRhVIN=Windows Vista installation                                                 \x20
+$$STRh2K8=Server 2008 R2 installation                                                \x20
+$$STRhW7I=Windows 7 installation                                                     \x20
+$$STRhW8I=Windows 8 installation                                                     \x20
+$$STRhW12=Server 2012 installation                                                   \x20
+$$STRhW10=Windows 10 installation                                                    \x20
+
+#                        --------- MENYPOSTER (.mnu) -------------------
+$$STRmAUT=^Ctrl+D DIREKT START Meny     [Ctrl+D] (\\_ISO\\AUTO)\n Starta en fil i \\_ISO\\AUTO mappen och nedan.
+$$STRm016=^Ctrl+A ANTIVIRUS Meny        [Ctrl+A]\n AntiVirus verktyg
+$$STRm022=^Ctrl+B BACKUP Meny           [Ctrl+B]\n Backup meny
+$$STRm018=^Ctrl+O DOS Meny              [Ctrl+O]\n MS-DOS och FreeDOS verktyg
+$$STRm020=^Ctrl+L LINUX Meny            [Ctrl+L]\n Linux ISOs, etc.
+$$STRm024=^Ctrl+V VERKTYGS Meny         [Ctrl+V]\n Memtest, etc.
+$$STRm026=^Ctrl+P WINPE Meny            [Ctrl+P]\n bootbar WinPE s
+$$STRm003=^Ctrl+W WINDOWS BOOT Meny     [Ctrl+W]\n Windows Boot-menyn
+$$STRm0WI=^ctrl+I WINDOWS INSTALL Meny  [Ctrl+I] (%CALL% närvarande)\n Installera Windows till en hårddisk med hjälp av en ISO-fil.
+$$STRm012=^Ctrl+M MINNE TEST Meny       [Ctrl+M]\n Systemminne Test verktyg
+$$STRm005=^Ctrl+F8 Tillbaka till Verktygs Meny [Ctrl+F8]\n Tillbaka till Verktygsmenyn
+$$STRhelp=^F1 Hjälp                     [F1]\n Hjälp om hur du använda Easy2Boot
+
+# GFX menyposter
+$$STRmG16=ANTIVIRUS Meny\n AntiVirus verktyg
+$$STRmG22=BACKUP Meny\n Verktyg för säkerhetskopiering
+$$STRmG18=DOS Meny\n MS-DOS och FreeDOS verktyg
+$$STRmG20=LINUX Meny\n Linux ISOs
+$$STRmG03=WINDOWS BOOT Meny\n Windows Boot Menyn
+$$STRmG26=WINPE Meny\n bootbar WinPE och Windows
+$$STRmG24=VERKTYGS Meny\n Utilities och Memtest
+$$STRmGWI=WINDOWS INSTALL Meny\n Installera Windows till en hårddisk med hjälp av en ISO-fil.
+$$STRmG12=MINNES TEST Meny\n Systemminnes Test verktyg
+$$STRmGAT=DIREKT BOOT Meny (\\_ISO\\AUTO)
+$$STRm0BL=BACKUP Linux Meny\n Linux Backup meny
+$$STRmG05=Tillbaka till Verktygsmeny\n Tillbaka till Verktygsmeny
+$$STRhelG=Hjälp\n Hjälp om hur du använder Easy2Boot
+
+# Övriga
+$$STRm014=Växla till Grub4dos v0.4.6 (för USB 2.0 Driver)\n Ladda grub4dos v0.4.6.\n Då kan du installera grub4dos USB-drivrutinen.\n Använd USB-drivrutinen om du har en buggig BIOS.
+$$STRm015=Installera snabbt Grub4dos USB 2.0 drivrutin\n Ersätter BIOS USB startkoden.\n Används om startas upp med Plop eller om BIOS har en buggig USB kod.\n t.ex. Om fel på uppstart från> 137GB USB-enhet.
+# chkpci MNU
+$$STRm007=Visa alla system PCI-ID\n Visa alla PCI-ID
+$$STRm008=Visa Mass Storage Controller PCI-ID\n Display diskkontroller PCI-ID
+$$STRm009=Lista matchande XP DriverPack.ini poster\n Kontrollera vad 32-bitars XP-drivrutin kommer att användas
+$$STRm010=Lista matchande Win2K DriverPack.ini poster\n Kontrollera vad 32-bitars Win 2000 förare kommer att användas
+$$STRm011=Lista matchande Win2K3 DriverPack.ini poster\n Kontrollera vad 32-bitars Win 2003 förare kommer att användas
+$$STRm0FD=FreeDos (från en diskett bild)\n Boot från en diskett bild
+# \_ISO\UTILITIES_MEMTEST\MNU\Memtest86-51.mnu VERSION=4.3.7 (använd UEFI för senaste versionen)
+$$STRmm02=Passmark Memtest86\n Testar Minnet\n http://www.memtest86.com
+$$STRmm03=Passmark Memtest86 (One Pass)\n Testar Minnet\n http://www.memtest86.com
+$$STRmm04=Passmark Memtest86 (Boot Trace aktiverad)\n Testar Minnet\n http://www.memtest86.com
+$$STRmm05=Passmark Memtest86 (Starta endast en CPU)\n Testar Minnet\n http://www.memtest86.com
+# \ _ISO\UTILITIES_MEMTEST\memtest.img.txt
+$$STRt001=Memtest86+\n Testar Minnet
+$$STRmmbp=Mäter BIOS USB Prestandan\n Detta ger dig tillgång till en fil katalog flera gånger.\ Den emulerar hur Easy2Boot söker efter filer vid uppstart.\ 100 gånger tar ungefär 20 sekunder
+# ----- .hdr Filer -----
+
+$$STRh0F7=^F7 Botar till första HDD     [F7]\n Bootar till den första interna hårddisken (HDD0).
+$$STRh0F8=^F8 Bygger om huvudmenyn      [F8]\n Kör denna om E2B innehåll har förändrats.\n Bygger om huvudmenyn och uppdaterar\n Fastload Cache (om aktiverade).
+$$STRh1BM=^F8 Tillbaka till huvudmenyn  [F8]\n Gå tillbaka till huvudmenyn
+$$STRh1RB=^F9 Startar om Datorn         [F9]\n Startar om Datorn.
+$$STRh110=^F10 Stäng av Datorn          [F10]\n Stänger av Datorn.
+$$STRh1MW=^Ctrl+I Tillbaka till Windows Installations menyn [Ctrl+I]\n Tillbaka till Windows Installations Menyn
+# GFX meny
+$$STRhGF7=Botar till första HDD\n Bootar till den första interna hårddisken (HDD0).
+$$STRhGF8=Bygger om huvudmenyn\n Kör denna om E2B innehåll har förändrats.\n Bygger om huvudmenyn och uppdaterar\n Fastload Cache (om aktiverade).
+$$STRhGBM=Tillbaka till huvudmenyn\n Gå tillbaka till huvudmenyn
+$$STRhGRB=Startar om Datorn\n Startar om Datorn
+$$STRhG10=Stäng av Datorn\n Stänger av Datorn
+$$STRhGMW=Tillbaka till Windows Installations menyn\n Tillbaka till Windows Installations Menyn
+
+$$STRh0MD=Ange standardmenyalternativ och timeout\n Du kan ställa in standardmenyalternativet\n och timeout nedräknings värde\n att automatiskt köra efter en tid.
+$$STRh1MD=Ange Standard Meny Artikelnummer (0-99): 
+$$STRh2MD=Ange Timeout Meny i sekunder (0=off): 
+$$STRmc64=  --- 64-bitars CPU (%TMEM%MB) ---
+$$STRmc32=  --- 32-bitars CPU (%TMEM%MB) ---
+$$STRmFS1=\x05 CACHAD MENY (FASTLOAD) \x05\n Använd Bygger om huvudmenyn för att uppdatera menyn\n så att eventuella senare ändringar kommer träda i kraft.
+$$STRhMFD=Inaktivera FASTLOAD\n Huvudmenyn kommer inte att cachas.
+$$STRhMFE=Aktivera FASTLOAD\n Huvudmenyn kommer att cachas.\n Alla framtida stövlar kommer att använda den cachade menyn\n Använd Bygg huvudmenyn för att uppdatera menyn.
+$$STRhMFL=UPPDATERA DEN HÄR FASTLOAD CACHAD MENY\n Kör om du har ändrat innehållet i USB-enheten.\n eller byt namn \FASTLOAD.YES till \FASTLOAD.NO för att stänga\n FastLoad funktionen.
+$$STRmg14=Grub4dos v0.4.5c\n Ladda grub4dos v0.4.5.\n Försök om du har problem med 0.4.6 version.
+
+
+# ---- MenuWinInstall.lst ---- GFX menyn är andra.
+$$STRl0x1=^Alt+1 Installera XP - Steg 1 [Alt+1]\n Om du använder DPMS, behöver du inte trycka F6\n Du måste starta till Easy2Boot igen och kör STEG 2 efteråt..
+$$STRl1x1=Installera XP - Steg 1\n Om du använder DPMS, du behöver inte trycka F6\n Du måste starta till Easy2Boot igen och kör STEG 2 efteråt..
+$$STRl0x2=^Alt+2 Installera XP - Steg 2 [Alt+2] (512+system)\n fas 2 av installatitionen (mest tillförlitliga)\n Detta kommer att slutföra installationen och starta om från hårddisken\n Det kräver minst 512 MB RAM-minne för att hålla ISO-filen.
+$$STRl1x2=Installera XP -.. Steg 2 (512+system)\n fas 2 av installatitionen (mest tillförlitliga)\n Detta kommer att slutföra installationen och starta om från hårddisken\n Det krävs minst 512 MB RAM-minne för att hålla ISO-filen.
+$$STRl0x3=^Alt+3 Installera XP - Steg 2 [Alt+3] (Låg RAM-system)\n snabbare - använd detta om inte tillräckligt systemminne (<512)\n Direkt ISO karta för WinVBlock.. Fungerar inte på alla\n system, t.ex. några Atom CPU-baserade system.
+$$STRl1x3=Installera XP - Steg 2 (Låg RAM-system)\n snabbare - använd detta om inte tillräckligt systemminne (<512)\n Direkt ISO karta för WinVBlock.. Fungerar inte på alla\n system, t.ex. några Atom CPU-baserade system.
+$$STRl0PE=^X Install XP med WinPE       [X]\n Installera Windows XP till din hårddisk med hjälp av WinPE.\n Du behöver också en WinPE ISO eller Windows Installera ISO-fil\n (WinPE v2/3/4 eller Vista Installera ISO eller senare).
+$$STRl1PE=Installera XP med WinPE\n Installera Windows XP till din hårddisk med hjälp av WinPE.\n Du behöver också en WinPE ISO eller Windows Installera ISO-fil\n (WinPE v2/3/4 eller Vista Installera ISO eller senare) .
+$$STRl0LD=^L Listar Disk Ctrl PCI ID    [L]\n Anteckna PCI-ID i listan och sedan kontrollera dem mot\n de TXTSETUP.OEM poster (se Handledning 30).
+$$STRl1LD=Listar Disk Kontroller PCI-ID\n Anteckna PCI-ID i listan och sedan kontrollera dem mot\n de TXTSETUP.OEM poster (se Handledning 30).
+$$STRl0IV=^V Installera Vista           [V] (%CV% närvarande)\n Installera Windows Vista från en ISO-fil.
+$$STRl1IV=Installera Vista\n Installera Windows Vista från en ISO-fil.
+$$STRl0I7=^7 Installera Windows 7       [7] (%C7% närvarande)\n Installera Windows 7 från en ISO-fil.
+$$STRl1I7=Installera Windows 7\n Installera Windows 7 från en ISO-fil.
+$$STRl082=^R Installera Server 2008 R2  [R] (%C28% närvarande)\n Installera Server 2008 R2 från en ISO-fil.
+$$STRl182=Installera Server 2008 R2\n Installera Server 2008 R2 från en ISO-fil.
+$$STRl0I8=^8 Installera Windows 8       [8] (%C8% närvarande)\n Installera Windows 8 från en ISO-fil
+$$STRl1I8=Installera Windows 8\n Installera Windows 8 från en ISO-fil
+$$STRl012=^S Installera Server 2012     [S] (%C12% närvarande)\n Installera Windows 2012 från en ISO-fil.
+$$STRl112=Installera Server 2012\n Installera Windows 2012 från en ISO-fil.
+$$STRl010=^T Installera Windows 10      [T] (%C10% närvarande)\n Installera Windows 10 från en ISO-fil.
+$$STRl110=Installera Windows 10\n Installera Windows 10 från en ISO-fil.
+
+#               --------- STRÄNGAR I GRUB4DOS KOMMANDOFILER (.g4b) -----------
+
+# XPStep1.g4b
+$$STRb001=XP INSTALLATION - STEG 1\n========================\n\n$[0104]VIKTIGT: Du måste starta från USB-enheten igen och kör STEP 2 efter detta!\n 
+$$STRb002=64-bitars XP ISO upptäckts!\n Du kommer att behöva trycka F6 för att ladda 64-bitars Firadisk drivrutin
+$$STRb003=ISO upptäckas som Windows%OSTYPE%(användning 'XP', '2K3' eller '2K' i ISO filnamnet om felaktiga)
+$$STRb004=Om detta är felaktig, ber vi skriver xp 2k eller 2K3 nu: 
+$$STRb005=Kommer att leta efter Windows %OSTYPE% endast tillhandahålla
+$$STRb006=DPMS2 Alternativ (32-bitars)\n============================\n1=SRS Driver+FiraDisk - default=FiraDisk+OEM drivers\n2=SRS Driver+FiraDisk+WinVBlock - default=FiraDisk+OEM drivrutiner
+$$STRb007=3=SRS Driver+WinVBlock+FiraDisk - default=WinVBlock+OEM drivrutiner (> 512 endast)
+$$STRb008=Hitta Automatiskt SATA/AHCI/RAID 32-bitars Masslagrings Drivrutiner ([J=2]/N/1/2/3): 
+$$STRb009=Hitta Automatiskt SATA/AHCI/RAID 32-bitars Masslagrings Drivrutiner ([J=2]/N/1/2): 
+$$STRb010=$[0104]OBS: Om du startar från en USB-hårddisk, säger JA till nästa fråga ....
+$$STRb011=Ladda XP ISO i minnet (rekommenderas) ([J]/N): 
+$$STRb012=Ladda XP ISO i minnet (tryck på Y om uppstart från USB-hårddisk eller om BSOD kraschar problem) Y/[N]): 
+$$STRb013=VAR GO VÄLJ EN OBEVAKD INSTALLATIONS FIL ...
+$$STRb014=Du MÅSTE TRYCKA F6 när du uppmanas att\ntrycka S väljer för att välja WinVBlock (32-bit) drivrutin,\nsen tryck S för att välja FiraDisk (32-bit) drivrutin,\nsen tryck S för att välja AHCI-drivrutinen (om närvarande)\n
+$$STRb015=Du MÅSTE TRYCKA F6 när du uppmanas att\ntrycka S väljer för att välja WinVBlock (64-bitars) drivrutin,\nsen tryck S för att välja FiraDisk (64-bitars) drivrutin,\nsen tryck S för att välja AHCI-drivrutinen (om närvarande)\n
+$$STRb016=\nExempel:\nAtom Netbook = WinVBlock+ICH7R/DH\nDQ67 serie 6=FiraDisk+Desktop\\Workstation\\Server Express
+$$STRb017=Tryck nu på [Enter] och tryck sedan på F6 när du uppmanas av XP och ladda drivrutiner ...
+$$STRb018=Tips: Om FiraDisk ger problem, starta om och försöka Alternativ 3 (WinVBlock)\n Om du fortfarande har problem, använda alternativ 2, men pressen F6 och lägga alla drivrutiner som anges av XP\n
+$$STRb019=$[0104]OBS: Du måste använda en av de "Installera XP - STEG 2" alternativ efter omstart (512+är säkrast).
+$$STRb020=$[0104]OBS: WinVBlock (alternativ 3) är endast lämplig för system med mer än 512 MB minne\nAnvänd endast "Installera XP - STEG 2 (512+system) alternativet på nästa omstart.\n
+$$STRb021= MELLANSLAG=Pausa, ENTER=Starta nu - STARTAR INOM 5 SEKUNDER...
+$$STRb022=Ingen Unattend fil kommer att användas
+$$STRb023=$[0104]FEL:! WINNT variabel inte korrekt inställd i %MFOLDER%/%CHOSEN%.AUTO!\n Var god använd\n!BAT\n SET WINNT.SIF=12345678\n\n\
+$$STRb024=$[0102]OBS: XP ISO kommer att använda %WINNT% som Winnt.sif filen
+$$STRb025=$[0104]DPMS alternativet inte tillgängligt (DriverPack inte funnen)!
+$$STRb026=$[0104]Missing /%grub%/dpms/DRIVERPACK.INI fil\n Döp om filen DriverPack_MassStorage_wnt5_x86-32.ini till DrivePack.ini.
+$$STRb027=$[0102]OBS: XP ISO kommer att använda %WINNT% som Winnt.sif filen
+$$STRb028=$[0104]VARNING: WINNT variabel inte korrekt inställd i %MFOLDER%/%ISO%.AUTO\n Var god använd\n!BAT\nset WINNT.SIF=12345678\n\n
+$$STRb029=$[0102]%WINNT%.cmd kommer att kallas efter installationen
+$$STRb030=$[0102]INFORMATION: Minnesstorlek
+
+# XPStep2.g4b
+$$STRbx21=XP INSTALLATION - STEG 2\n========================
+$$STRbx22=Laddar %ISO% i minnet - var god vänta ...
+
+# XPStep2LowRam.g4b
+$$STRbLR1=XP INSTALLATION - STEG 2 LowRAM (använd endast för Low RAM Systems <512MB)\n==========================================================================
+$$STRbLR2=$[0104] TA INTE BORT USB-ENHETEN! - Startar om datorn från hårddisken...
+
+# XPWINNT.g4b
+$$STRT001=Välj en Windows XP ISO-fil\n==========================
+$$STRT002=VÄLJA NU EN WINPE "Helper" ISO\n==============================\nVi måste tillfälligt boot till WinPE för att köra Winnt32.exe\nVänligen ange en WinPE eller Windows Installera ISO (måste vara Vista eller senare, 32-bit)
+$$STRT003=Vilken mapp är WinPE ISO i (1-10, Esc=Avbryt)? : 
+$$STRT004=VÄLJ NU EN WINPE "Helper" ISO\n=============================\nFrån %PEPATH%
+$$STRT005=HÅRDDISKPARTITION STORLEK\n=========================\n\nEasy2Boot kan torka hårddisken och skapa en ny partition \n eller kan formatera en befintlig partition \n heller kan installera på en befintlig partition.
+$$STRTA05=\nVänligen ange ett standardstorlek.\nDu kommer att tillfrågas om du vill formatera hårddisken senare ...
+$$STRTB05=Default Disk 0 Första partitionen (1) i MB (0=MAX, ESC=Avbryt): 
+$$STRT006=VÄLJ NU EN UNATTEND.TXT FIL\n===========================\nFrån %MYPATH%
+
+# RunVista.g4b
+$$STRbV01=Välj nu en Unattend.xml-fil\n===========================
+$$STRbV02=Använd Easy2Boot XML-fil (standard)
+$$STRbV03=$[0104] VARNING: Om du vill installera Windows från en USB-hårddisk behöver du också en E2B HJÄLPREDA USB-minne\n Om du inte har en du kommer att få en "drive drivrutin DVD saknas" meddelande\nVar läsa Easy2Boot Handledning för mer information.
+$$STRbV04=Tryck C för att fortsätta eller tryck på [Enter] för att återgå: 
+$$STRbV05=$[0104] USB-ENHET HAR WINHELPER.USB fil men ingen autounattend.xml!
+
+# RunWin8.g4b
+$$STRb801=Välj en Unattend.xml-fil\n========================\n\nObs: Egna XML-filer bör innehålla rätt nyckel\n och de måste köra LOADISO (se exempelfilen).\n\n $[0104] 0=(standard) För Win8/10 du normalt måste ange en produktnyckel
+$$STRb802=VÄLJ EN PRODUKTNYCKEL (standard) - rätt nyckel krävs vanligtvis
+$$STRb803=Välj en produktnyckel fil\n=========================
+$$STRb805=Skriv in din egen nyckel
+$$STRb806=$[0104] Produktnycklar måste vara i AAAAA-BBBBB-CCCCC-DDDDD-EEEEE format (29 tecken)
+$$STRb807=Fyll i din 5x5 produktnyckel: 
+$$STRb8rp=Tryck på valfri tangent för endast Windows Repair...\n
+
+# PickAFile.g4b
+$$STRbp01=Välj (ESC=Avbryt) ...
+$$STRbp02=$[0102] Med den enda filen närvarande ...
+$$STRbp03=Välj ett nummer
+$$STRPKEY=Tryck på en tangent för att fortsätta ...
+
+# QRUN.g4b
+$$STRberr=$[0104]FEL: %ISOC% ÄR INTE ANGRÄNSANDE (eller är skadad eller saknas)\n Vänligen köra RMPrepUSB - CTRL+F2 eller köra MAKE_THIS_DRIVE_CONTIGUOUS.cmd att defragmentera alla filer!.
+$$STRbpt1=$[0104] VARNING: DENNA E2B DRIVE PARTITIONSTABELL ÄR PÅ VÄG ATT SKRIVAS ÖVER\n   DET FINNS EN LITEN RISK FÖR ATT FÖRLORA alla filer på E2B DRIVE\n   en säkerhetskopia av MBR HAR GJORTS\n 
+$$STRbpt2=$[0104]   Du kan återställa de ursprungliga E2B partitioner från Windows\n   med hjälp av '\\e2b\\RestoreE2B.cmd" scriptet på USB-enheten (se www.easy2boot.com för detaljer).\n 
+$$STRbpt3=\n För uppstart med hjälp UEFI, starta och välj UEFI:xxxx startalternativet från din UEFI startmeny\n För växla tillbaka till Easy2Boot, känga i icke-UEFI-läge (Legacy eller CSM läge)\n och väljer Easy2Boot menyn alternativ.
+$$STRbpt4=OK att ersätta E2B partitionerna ([J]/N): 
+$$STRbsug=ÄNDRA FILÄNDELSEN?\n==================\n\nTips: För att undvika detta prompt, använd inte .iso som filen filändelse.\n   Använd istället .isodefault (set NOSUG=1)\n\n$[0x0e]Tryck Y snabbt att använda %SUGJE%\n 
+$$STRbsuf=Använd %SUGJE% filändelsen? (Y/[N]): 
+
+$$STRl600=^6 Installera Server 2016     [6] (%C16% närvarande)\n Installera Server 2016 från en ISO-fil.
+$$STR16G0=Installera Server 2016\n Installera Server 2016 från en ISO-fil.
+$$STRhS16=Server 2016 installation                                                         \x20
+
+$$STRmldk=List BIOS Disks\n List the partitions detected by grub4dos and the BIOS

@@ -1,0 +1,59 @@
+# Make a \casper-rw ext2 file using RMPrepUSB in the root of the drive using RMPrepUSB
+# File Name=desinfect-rw  Volume Name=desinfectSIGS size=1000MB to 2000MB
+# Place this .mnu file and the ISO in either \_ISO\MainMenu\MNU or \_ISO\LINUX\MNU
+# This menu will work even on an NTFS USB boot drive
+# IMPORTANT: you MUST run WinContig (Ctrl+F2) before booting E2B.
+# You MUST follow the instructions at
+# http://rmprepusb.blogspot.co.uk/2014/08/add-desinfect-2014-persistent-virus.html
+ 
+iftitle [if exist $HOME$/ct_Desinfect_2014.iso] Desinfect 2014 with Updates\n Boot using .mnu file with persistent updates
+
+set ISO=$HOME$/ct_Desinfect_2014.iso
+set PER=/desinfect-rw
+
+if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (bd)/menu.lst
+if "%E2BDEV%"=="" set E2BDEV=hd0 && pause E2BDEV forced to hd0!
+#enable parttype output
+debug 1
+# make empty table entry in 3rd position in ptn table
+parttype (%E2BDEV%,2) | set check=
+debug off
+set check=%check:~-5,4%
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0 0 0
+if not "%check%"=="0x00" echo WARNING: PTN TABLE 3 IS ALREADY IN USE - PERSISTENCE MAY NOT WORK! && pause
+debug 1
+if not exist %PER% echo WARNING: %PER% persistence file not found! && pause
+errorcheck off
+set P=0
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0x0 %PER% && set P=1
+errorcheck on
+
+#Language
+set L=debian-installer/language=de console-setup/layoutcode?=de
+echo
+set ask=
+#English text below can be changed to German
+if "%P%"=="1" echo -e PERSISTENCE FOR UPDATES IS ENABLED\n\n
+
+set /p:3 ask=Press E and [Enter] for English (within 3 seconds)... 
+
+if /i "%ask%"=="E" set L=
+#set L=debian-installer/language=en console-setup/layoutcode?=en
+
+echo
+echo
+#map ptn 4 to ISO
+partnew (%E2BDEV%,3) 0x0 %ISO%
+map %ISO% (0xff)
+map --hook
+root (0xff)
+set A=file=/cdrom/preseed/ubuntu.seed boot=casper 
+set B=iso-scan/filename=
+set INTISO=/software/desinfect-2014.iso
+set C=quiet splash memtest=4 -- 
+set D=persistent persistent-path=/
+echo
+if not exist %INTISO% echo ERROR: INTISO is set to %INTISO% but it is not present inside %ISO% && pause
+
+kernel /casper/vmlinuz %A% %B%%INTISO% %C% %L% %D%
+initrd /casper/initrd.lz

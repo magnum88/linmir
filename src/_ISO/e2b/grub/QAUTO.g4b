@@ -1,0 +1,441 @@
+!BAT
+:: GRUB4DOS batch script. www.easy2boot.com [SSi]
+:: Uses: Adds all *.iso file contents to make a single menu
+::
+:: Usage: in menu.lst, put \_ISO\e2b\grub\QAUTO.g4b .automenu (folder that has .iso files)
+::        then load using configfile (md)0x3000+0x50
+:: An optional \%grub%\AUTO.hdr file can be included to contain default menu settings (color etc.)
+:: This script used the default image file path as %2 variable - e.g. /_ISO/Auto
+:: A menu file is generated in memory by this code for all ISO files in the /%2 folder and below
+:: Run this grub4dos batch file using the following 2 lines
+:: \grub\QUATO.g4b .Automenu /_ISO/AUTO
+:: Configfile (md)0x3000+0x50
+::
+:: This script requires GRUB4DOS 2010-12-14 or later.
+:: If ELBACKUP=YES then a copy of the generated menu will be written to 
+
+:: version 1  18 December 2012
+:: version 2  6 Jan 2013 - Back to main menu now reboots as problem not detecting files using iftitle if just reload menu.lst!
+:: version 3  7 Mar 2013 - changed for general ISOs and uses _ISO\AutoISO folder
+:: version 4  9 Dec 2013 - use .hdr files for F7-F10
+:: version 5  5 Jan 2014 - need errorcheck off or get cant find file on empty string, use (bd) for F7-10 menus
+:: version 6  3 Mar 2014 - convert $HOME$ in .txt file to current folder
+:: version 7  27 Apr 2014 - bugfix for Modulo 4GB files not working with cat --length=0#
+:: version 8  3 June 2014 - bugfix for v7! did not blow down through subfolders!
+:: version 9  31 Jan 2015 - reload main menu on failure of boot
+:: version 10 28 April 2015 - $NAME$ supported in .txt files - add \n to .txt files if no \n already
+:: version 11 5 July 2015 - RTL support added
+:: version 12 31 Jan 2016 - ignore .exe files
+::=============================================================================
+
+::set DD=0
+::Uncomment line below to show debug lines
+::set DD=1
+
+debug off
+checkrange 20101214:-1 read 0x8278 || echo Err.version && exit 1
+:: this batch file calls itself, so use the label as the place to jump to
+goto %~x1
+exit
+
+:.automenu
+
+:: Variables: %0=/xx/automenu.bat %~nx0=automenu.bat %~nx1=.automenu %1=.automenu %~x1=.automenu
+::echo 0=%0 nx0=%~nx0 nx1=%~nx1 nx2=%~nx2 nx3=%~nx3 1=%1 x1=%~x1
+:: get the menu folder into DIR variable
+::echo Checking if .makemenu is loaded - if not load it
+::delmod -l %~nx0 || insmod %0 .makemenu
+if not "%MOD%"=="1" delmod -l %~nx0 || insmod %0
+
+if "%DD%"=="1" echo Writing default menu entry
+if "%DD%"=="1" echo -e default 0\n#timeout 10\n\n > (md)0x3000+0x50
+if exist (bd)/%grub%/AUTO.hdr echo Using default user menu /%grub%/AUTO.hdr   %redir%
+cat --length=0 (bd)/%grub%/AUTO.hdr > nul && set MDIR=(bd)/%grub%/AUTO.hdr && call :XLATE
+
+::set ME=%0
+
+if "%2"=="" goto :endloop
+errorcheck off
+set DIR=%2
+if not "%DIR:~0,1%"=="(" set DIR=()%DIR%
+#echo Searching %DIR%  %redir%
+echo set MFOLDER=%DIR% >> (md)0x3000+0x50
+#echo Looking for files starting at %DIR%  %redir%
+#ls %DIR%/ | call :cpa
+call :cpa
+
+:endloop
+::echo writing 'back to main menu' entry into menu as last item
+
+if not "%LBACKMENU%"=="" if not exist NOF7HD set MDIR=(bd)/%grub%/MenuF7.hdr && call :XLATE
+if not "%LBACKMENU%"=="" if not exist NOF8B  set MDIR=(bd)/%grub%/MenuF8.hdr && call :XLATE
+if "%NOF9R%"==""                             set MDIR=(bd)/%grub%/MenuF9.hdr && call :XLATE
+if "%NOF10H%"==""                            set MDIR=(bd)/%grub%/MenuF10.hdr && call :XLATE
+
+set LL=
+set DD=
+set DIR=
+set hlp=
+set MDIR=
+set mem=
+set mem1=
+set s=
+set count=
+set LASTDIR=
+set LEVEL1=
+:: must set root back!
+root (bd)/ > nul
+delmod %~nx0 > nul
+
+# test for SPACE key pressed (don't remove from kbd buffer)
+call Fn.20
+set /A key=%@retval%&0xff > nul
+if "%key%"=="0x20" set /p key=[SPACE] key was pressed - Press [Enter] to continue...
+if "%key%"=="0x20" echo
+set key=
+
+:: pause if ENUMWAIT exists
+if exist ENUMWAIT pause Press a key...
+
+::if exist RTL call /%grub%/rtl.g4b
+
+debug 1
+exit
+
+:: ----------------------- SUBROUTINES ----------------------
+
+
+:.makemenu
+if "%DD%"=="1" echo @MAKEMENU
+setlocal
+if "%DD%"=="1" echo Checking %DIR%/%1
+if "%1"=="" endlocal && goto :EOF
+::If is a directory ignore it
+::ZZZcat --length=0 (bd)%DIR%/%1 || goto :EOF
+if "##"=="#%~x1#" goto :eof
+
+:: if .txt file then ignore but use as title line
+if /i "#.txt#"=="#%~x1#" goto :eof
+if /i "#.cmd#"=="#%~x1#" goto :eof
+if /i "#.mnu#"=="#%~x1#" goto :eof
+if /i "#.exe#"=="#%~x1#" goto :eof
+if "#.#"=="#%~x1#" goto :eof
+
+set LL=0
+cat --length=0 %DIR%/%~n1.txt > nul && set LL=1
+if "%LL%"=="1" && cat --length=12 --locate="title " %DIR%/%~n1.txt > nul || echo -e $[0104]ERROR: No 'title' keyword in %~n1.txt! && set LL=0 && pause
+if "%LL%"=="0" echo -e %~nx1 %redir% 
+if "%LL%"=="1" echo -e %~nx1 + %~n1.txt %redir%
+
+# check for 64 in extension or ending in 32
+echo %~x1 > (md)0x220+1
+set B64=
+cat --locate=64 (md)0x220+1 > nul && set B64=1
+set xx=%~x1
+echo %xx:~-2% > (md)0x220+1
+set xx=
+if "%LL%"=="0" echo >> (md)0x3000+0x50
+cat --locate=32 (md)0x220+1 > nul && set B64=32
+
+set spath=%1 && set sname=%~n1 && set sdir=%DIR:~2%/%1
+
+if "%B64%"=="" if not   exist EXTOFF if "%LL%"=="0" echo title %spath%\n %sdir% >> (md)0x3000+0x50
+if "%B64%"=="" if       exist EXTOFF if "%LL%"=="0" echo title %sname%\n %sdir% >> (md)0x3000+0x50
+if "%B64%"=="1" if not  exist EXTOFF if "%LL%"=="0" echo iftitle [checkrange 2,3 is64bit] %spath%\n %sdir% >> (md)0x3000+0x50
+if "%B64%"=="1" if      exist EXTOFF if "%LL%"=="0" echo iftitle [checkrange 2,3 is64bit] %sname%\n %sdir% >> (md)0x3000+0x50
+if "%B64%"=="32" if not exist EXTOFF if "%LL%"=="0" echo iftitle [checkrange 0,1 is64bit] %spath%\n %sdir% >> (md)0x3000+0x50
+if "%B64%"=="32" if     exist EXTOFF if "%LL%"=="0" echo iftitle [checkrange 0,1 is64bit] %sname%\n %sdir% >> (md)0x3000+0x50
+set B64=
+
+# if .txt file only use first line and add \n to end to suppress grub4dos help message
+if "%LL%"=="1" cat %DIR%/%~n1.txt > (md)0x230+1
+if "%LL%"=="1" cat --locate=\x0D --replace=\x00 (md)0x230+1 > nul
+if "%LL%"=="1" set MDIR=(md)0x230+1 && call :XLATE %~1
+if "%LL%"=="1" echo \n >> (md)0x3000+0x50
+
+# must add CR in case not in .txt file
+echo >> (md)0x3000+0x50
+echo /%grub%/QRUN.g4b %DIR%/%1 >> (md)0x3000+0x50
+echo -e errorcheck off\nboot\nerrorcheck on\nconfigfile (md)0xa000+0x50 >> (md)0x3000+0x50
+goto :EOF
+
+:XLATE
+set DDIR=%DIR%
+:: get rid of leading ()
+if "%DDIR:~0,2%"=="()" set DDIR=%DDIR:~2%
+:: ----- Change all $HOME$ strings in file %MDIR% to %DDIR%
+echo > (md)0x3100+0x20
+set ST=0
+set END=0
+:: For faster speed copy .mnu file to memory  A800 = 21MB address
+cat %MDIR% > (md)0xA800+0x100
+# file is now in A800 - translate to 3100
+set MDIR=(md)0xA800+0x100
+:XLOOP
+if "%DD%"=="1" echo Start=%ST%
+cat --skip=%ST% --locate=$HOME$ --number=1 %MDIR% > nul
+set /a END=%?% > nul
+if  "%END%"=="0" goto :nohome
+set /a LENGTH=%END%-%ST% > nul
+cat --skip=%ST% --length=%LENGTH% %MDIR% >> (md)0x3100+0x20
+echo -n %DDIR% >> (md)0x3100+0x20
+set /a ST=%END%+6 > nul
+goto :XLOOP
+:nohome
+cat --skip=%ST% %MDIR% >> (md)0x3100+0x20
+
+
+:: ----- xlate $NAME$ --------------
+echo > (md)0x3150+0x20
+set MDIR=(md)0x3100+0x20
+set ST=0
+set END=0
+:: look for $NAME$ - translate from (md)3100 to (md)3150
+:nlp
+if "%DD%"=="1" echo Start=%ST%
+cat --skip=%ST% --locate=$NAME$ --number=1 %MDIR% > nul
+set /a END=%?% > nul
+if  "%END%"=="0" goto :non
+set /a LENGTH=%END%-%ST% > nul
+cat --skip=%ST% --length=%LENGTH% %MDIR% >> (md)0x3150+0x20
+echo -n %~n1 >> (md)0x3150+0x20
+set /a ST=%END%+6 > nul
+goto :nlp
+:non
+cat --skip=%ST% %MDIR% >> (md)0x3150+0x20
+
+
+:: copy and convert $$STR keywords from (md)0x3150+0x20 and add to full menu at (md)3000
+call :XLATE9
+
+set DD=
+set LENGTH=
+set END=
+set ST=
+set DDIR=
+set mem=
+set mem1=
+set s=
+goto :EOF
+
+::-----------------------
+
+
+:: -- $$STR substitution
+
+:XLATE9
+set MDIR=(md)0x3150+0x20
+if "%DD%"=="1" echo Changing all $$STR strings in file %MDIR%
+echo -n > (md)0x3300+0x20
+set ST=0
+set END=0
+
+:XLOOP9
+if "%DD%"=="1" echo Looking for $$STR starting at %ST%
+cat --skip=%ST% --locate="$$STR" --number=1 %MDIR% > nul
+set /a END=%?% > nul
+if  "%END%"=="0" goto :nohome9
+set /a LENGTH=%END%-%ST% > nul
+cat --skip=%ST% --length=%LENGTH% %MDIR% >> (md)0x3300+0x20
+cat --skip=%END% --length=9 %MDIR% | echo -e !BAT\nset A= > (md)0x3200+1
+call (md)0x3200+1
+if "%DD%"=="1" echo Found %A%
+
+:: now find A in (md)0x880+0x80
+cat --locate=%A% --number=1 (md)0x880+0x80 > nul
+set /a ALOC=%?% > nul
+if "%ALOC%"=="0" echo $[0104]ERROR %A% NOT FOUND IN STRINGS.TXT FILE! && pause
+if "%ALOC%"=="0" echo -n %A% >> (md)0x3300+1 && goto :badstr
+set /a ALOC=%ALOC%+10 > nul
+:: get end of line
+cat --locate=\x0a --skip=%ALOC% --number=1 (md)0x880+0x80 > nul
+set /a LL=%?%-%ALOC%-1 > nul
+cat --skip=%ALOC% --length=%LL% (md)0x880+0x80 >> (md)0x3300+0x20
+if "%DD%"=="1" echo Replacing with
+if "%DD%"=="1" cat --skip=%ALOC% --length=%LL% (md)0x880+0x80 && echo 
+set A=
+set ALOC=
+:badstr
+
+# move past string and CR\LF
+set /a ST=%END%+9 > nul
+
+goto :XLOOP9
+
+:nohome9
+if "%DD%"=="1" echo NOHOME9
+cat --skip=%ST% %MDIR% >> (md)0x3300+0x20
+:: copy to menu at 0x3000
+cat (md)0x3300+0x20 >> (md)0x3000+0x50
+echo >> (md)0x3000+0x50
+
+set ALOC=
+set LENGTH=
+set END=
+set ST=
+set DDIR=
+goto :EOF
+
+:: ----
+
+
+:cpa
+if "%DD%"=="1" echo @CPA: Current Root: %DIR%
+if "%DD%"=="1" echo Change source root to %DIR%/
+
+:: must or || in case empty directory! Prevents hanging if use root without dir access!
+::echo -e $[0x0e]%DIR% %redir%
+
+::echo DIR=%DIR% LASTDIR=%LASTDIR%
+if not "%DIR%"=="%LASTDIR%" set LASTDIR=%DIR% && echo -e $[0x0e]%DIR% %redir%
+ls %DIR%/ > nul || echo -n %redir%
+root %DIR% > nul || echo -n %redir%
+
+if exist NOSORT echo %redir% && ls | call :copyfiles && goto :eof
+
+:: get dir listing and sort entries alphabetically
+#echo -e and sorting files...  %redir%
+set sortlist=(md)0x1c000+0x50
+echo -e -n \x00\x00 > %sortlist%
+ls | call :sort 
+cat %sortlist% | call :copyfiles 
+set sortlist=
+goto :eof
+
+
+:copyfiles
+if "%DD%"=="1" echo @COPYFILES %1
+if "%1"=="" goto :eof
+::If is a directory
+
+#turn on echo for cat command
+debug 1
+if "%DD%"=="1" echo @COPYFILES: Checking %DIR%/%1 
+if "%1"=="" endlocal && goto :EOF
+#If is a directory ignore it (bug if file modulo 4GB - so echo size)  v8 bugfix!
+# if NTFS get 0x0, if FAT32 get 'Error 2: Bad file or directory'
+cat --length=0 /%1 > (md)0x220+1
+if exist LEVEL1 goto :skipdir
+cat --locate="is 0x0" (md)0x220+1 > nul && goto  :sub-dir
+cat --locate="is 0x" (md)0x220+1 > nul || goto  :sub-dir
+:skipdir
+
+::cat --length=0 /%1 || goto :sub-dir
+::if "##"=="#%~x1#" goto :sub-dir
+
+::echo DIR=%DIR% LASTDIR=%LASTDIR%
+if not "%DIR%"=="%LASTDIR%" set LASTDIR=%DIR% && echo -e $[0x0e]%DIR% %redir%
+
+::copy file
+if "%DD%"=="1" echo @COPY FILE
+call :.makemenu %1
+shift
+goto :copyfiles
+
+:sub-dir
+if "%DD%"=="1" echo @SUB_DIR %1
+setlocal
+set DIR=%DIR%/%1
+call :cpa
+endlocal
+set LASTDIR=
+shift
+goto :copyfiles
+
+
+
+:: ------------ SORT LIST -----
+:sort
+set /a count=0 > nul
+echo -e \x00\x00 > %sortlist%
+if "%1"=="" goto :eof
+set mem=0x23450
+:loop
+if "%1"=="" goto :startSort
+#if "#%~x1#"=="##" shift && goto :loop
+if /i "#%~x1#"=="#.txt#" shift && goto :loop
+if /i "#%~x1#"=="#.mnu#" shift && goto :loop
+set s=%1
+set /A mem1=%mem%+%count% > nul
+echo %1 > (md)%mem1%+1
+set /A count=%count%+1 > nul
+shift
+goto loop
+
+:startSort
+::echo STARTSORT count=%count% && pause
+if "%count%"=="0" exit
+if "%count%"=="0x1" echo -n %s% > %sortlist%  &&  goto :eof
+set /a total=%count%-1 > nul
+
+:: Following code runs many times so make efficient!
+
+:RestartSort
+set count=0 > nul
+
+:sortLoop
+set /a next=%count%+1 > nul
+call :swap %count% %next%
+set /a count=%count%+1 > nul
+if "%swapped%"=="1" goto :RestartSort
+if "%count%"=="%total%" goto :output || goto :sortLoop
+
+:swap
+set /A mem1=%mem%+%1 > nul && set /A mem2=%mem%+%2 > nul
+cat (md)%mem1%+1 | set var1= && cat (md)%mem2%+1 | set var2=
+if "%badver%"=="1" if %var1%<=%var2% set swapped= && goto :eof
+if "%badver%"=="" if /i %var1%<=%var2% set swapped= && goto :eof
+echo %var1% > (md)%mem2%+1 && echo %var2% > (md)%mem1%+1
+set swapped=1 && goto :eof
+
+
+:output
+set count=0
+set /a total=%total%+1 > nul
+:llp
+if %count%>=%total% goto :tidyup
+set /A mem1=%mem%+%count% > nul
+cat (md)%mem1%+1 | set f=
+echo -n %f% >> %sortlist%
+echo -n -e \x20 >> %sortlist%
+::| set %sortlist%=%sortlist% 
+set /a count=%count%+1 > nul
+goto :llp
+
+:tidyup
+set mem=
+set mem1=
+set mem2=
+set var1=
+set var2=
+set count=
+set total=
+set swapped=
+set total=
+set f=
+set s=
+set next=
+set count=
+goto :eof
+
+# ----- REVERSE STRING to %REV% ----
+
+:reverse
+set REV=
+set A=%1
+# get length of string in L
+set /a L=%@retval%-1 > nul
+if "%A%"=="" goto :eof
+:revlp
+call set "REV=%REV%%%^A:~%L%,1%"
+if %L%<=0 goto :finlr
+set /a L=%L%-1 > nul
+goto :revlp
+:finlr
+set A=
+set L=
+#pause REV=%REV% A=%A%
+goto :eof
+
+
+

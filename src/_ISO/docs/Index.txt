@@ -1,0 +1,25 @@
+\_ISO\docs files and folders
+============================
+
+	BOOT_ME_USING_QEMU - files used to run the QEMU emulator
+	Download URLs - useful links to web pages
+	E2B Utilities - various useful utilities for E2B. Read the ReadMe.txt file for details.
+	FASTLOAD - contains the FASTLOAD.YES file needed to enable Fastload on E2B (read the ReadMe.txt file)
+	Fonts - contains a selection of English fonts which can be used for E2B menus
+	GFXBoot - double-click on repack.cmd to make a new message file.
+	linux_utils - contains a linux .sh script which will make an E2B USB drive for you
+	Make_E2B_USB_Drive - contains a Windows .cmd script which will make a E2B USB drive for you
+	MyThemes - contains files and instructions which allow you to test a variety of different templates\themes\skins
+	PassPass - allows you to bypass Windows login password om local accounts
+	Sample mnu files - useful grub4dos menu files (.mnu) which can be added to your E2B menus
+	Templates - a variety of 'themes' or skins\template files - read the ReadMe.txt file for more information
+	USB FLASH DRIVE HELPER FILES - contains files needed to make the E2B HELPER USB Flash drive
+	WINCONTIG - contains WinContig.exe to make files contiguous
+
+	E2B_DPMS2_ReadMe.txt - Instructions on how to add 32-bit XP Mass Storage drivers to your E2B drive (may not be present on DPMS version)
+	E2B_ReadMe.html - html help
+	PatchMe - this is a grub4dos program which modifies grub4dos on your E2B USB drive (MBR+grldr)
+	PatchMe_ReadMe.txt - Instructions on how to run PatchMe
+	PatchMyMBR - patches the code in the grub4dos MBR only to make it boot silently
+
+Please visit www.easy2boot.com for more details.

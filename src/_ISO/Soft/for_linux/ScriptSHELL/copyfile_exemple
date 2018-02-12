@@ -1,0 +1,89 @@
+#!/bin/bash
+
+#############################################
+# Script de sauvegarde pour FTP             #
+# ------------------------------------------#
+# Ce script sauvegadre tout les fichiers    #
+# qui sont dans le répertoire $PATH_SAVE à  #
+# l'exeption du répertoire $PATH_BACK_FILES.#
+# Ce script sauvegarde aussi les bases de   #
+# données MYSQL.                            #
+#############################################
+
+#############################################
+# Definition des variables                  #
+#############################################
+
+# Nom du fichier de backup
+NAME_FILES="savftp"
+
+# Paramètres MYSQL
+MYSQL_NAME="savsql"
+
+# Dates
+DATE_JOUR=`date +%y%m%d` # Date du jour
+DATE_MOIS=`date +%y%m` # Date du jour
+DATE_MOINS3=`date --date '7 days ago' +%y%m%d` # Date 7 jours avant, pour effacer les vieux backups
+
+# Chemin des répertoires
+
+PATH_BACK="backup" # Répertoire de base des sauvegardes
+PATH_BACK_FILES=${PATH_BACK}"/backupfiles" # Répertoire du backup des fichiers
+
+
+# Paramètre WGET
+FTP_HOST="http://123.123.123.123"
+PATH_BACK_DEST="/home/srvadf"
+
+FTP_HOST2="http://145.145.145.145"
+PATH_BACK_DEST2="/home/srvonpc"
+
+
+
+# Préparation des paramètres de compression
+FILENAME=${DATE_JOUR}"-"${NAME_FILES}".tar.gz"
+FILENAME2=${DATE_JOUR}"-"${MYSQL_NAME}".tar.gz"
+
+#Srv ADF
+cd $PATH_BACK_DEST
+PATH_DEST=${PATH_BACK_DEST}"/"${FILENAME}
+echo $PATH_DEST
+PATH_DEST2=${PATH_BACK_DEST}"/"${FILENAME2}
+# Préparation du répertoire racine pour les backups
+if [ -f ${PATH_DEST} ]; then 
+	
+	echo "file existe"
+else 
+
+	wget $FTP_HOST/$PATH_BACK_FILES/$FILENAME	
+
+fi
+if [ -f ${PATH_DEST2} ]; then 
+	echo "file existe"
+
+else 
+	wget $FTP_HOST/$PATH_BACK_FILES/$FILENAME2
+fi
+
+
+#Srv ONPC
+cd $PATH_BACK_DEST2
+
+PATH_DEST=${PATH_BACK_DEST2}"/"${FILENAME}
+PATH_DEST2=${PATH_BACK_DEST2}"/"${FILENAME2}
+# Préparation du répertoire racine pour les backups
+if [ -f ${PATH_DEST} ]; then 
+	echo "file existe"
+else 
+	wget $FTP_HOST2/$PATH_BACK_FILES/$FILENAME
+
+fi
+if [ -f ${PATH_DEST2} ]; then 
+	echo "file existe"
+
+else 
+	wget $FTP_HOST2/$PATH_BACK_FILES/$FILENAME2
+fi
+
+echo 'FIN'
+exit 0

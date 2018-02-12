@@ -1,0 +1,214 @@
+!BAT
+:: GRUB4DOS batch script. See Tutorials at www.rmprepusb.com  [SSi]
+::
+:: Uses: List current root drive for files with a matching file extension (case insensitive)
+:: Usage:  %1 is folder to search, %2 is a partial filestring to find
+::
+::         (bd)\LstFExt.g4b  /_ISO .iso [SILENT]
+::         (bd)\LstFExt.g4b  (hd0,0)    [SILENT]
+::         (bd)\LstFExt.g4b  ()         [SILENT]
+::         (bd)\LstFExt.g4b  ()\_ISO    [SILENT]
+::
+:: variables FILEDIR  FILEPATH   FILENAME  FILEEXT  are set on return if successful
+::
+:: A list of set FILE_xx=sdsdsd commands will be in memory at (md)0x900 after completion
+:: If this batch file is called, e.g. 'call (md)0x900+0x10', then the FILE_xx variables will be set
+::
+:: Note: debug is ON after completion
+::
+:: Advanced example with debug enabled - searches a hard disk image for a .com file
+::  
+:: title Test FileSearch
+:: map  (bd)/harddisk.img (hd2)
+:: map --hook
+:: root (hd2,0)
+:: # set DD=1
+:: pager off
+:: # look for a file with a .iso extension - param1=start folder   param2=extension
+:: (bd)/LstFExt.g4b / .iso
+:: if not "%FILEPATH%"=="" echo FILE FOUND AT %FILEPATH%! 
+:: if "%FILEPATH%"==""  echo No file with matching extension found!
+:: # get all filenames as FILE_x variables...
+:: call (md)0x900+0x10
+:: echo FILE_1=%FILE_1%  FILE_2=%FILE_2%
+:: pause
+:: root
+::
+:: This script requires GRUB4DOS 2010-12-14 or later.
+::
+:: History
+:: =======
+:: version 2 2013-05-13
+:: version 3 2014-07-14 improve speed - no delmod on exit to keep in memory
+::=============================================================================
+
+::set DD=0
+::Uncomment line below to show debug lines or set DD=1 before calling
+::set DD=1
+
+
+if "%1"=="" goto :eof
+if "%2"=="" goto :eof
+set sh=%3
+
+:: we don't want any extra messages - debug off = 0  so large exFAT drives work (grub4dos bug)! 
+debug off
+
+:: Variables: %0=/xx/xxx.bat %~nx0=automenu.bat %~nx1=.automenu %1=.automenu %~x1=.automenu
+::echo 0=%0 nx0=%~nx0 nx1=%~nx1 nx2=%~nx2 nx3=%~nx3 1=%1 x1=%~x1
+
+:: Check if loaded - if not load it
+if not "%MOD%"=="1" delmod -l %~nx0 > nul || insmod %0 > nul
+
+set FILEDIR=
+set FILEPATH=
+set FILENAME=
+set FILEEXT=
+set FCOUNT=0
+
+set n=0
+:: set COUNT in memory to start at 0
+write 0x500004 0 > nul
+:: clear batch file in memory
+echo !BAT > (md)0x3000+1
+
+:: reset finish flag
+:: WRITE FINISH FLAG INTO MEMORY at 0x500000 = 0  (set to 1 when we find a match)
+::write 0x500000 0  > nul
+
+
+:: %1 is folder  %2 is search string
+:: get the Search String
+set SS=%2
+if not "%SS:~0,1%"=="." echo 2nd parameter must start with . for a valid file extension! && pause && goto :eof
+:: get the folder into DIR variable
+
+set DIR=%1
+if not "%DIR:~0,1%"=="(" set DIR=()%DIR%
+::echo Using %DIR% as start folder for search
+if "%DIR%"=="()/" set DIR=()
+
+echo !BAT > (md)0x900+0x10
+::echo Looking for first %SS% file, starting at %DIR%/ - please wait...
+
+:: bugfix no need to ls dir as it is done in :cpa!
+:: ZZZZ  ls %DIR%/ | call :cpa
+call :cpa
+
+
+:endloop
+set DIR=
+set SS=
+:: set root back to top level at end!
+root (bd)/ > nul
+
+:: call the batch file to get variables
+call (md)0x3000+1
+:: get FILE_n variables
+echo -e \x0 >> (md)0x900+0x10
+######call (md)0x900+10
+::debug 1
+::echo %0 HAS FINISHED
+set sh=
+set n=
+write 0x500004 0 > nul
+errorcheck on
+::delmod %~nx0 > nul
+
+exit
+
+:: ----------------------- SUBROUTINES ----------------------
+
+:.findfile
+if "%DD%"=="1" echo @findfile  Checking %DIR%/%1
+if "%1"=="" endlocal && goto :EOF
+
+setlocal
+::If is a directory or ZERO length - ignore it
+::ZZZcat --length=0 ()%DIR%/%1 > nul || goto :EOF
+
+:: if not correct file then ignore
+if "%DD%"=="1" echo findfile: checking %~x1 extension for %SS%
+if /i not "#%SS%#"=="#%~x1#" goto :EOF
+:: WE FOUND A MATCH!!!!!!
+
+#echo %sh% %SS%
+if not "%sh%"=="SILENT" echo %1 
+
+read 0x500004 > nul
+set n=%@retval%
+set /a n=%n% + 1 > nul
+write 0x500004 %n% > nul
+
+
+:: make a batch file in memory to get the variables later on
+echo !BAT > (md)0x3000+1
+echo set FILEPATH=%DIR%/%1 >> (md)0x3000+1
+echo set FILENAME=%1 >> (md)0x3000+1
+echo set FILEEXT=%SS% >> (md)0x3000+1
+echo set FCOUNT=%n% >> (md)0x3000+1
+::echo FOUND %DIR%/%1
+if "%DIR%"=="()" set DIR=/
+echo set FILEDIR=%DIR% >> (md)0x3000+1
+if "%DIR%"=="/" set DIR=()
+echo -e \x0 >> (md)0x3000+1
+
+:: add ISO variable  FILE_n=filename
+echo set FILE_%n%=%1 >> (md)0x900+10
+
+endlocal
+
+:: THIS SECTION FOR DEBUG
+if not "%DD%"=="1" goto :DD1
+echo calling (md)
+:: call the batch file to get variables
+call (md)0x3000+1
+echo called (md) OK
+:: if "%DD%"=="1" echo ********** SHOW ALL VARIABLES **************
+:: if "%DD%"=="1" set
+:: if "%DD%"=="1" echo ********************************************
+:: if "%DD%"=="1" echo PAUSED FOR DEBUG && pause
+::pager on
+debug 1
+
+:DD1
+:: signal we have found a match!
+::write  0x500000 1 > nul
+:: ZZZZread 0x500000 > nul
+goto :eof
+
+
+:cpa
+if "%DD%"=="1" echo @CPA: Current Root: %DIR% - Changing source root to %DIR%/
+::ZZZif not exist %DIR%/ errorcheck off
+root %DIR%/ > nul
+ls | call :copyfiles
+goto :EOF
+
+:copyfiles
+if "%DD%"=="1" echo @COPYFILES %1
+if "%1"=="" goto :eof
+::checkrange 1 read 0x500000  > nul && goto :EOF
+::If is a directory
+
+:: DONT DO SUBDIRS
+::cat --length=0 /%1 > nul || goto :sub-dir
+
+if "%DD%"=="1" echo @COPY FILE
+call :.findfile %1
+shift
+goto :copyfiles
+
+:sub-dir
+if "%DD%"=="1" echo @SUB_DIR %1
+setlocal
+set DIR=%DIR%/%1
+call :cpa
+endlocal
+shift
+goto :copyfiles
+
+
+
+
+

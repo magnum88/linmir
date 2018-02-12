@@ -1,0 +1,83 @@
+# Make a \aufs32-rw or \aufs64-rw ext2 file using RMPrepUSB in the root of the drive using RMPrepUSB
+# File Name=aufsXX-rw  Volume Name=aufs-rw size=anything over 256MB
+# Place this .mnu file and the ISO in either \_ISO\MainMenu\MNU or \_ISO\LINUX\MNU
+# This menu will work even on an NTFS USB boot drive
+# IMPORTANT: you MUST run WinContig (Ctrl+F2) before booting E2B.
+# On first boot (only), Gentoo will prompt you for the size of the persistence file
+# http://rmprepusb.blogspot.co.uk/2016/07/add-gentoo-persistence-to-e2b.html
+
+iftitle [if exist $HOME$/livedvd-x86-amd64-32ul-20140826_gentoo.iso] gentoo 32-bit + persistent\n Gentoo with persistence
+set PER=/aufs32-rw
+set ISO=$HOME$/livedvd-x86-amd64-32ul-20140826_gentoo.iso
+set me=
+if not exist me geometry (hd1) > nul || if not exist me set me=/dev/sda3
+if not exist me geometry (hd2) > nul || if not exist me set me=/dev/sdb3
+if not exist me geometry (hd3) > nul || if not exist me set me=/dev/sdc3
+if not exist me geometry (hd4) > nul || if not exist me set me=/dev/sdd3
+if not exist me geometry (hd5) > nul || if not exist me set me=/dev/sde3
+if not exist me geometry (hd6) > nul || if not exist me set me=/dev/sdf3
+if not exist me geometry (hd7) > nul || if not exist me set me=/dev/sdg3
+if not exist me geometry (hd8) > nul || if not exist me set me=/dev/sdh3
+if not exist me geometry (hd9) > nul || if not exist me set me=/dev/sdi3
+echo
+echo -e I guess that the USB drive will be $[0104]%me%
+set /p me=Press [ENTER] if correct - else type in correct device (e.g. /dev/sdx) : 
+echo
+echo Assuming persistence file %PER% is on %me%
+#enable parttype output
+debug 1
+# make empty table entry in 3rd position in ptn table
+parttype (%E2BDEV%,2) | set check=
+debug off
+set check=%check:~-5,4%
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0 0 0
+if not "%check%"=="0x00" echo WARNING: PTN TABLE 3 IS ALREADY IN USE - PERSISTENCE WILL NOT WORK! && pause
+debug 1
+if not exist %PER% echo WARNING: %PER% persistence file not found! && pause
+errorcheck off
+set P=0
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0x0 %PER% && set P=1
+errorcheck on
+/%grub%/QRUN.g4b force.isodefault %ISO%
+root (0xff)
+kernel /isolinux/gentoo root=/dev/ram0 init=/linuxrc aufs=%me% looptype=squashfs loop=/image.squashfs cdroot vconsole.keymap=$bootkeymap locale=$bootlang $modeset_opt $nox $acpi_opt console=tty1 --
+initrd /isolinux/gentoo.igz
+boot
+
+iftitle [if exist $HOME$/livedvd-x86-amd64-32ul-20140826_gentoo.iso] gentoo 64-bit + persistent\n Gentoo with persistence
+set PER=/aufs64-rw
+set ISO=$HOME$/livedvd-x86-amd64-32ul-20140826_gentoo.iso
+set me=
+if not exist me geometry (hd1) > nul || if not exist me set me=/dev/sda3
+if not exist me geometry (hd2) > nul || if not exist me set me=/dev/sdb3
+if not exist me geometry (hd3) > nul || if not exist me set me=/dev/sdc3
+if not exist me geometry (hd4) > nul || if not exist me set me=/dev/sdd3
+if not exist me geometry (hd5) > nul || if not exist me set me=/dev/sde3
+if not exist me geometry (hd6) > nul || if not exist me set me=/dev/sdf3
+if not exist me geometry (hd7) > nul || if not exist me set me=/dev/sdg3
+if not exist me geometry (hd8) > nul || if not exist me set me=/dev/sdh3
+if not exist me geometry (hd9) > nul || if not exist me set me=/dev/sdi3
+echo
+echo I guess that the USB drive will be $[0104]%me%
+set /p me=Press [ENTER] if correct - else type in correct device (e.g. /dev/sdx) : 
+echo
+echo Assuming persistence file %PER% is on %me%
+#enable parttype output
+debug 1
+# make empty table entry in 3rd position in ptn table
+parttype (%E2BDEV%,2) | set check=
+debug off
+set check=%check:~-5,4%
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0 0 0
+if not "%check%"=="0x00" echo WARNING: PTN TABLE 3 IS ALREADY IN USE - PERSISTENCE WILL NOT WORK! && pause
+debug 1
+if not exist %PER% echo WARNING: %PER% persistence file not found! && pause
+errorcheck off
+set P=0
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0x0 %PER% && set P=1
+errorcheck on
+/%grub%/QRUN.g4b force.isodefault %ISO%
+root (0xff)
+kernel /isolinux/gentoo64 root=/dev/ram0 init=/linuxrc aufs=%me% looptype=squashfs loop=/image.squashfs cdroot vconsole.keymap=$bootkeymap locale=$bootlang $modeset_opt $nox $acpi_opt console=tty1 --
+initrd /isolinux/gentoo64.igz
+boot

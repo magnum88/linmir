@@ -1,0 +1,24 @@
+title Windows 8.1 x86 (pwd=fred)\n Enter password - if wrong Windows menu is loaded
+# Example .txt file for a \_ISO\WINDOWS\WIN8\Windows_8.1_EN-US_x86_PWD.iso file
+# which asks for a password - see http://www.easy2boot.com/configuring-e2b/protection-and-security/
+errorcheck on
+set bad=
+# show bitmap
+call Fn.70 3 && clear
+# display your own message
+echo && echo -n $[0x0e]Enter the secret password 
+# cursor off
+call Fn.70 0
+# ask for password but do not display **** characters
+password fred > nul || set bad=1
+# normal mode
+call Fn.70 2
+clear
+if "%bad%"=="1" echo -e $[0x0e]Wrong password! && set /p:3 ask=
+if "%bad%"=="1" call /%grub%/bios int=0x10 eax=0xe07 > nul
+# get rid of background
+call Fn.70 1 
+clear
+set ask=
+if "%bad%"=="1" set bad= && configfile (md)0x3000+0x50
+

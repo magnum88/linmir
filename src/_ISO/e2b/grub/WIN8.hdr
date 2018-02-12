@@ -1,0 +1,21 @@
+if exist /_ISO/WIN8.g4b call /_ISO/WIN8.g4b || if exist /_ISO/WIN8.bmp splashimage /_ISO/WIN8.bmp
+if not "%GFX%"=="" gfxmenu /_ISO/%GFX%
+# display this heading
+set HDG=$$STRhW8I
+if "%HDG%"=="" set HDG=\x20                   --- Windows 8 install ---                          \0
+if not "%CENTREHD%_%RTL"=="_" call /%grub%/centrehd.g4b HDG
+if not exist HEADPOS set HEADPOS=0000
+set HP=0000 $[0004]                                                                \necho -n -e -P:
+write (md)0x220+1 !BAT\necho -n -e -P:%HP%%%^HEADPOS% $[\x25HCOLOUR\x25]%HPAD%%HDG%\necho -n -P:%HBTM% $[\x25FCOLOUR\x25]%HELPTEXT%\0 >> (md)0x3000+0x50
+initscript (md)0x220+1
+set HP=
+set HDG=
+
+#autonumber boot entries with a space (20) after the number
+write 0x8274 %AUTONUM% > nul
+set KEY=
+set DKEY=
+default 0
+if not "%pwd%"=="" password %pwd%
+debug 0
+

@@ -1,0 +1,22 @@
+# http://rmprepusb.blogspot.co.uk/2013/11/install-windows-98se-from-iso-with.html
+# Drag-and-drop Win98.iso onto MPI_FAT32 to make a .imgPTN file (increase size by a few MB)
+# Unzip [BOOT]\Boot-1.44M.img contents from ISO into the root on the .imgPTN file
+# Should work with most DOS-based ISOs - edit this file with the correct file name and title
+
+title Install Win98\n Install Win98 using .imgPTN file
+map $HOME$/Win98_SE.imgPTN (fd0)
+
+map --hook
+set A=
+if exist (fd0)/IO.SYS set A=1
+if exist (fd0)/KERNEL.SYS set A=1
+if not exist A set /p A=ERROR: No DOS boot files found in .imgPTN file! && chainloader /grldr
+map (hd1) (hd0)
+map --hook
+#set just one HDD and one floppy
+map --harddrives=1
+map --floppies=1
+root (fd0)
+chainloader /IO.SYS || chainloader /KERNEL.SYS
+
+

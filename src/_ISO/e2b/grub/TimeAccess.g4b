@@ -1,0 +1,50 @@
+!BAT
+debug normal
+insmod %0 > nul
+echo PRE-TEST (100 loops)
+#echo Accessing %0 100 times...
+set t=0
+echo %@time% | set t= ;; set /a st=%t:~0,2% * 3600 + %t:~3,2% * 60 + %t:~6,2% > nul
+echo STARTING AT %t%
+set a=0
+
+:lp
+if exist %0 echo %0 > (md)0x300+1
+set /a a=%a%+1 > nul
+if %a%<=99 goto :lp
+
+echo %@time% | set t= ;; set /a et=%t:~0,2% * 3600 + %t:~3,2% * 60 + %t:~6,2% > nul
+set /a t=%et% - %st% > nul
+echo ENDED    AT %@time%  = %t% seconds
+set t=
+set et=
+set st=
+echo
+set ask=
+set /p ask=Now run 1000 loops? (Y/[N]) : 
+if /i not "%ask%"=="Y" delmod %~nx0 > nul
+if /i not "%ask%"=="Y" goto :eof
+echo
+echo
+echo FULL TEST (1000 loops)
+#echo Accessing %0 1000 times...
+set t=0
+echo %@time% | set t= ;; set /a st=%t:~0,2% * 3600 + %t:~3,2% * 60 + %t:~6,2% > nul
+echo STARTING AT %t%
+set a=0
+
+:lpx
+if exist %0 echo %0 > (md)0x300+1
+set /a a=%a%+1 > nul
+if %a%<=999 goto :lpx
+
+echo %@time% | set t= ;; set /a et=%t:~0,2% * 3600 + %t:~3,2% * 60 + %t:~6,2% > nul
+set /a t=%et% - %st% > nul
+echo ENDED    AT %@time%  = %t% seconds
+set t=
+set et=
+set st=
+echo
+delmod %~nx0 > nul
+pause Finished - press a key to return to Main Menu...
+

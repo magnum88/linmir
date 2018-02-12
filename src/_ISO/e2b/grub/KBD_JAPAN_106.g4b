@@ -1,0 +1,24 @@
+!BAT
+setkey
+:: Jp106 keypad
+setkey at bracketleft
+setkey doublequote at
+setkey ampersand caret
+setkey quote ampersand
+setkey parenleft asterisk
+setkey parenright parenleft
+setkey underscore parenright
+setkey equal underscore
+setkey plus colon
+setkey colon quote
+setkey asterisk doublequote
+setkey bracketleft bracketright
+setkey braceleft braceright
+setkey bracketright backslash
+setkey braceright bar
+setkey backslash backquote
+setkey tilde plus
+setkey caret equal
+setkey backquote braceleft
+setkey bar tilde
+echo JAPANESE KBD MAP %redir%

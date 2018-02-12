@@ -1,0 +1,6 @@
+# display usb driver menu entry if we booted to E2B using Plop!
+
+iftitle [cat --hex --locate="PoLPu@" (md)0x3d0+0x130] Plop detected - Install grub4dos USB 2.0 read/write driver \n Plop! has been detected which is a read-only driver
+usb --init
+errorcheck off
+boot

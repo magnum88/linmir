@@ -1,0 +1,10 @@
+# Specify the file name (e.g. xxxx.iso, xxxx.isoPE01, xxxx.imgPTN, xxxx.img)
+# Edit the file name as required (two places)
+# Not suitable for Windows Install ISOs
+
+iftitle [if exist (hd0,1)/_ISO/LINUX/arch.iso] Arch (ptn2)\n Boot any ISO from Partition 2
+# suppress auto-suggest
+set NOSUG=1
+# run file
+/%grub%/QRUN.g4b  (hd0,1)/_ISO/LINUX/arch.iso
+boot

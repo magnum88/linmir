@@ -1,0 +1,40 @@
+
+KNOPPIX with Persistence
+========================
+
+Use a NTFS E2B USB drive because the .imgPTN file will be over 4GB.
+
+See http://rmprepusb.blogspot.co.uk/2015/03/add-knoppixpersistence-to-your-e2b-drive.html
+
+1. Drag-and-drop the Knoppix ISO file onto the MakePartImage Desktop shortcut. Don't use the MPI_FAT32 shortcut because you need to specify a larger file than the default size that MPI_FAT32 would choose.
+
+2. Choose a size for the .imgPTN file that is the same size as you ISO file PLUS the size of the persistence storage that you want - e.g. 4000MB for the ISO and 1000MB for the persistence file = 5000MB. Choose FAT32 and a suitable filename ending in .imgPTN.
+You MUST choose FAT32 for the filesystem format of the .imgPTN file.
+
+Note: If using FAT32, you cannot have a persistence file of >4GB. See below if you really want >4GB for persistence.
+
+3. Copy the .imgPTN file to your E2B USB drive (e.g. \_ISO\LINUX folder) and boot to E2B.
+
+4. Select the Knoppix .imgPTN file and press ENTER to get to the CSM menu.
+
+Now try to boot to Knoppix from the CSM menu - Knoppix should prompt you to create a persistence file (it will tell you the maximum size possible).
+
+
+For Persistence file > 4GB
+==========================
+
+You can repeat the method above but specify NTFS when making the MakePartImage .imgPTN file and allow at least 4GB of extra space for persistence.
+
+However, once you boot to the CSM Menu, it will not boot from the menu entries because syslinux could not be installed (you should have been warned of this when MakePartImage ran).
+
+To fix this we need to add an extra menu entry to the CSM  \menu.lst file:
+
+Example menu:
+
+title Knoppix\n Boot to Knoppix 
+kernel /boot/isolinux/linux lang=en apm=power-off  nomce libata.force=noncq hpsa.hpsa_allow_any=1 loglevel=1 noeject 
+initrd /boot/isolinux/minirt.gzboot
+
+
+
+This example will run the default version of Knoppix 7.2. The cheat codes and kernel and initrd files may vary slightly with each distro. Examine the \boot\isolinux\isolinux.cfg file to find the correct options for your preferences. 

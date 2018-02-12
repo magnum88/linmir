@@ -1,0 +1,15 @@
+# Boot from an image inside a .WIM file (useful for self-contained WinPE - e.g. MSDaRT)
+# extract files from a WinPE ISO to a folder on the E2B drive (do not place files in a \_ISO\XXX folder)
+# set FOLDER value below - check location of boot.wim and other files are correct (else 0xc000000f error)
+# Some files and folders may not be required and can be deleted
+
+# Boot to first image in wim file, wim file can be located on any partition
+title Boot Windows WIM\n Boot using NTBOOT
+/%grub%/NTBOOT NT6=/sources/boot.wim NTLDR=/%grub%/DPMS/NTBOOT.MOD/bootmgr
+boot
+
+# boot.wim, bootmgr and boot.sdi files required
+title WinPE boot from WIM image #2\n Boot from a .wim file using wimboot
+set FOLDER=/MSDART
+kernel /%grub%/wimboot index=2
+initrd @bcd=%FOLDER%/boot/bcd @boot.sdi=%FOLDER%/boot/boot.sdi @bootmgr=%FOLDER%/bootmgr @boot.wim=%FOLDER%/sources/boot.wim

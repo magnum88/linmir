@@ -1,0 +1,15 @@
+:: Usage: date.g4b 2013-01-23    sets date
+::        date.g4b               prompts user for new date
+
+title Set Clock Date to 2014-03-27\n Permanently changes the date of the system Real Time Clock
+call /%grub%/date.g4b 2014-03-27 SHOW
+echo
+pause --wait=2
+configfile (md)0xa000+0x50 || configfile /menu.lst
+
+title Change Clock Date (user entry)\n Permanently changes the date of the system Real Time Clock
+call /%grub%/date.g4b
+echo
+pause --wait=2
+configfile (md)0xa000+0x50 || configfile /menu.lst
+

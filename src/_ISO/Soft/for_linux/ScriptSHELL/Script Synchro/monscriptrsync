@@ -1,0 +1,23 @@
+sudo rsync -azvv /opt/lampp/ /media/neo/Data/opt/lampp
+
+sudo rsync -azvv /home/neo/Public/ /media/neo/Data/neo/Public
+
+sudo rsync -azvv /home/neo/Images/ /media/neo/Data/neo/Images
+
+sudo rsync -azvv /home/neo/.mozilla/ /media/neo/Data/neo/.mozilla
+
+sudo rsync -azvv /home/neo/.thunderbird/ /media/neo/Data/neo/.thunderbird
+
+sudo rsync -azvv /home/neo/Téléchargements/ /media/neo/Data/neo/Téléchargements
+
+sudo rsync -azvv /home/neo/Documents/ /media/neo/Data/neo/Documents
+
+sudo rsync -azvv /home/neo/.loacal/share/applications/ /media/neo/Data/neo/.loacal/share/applications
+
+sudo rsync -azvv /home/neo/.wine/ /media/neo/Data/neo/.wine
+
+sudo rsync -azvv /home/neo/websites/ /media/neo/Data/neo/websites
+
+sudo rsync -azvv /usr/share/pixmaps/ /media/neo/Data/usr/share/pixmaps
+
+sudo rsync -azvv  --exclude-from=exclubin /bin/ /media/neo/Data/bin

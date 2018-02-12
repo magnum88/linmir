@@ -1,0 +1,50 @@
+# Place this .mnu file and the ISO in either \_ISO\MainMenu\MNU or \_ISO\Linux\MNU
+# This menu will work even on an NTFS USB boot drive
+# IMPORTANT: you MUST run WinContig (Ctrl+F2) before booting E2B.
+
+# For persistence: (File Name=lmde-rw  Volume Name=persistence)
+# 1. click 'Create ext2 FS' in RMPrepUSB
+# 2. Set the FILENAME     to:  lmde-rw
+# 3. Set the VOLUME LABEL to:  persistence      <------ VERY IMPORTANT
+# 4. Set amount of space you would like allowed to persist
+
+#The persistence 'volume' needs a persistence.conf file added
+# Boot to linux and then type following 5 lines in the terminal console (Applications - System Tools - Mate terminal)
+#    sudo mkdir /mnt/usb
+#    ls /dev/                (to see which is the USB device 3rd ptn - it will always be sd(something)3 - try also sudo fdisk -l)
+#    sudo mount /dev/sdb3 /mnt/usb
+#    echo "/ union" > /mnt/usb/persistence.conf
+#    sudo umount /mnt/usb
+
+# now reboot linux
+
+iftitle [if exist $HOME$/lmde-2-201503-mate-32bit.iso] Mint\n Boot using .mnu file with persistence
+
+set ISO=$HOME$/lmde-2-201503-mate-32bit.iso
+set PER=/lmde-rw
+
+if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (bd)/menu.lst
+if "%E2BDEV%"=="" set E2BDEV=hd0 && pause E2BDEV forced to hd0!
+#enable parttype output
+debug 1
+# make empty table entry in 3rd position in ptn table
+parttype (%E2BDEV%,2) | set check=
+debug off
+set check=%check:~-5,4%
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0 0 0
+if not "%check%"=="0x00" echo WARNING: PTN TABLE 3 IS ALREADY IN USE - PERSISTENCE MAY NOT WORK! && pause
+debug 1
+if not exist %PER% echo WARNING: %PER% persistence file not found! && pause
+errorcheck off
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0x0 %PER%
+errorcheck on
+#map ptn 4 to ISO
+partnew (%E2BDEV%,3) 0x0 %ISO%
+map %ISO% (0xff)
+map --hook
+root (0xff)
+
+kernel /live/vmlinuz boot=live config live-media-path=/live persistence quiet splash --
+initrd /live/initrd.lz
+
+boot
