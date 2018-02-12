@@ -1,0 +1,5 @@
+#this is only to prevent the grub4dos default menu from appearing for a brief second!
+clear
+if "%grub%"=="" if exist (bd)/_ISO/e2b/grub/E2B_GRUB.txt set grub=_ISO/e2b/grub
+if not "%grub%"=="" cat /%grub%/menu.lst > (md)0xa100+0x50 && configfile (md)0xa100+0x50
+echo SORRY - CAN'T FIND \_ISO\e2b\grub\E2B_GRUB.txt FILE (please edit \menu.lst file)! && pause && commandline
