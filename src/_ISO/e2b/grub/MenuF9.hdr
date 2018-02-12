@@ -1,4 +1,0 @@
-﻿iftitle [if not "%GFX%"==""] $$STRhGRB
-reboot
-iftitle [if "%GFX%"==""] $$STRh1RB
-reboot

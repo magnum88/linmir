@@ -1,6 +1,0 @@
-# Use this .mnu file to have a REFRESH FASTLOAD entry at the beginning of the menu
-iftitle [if not exist CD if exist /FASTLOAD.YES] REFRESH THIS FASTLOAD CACHED MENU\n Run if you have changed the contents of the USB drive.\n Or rename \FASTLOAD.YES to \FASTLOAD.NO to turn off\n the FastLoad feature.
-echo REFRESH > /FASTLOAD.YES
-configfile ()/%grub%/menu.lst
-
-

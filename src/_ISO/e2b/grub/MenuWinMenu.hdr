@@ -1,9 +1,0 @@
-﻿
-iftitle [if not "%GFX%"==""] $$STRhGMW
-/%grub%/configX.g4b /%grub%/menuWinInstall.lst
-boot
-
-iftitle [if "%GFX%"==""] $$STRh1MW
-/%grub%/configX.g4b /%grub%/menuWinInstall.lst
-boot
-

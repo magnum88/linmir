@@ -1,4 +1,0 @@
-Copy the PassPass_chenall folder to \_ISO\MAINMENU or \_ISO\UTILITIES
-Move the \_ISO\docs\Sample mnu Files\PassPass_E2B\PassPass.bak file to \PassPass.bak
-
-http://www.sherlock.reboot.pro/passpass-bypass-the-password/

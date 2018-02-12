@@ -1,4 +1,0 @@
-﻿title Grub4dos shell\n Grub4dos command line shell\n e.g. help, help map, find, map --status, geometry, ls (hd0,0)/\n cat (hd1,0)/boot.ini, cat --hex (hd1)0+1\n Press [ESC] to exit
-errorcheck on
-debug 2
-commandline

@@ -1,8 +1,0 @@
-# copy to \_ISO\MAINMENU for a quick way to get to the grub4dos prompt
-# Press ESC in the grub4dos console to return to the menu
-
-title GRUB4DOS COMMAND PROMPT\n Grub4dos console\n Press ESC to return to menu
-errorcheck on
-debug 2
-commandline
-

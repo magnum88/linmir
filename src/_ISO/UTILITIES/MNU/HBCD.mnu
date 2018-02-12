@@ -1,6 +1,0 @@
-title Start Hiren's BootCD 15.2
-errorcheck off
-configfile /HBCD/menu.lst
-find --set-root --ignore-floppies --ignore-cd /_ISO/HBCD/menu.lst && configfile /_ISO/HBCD/menu.lst
-errorcheck on
-commandline 	

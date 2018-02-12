@@ -1,7 +1,0 @@
-﻿iftitle [if not "%GFX%"==""] $$STRhG10
-halt
-
-iftitle [if "%GFX%"==""] $$STRh110
-halt
-
-

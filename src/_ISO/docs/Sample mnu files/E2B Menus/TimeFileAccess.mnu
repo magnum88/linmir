@@ -1,4 +1,0 @@
-title Measure BIOS USB Performance \n This accesses a file directory entry multiple times\n It emulates how Easy2Boot looks for files during start up\n 1000 Accesses should take less than 20 seconds
-/%grub%/TimeAccess.g4b
-configfile (md)0xa000+0x50
-

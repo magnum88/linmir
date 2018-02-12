@@ -1,7 +1,0 @@
-!BAT
-# soak up any previous key presses
-:loopk
-# Check for key in BIOS keyboard buffer
-call Fn.20
-# Call Fn. 19 to get the key character if present
-if not %@retval%==-1 call Fn.19 && goto :loopk

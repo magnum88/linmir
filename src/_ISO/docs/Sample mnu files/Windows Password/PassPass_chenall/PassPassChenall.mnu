@@ -1,7 +1,0 @@
-# Place PassPass.bat (E2B website -  Alternate Download) and this file in the \_ISO\UTILITIES\PassPass_chenall folder or \_ISO\MAINMENU\PassPass_chenall folder
-# Copy PassPass.bak to root of USB drive (empty file of 800KB from E2B PassPass download)
-
-iftitle [if exist $HOME$/PassPass.bat] ByPass Windows Password (PassPass - chenall version 1.2)\n Holmes.Sherlock's PassPass patcher utility (chenall version).\n Patches a Windows DLL to allow any password to be used.\n Remember to UnPatch after use.
-if not exist /PassPass.bak pause WARNING: /PassPass.bak is missing...
-$HOME$/PassPass.bat
-configfile (md)0xa000+0x50 || configfile (bd)/menu.lst

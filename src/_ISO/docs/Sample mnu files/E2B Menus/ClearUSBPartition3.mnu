@@ -1,5 +1,0 @@
-title Clear PTN3
-if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (bd)/menu.lst
-partnew (hd0,2) 0 0 0 0
-configfile (md)0xa000+0x50 || configfile /menu.lst
-

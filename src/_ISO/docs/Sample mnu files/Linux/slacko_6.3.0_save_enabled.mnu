@@ -1,8 +1,0 @@
-# runs the Slacko ISO but enable saving on exit
-# I recommend using an ext4 filesystem as ext2 can get easily corrupted
-
-iftitle [if exist $HOME$/slacko64-6.3.0.iso] Slacko 6.3.0 64-bit with Save \n Boot from Slacko ISO with save enabled\n On exit, do not copy the .sfs file as there is no need.
-call /%grub%/qrun.g4b force.isodefault $HOME$/slacko64-6.3.0.iso
-kernel /vmlinuz pmedia= fix=fsck psavemark=1 
-initrd /initrd.gz
-boot

@@ -1,9 +1,0 @@
-# Use this menu to hide or unhide the hd0,0 partition (first partition of the E2B drive) so that Windows cannot access it
-
-iftitle [hiddenflag (hd0,0) > nul] UnHide E2B Partition\n Unhide the 1st partition
-unhide (hd0,0)
-configfile (md)0xa000+0x50 || configfile /menu.lst
-
-iftitle [checkrange 0 hiddenflag (hd0,0) > nul] Hide E2B Partition\n Hide the 1st partition
-hide (hd0,0)
-configfile (md)0xa000+0x50 || configfile /menu.lst

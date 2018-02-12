@@ -1,9 +1,0 @@
-!BAT
-#reset key map
-setkey
-#change key map for UK keyboard
-setkey at doublequote
-setkey doublequote at
-setkey tilde bar
-setkey numbersign backslash
-echo UK KBD MAP %redir%

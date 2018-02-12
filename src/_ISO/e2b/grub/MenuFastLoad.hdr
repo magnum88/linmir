@@ -1,5 +1,0 @@
-﻿
-iftitle [if not exist CD] $$STRhMFL
-echo REFRESH > /FASTLOAD.YES
-configfile ()/%grub%/menu.lst
-

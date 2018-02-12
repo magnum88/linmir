@@ -1,8 +1,0 @@
-﻿
-iftitle [if not "%GFX%"==""] $$STRhGBM
-set MFOLDER=/_ISO/MAINMENU
-configfile (md)0xA000+0x50 || configfile /%grub%/menu.lst
-
-iftitle [if "%GFX%"==""] $$STRh1BM
-set MFOLDER=/_ISO/MAINMENU
-configfile (md)0xA000+0x50 || configfile /%grub%/menu.lst

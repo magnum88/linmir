@@ -1,9 +1,0 @@
-select disk 0
-clean
-convert MBR
-create partition primary
-format quick fs=ntfs label="Windows"
-assign letter="W"
-active
-list volume
-exit
