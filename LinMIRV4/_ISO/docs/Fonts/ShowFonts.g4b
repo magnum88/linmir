@@ -1,0 +1,53 @@
+!BAT 
+graphicsmode -1 1024 
+errorcheck off 
+clear 
+set F=BIOS 
+font 
+call :demo 
+errorcheck on 
+set F=/_ISO/e2b/grub/unifont.hex.gz 
+call :demo 
+set F=/_ISO/docs/fonts/28STD.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/ANTIQUE.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/APL.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/ART.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/BROADWAY.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/COURIER.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/cp850.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/DECORATE.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/donna.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/flori.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/GREEK.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/HISQUASH.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/HISTD.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/HITHIN.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/IBM.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/LITE.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/MEDIEVAL.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/orator_caps.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/READABL7.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/READABL8.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/ROMAN.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/SANS.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/sans2.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/sansf1.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/sans_bold.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/SCRIPT.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/smallfont.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/SQUASHED.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/STANDARD.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/terminal.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/terminal_ital.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/terminus.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/THIN.uni.gz ;; call :demo 
+set F=/_ISO/docs/fonts/WIGGLY.uni.gz ;; call :demo 
+exit
+ 
+:demo 
+font 
+echo Testing %F% 
+font %F% 
+echo 0123456789 !£$@~;'#<>?,./ abcdefghijklmnopqrstuvwxyz ABCDEFGHIJKLMNOPQRSTUVWXYZ 
+goto :eof 
+ 

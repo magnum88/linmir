@@ -1,0 +1,11 @@
+﻿# Does not work in text mode menus
+# File must be saved in UTF-8 format
+
+title \n
+root ()
+
+title     -------   ❖   -------
+root ()
+
+title \n
+root ()

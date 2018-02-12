@@ -1,0 +1,3 @@
+title Boot a non-contiguous linux ISO\n Boot ISOs using linux cheat codes
+/%grub%/isoboot.g4b ask /_ISO/MAINMENU
+boot

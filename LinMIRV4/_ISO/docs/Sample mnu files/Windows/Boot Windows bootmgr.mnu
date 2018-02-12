@@ -1,0 +1,3 @@
+
+iftitle [if exist /bootmgr] Boot Windows (\\bootmgr)\n Boot to the Windows version on the E2B partition.
+chainloader /bootmgr

@@ -1,0 +1,5 @@
+# Copy AOSS.ISO to root \ of E2B USB drive - do not rename or move it!
+
+iftitle [if exist /AOSS.ISO] PC Tools AOSS\n Alternate Operating System Scanner and Tools\n Use to repair Windows\n PC Tools Symantec (AOSS)
+/%grub%/QRUN.g4b /AOSS.ISO
+boot

@@ -1,0 +1,13 @@
+# http://rmprepusb.blogspot.co.uk/2017/01/add-recent-gandalf-pe-builds-to-e2b.html
+# For Gandalf's Win10PE x86 Redstone - 11-07-2016.ISO 
+# Rename it to \Win10PE_x86.ISO
+# Copy the .iso file to the root of the E2B USB drive
+# Copy this .mnu file to \_ISO\WINPE folder
+# For MBR & UEFI-booting, just convert the .iso to a FAT32 .imgPTN file (use 4300MB for size)
+
+title Gandalf 10 x86 11-07-2016\n Boot to Gandalf 32-bit PE
+set ISO=Win10PE_x86.iso
+/%grub%/qrun.g4b force.iso01 /%ISO%
+boot
+
+

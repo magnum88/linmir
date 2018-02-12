@@ -1,0 +1,236 @@
+﻿# NEDERLANDS (NL) v1.02 2014/09/23 [SSi]
+# 1.02 padding toegevoegd aan de rubrieken in het geval GFX=none set, extra snaren aan het einde
+# 1.03 volgorde veranderd
+#
+# NIET Dit bestand !!! Zie 'Wijzigen van de Taal' op pagina http://www.easy2boot.com/configuring-e2b/changing-the-e2b-preset-text/
+#
+# Convention: $$STRm voor .mnu bestand strijkers, $$STRT voor .txt-bestanden, $$STRB voor .g4b batch-bestanden, $$STRh voor .hdr bestand $$STRl voor .lst bestanden
+# Opmerking: $$STR strings zijn hoofdlettergevoelig
+#
+# Speciale tekens moet je niet veranderen:
+#\n is een harde return (nieuwe regel)
+# $[0401] definieërt een tekstkleur en achtergrondkleur
+#%....%Worden variabelen gebruikt door grub4dos
+# Als '[Y]/N', dan MOET je de letter N gebruiken voor Nee=als '[N], Y', dan MOET je de letter Y gebruiken voor Ja
+#
+# ^In .mnu en .txt strings worden gebruikt om een ​​sneltoets opgeven
+# Waar er twee vrijwel identieke strings, één (STRxGxx) zal zijn voor een GFX opstartmenu die niet sneltoetsen toelaat=bijvoorbeeld STRhGF7
+# Als u geen gebruik maakt GFX Boot dan heb je niet nodig om te veranderen \ vertalen van de GFX snaren
+#
+# Bij gebruik van UTF-8 double-byte niet-ASCII-tekens, blijven vragen strings (bv $$STRbxx) zo kort mogelijk of u een foutmelding krijgen als te lang
+
+
+# --------- Menutitels -----
+#
+# Koppen moet tussen twee \x20 en tussen de 58 en 78 karakters lang=maar niet meer dan 78 of zullen lijn overslag als in 640x480-modus
+# 1 2 3 4 5 6 7 8
+# \ X202345678901234567890123456789012345678901234567890123456789012345678901234567890 \x20
+# XXXXXXXXXXXXXXXXXXXXX <- tekst moet eindigen in dit gebied!
+#
+# Menu rubrieken (voorloopspaties starten vanaf linker kant van het menu)
+# Koppen moeten eindigen hier >>>> \x20
+$$STRm004=Windows Installatie Menu \x20
+$$STRm019=DOS Menu \x20
+$$STRm017=AntiVirus Menu \x20
+$$STRm021=Linux Menu \x20
+$$STRm023=Backup Menu \x20
+$$STRm025=Utilities Menu \x20
+$$STRm027=WinPE Menu \x20
+$$STRm013=Utilities=Memory Tests Menu \x20
+$$STRhAUT=DIRECT BOOT Menu (AUTO) \x20
+$$STRlWIN=Windows installeren van een ISO \x20
+$$STRhVIN=Windows Vista \x20
+$$STRh2K8=Server 2008 R2 te installeren \x20
+$$STRhW7I=Windows 7 te installeren \x20
+$$STRhW8I=Windows 8 te installeren \x20
+$$STRhW12=Server 2012 te installeren \x20
+$$STRhW10=Windows 10 te installeren \x20
+
+# --------- Menu-items (.mnu) -------------------
+$$STRmAUT=^Ctrl+D DIRECT opstartmenu        [Ctrl+D] (\\_ISO\\AUTO)\n Start een bestand in de \\_ISO\\AUTO map of maak een keuze hieronder.
+$$STRm016=^Ctrl+A ANTIVIRUS Menu            [Ctrl+A]\n AntiVirus Programma's
+$$STRm022=^Ctrl+B BACK-UP Menu              [Ctrl+B]\n Back-up Menu
+$$STRm018=^Ctrl+O DOS Menu                  [Ctrl+O]\n MS-DOS en FreeDOS
+$$STRm020=^Ctrl+L LINUX Menu                [Ctrl+L]\n Linux ISO's, etc.
+$$STRm024=^Ctrl+U HULPPROGRAMMA'S Menu      [Ctrl+U]\n Memtest, etc.
+$$STRm026=^Ctrl+P WINPE Menu                [Ctrl+P]\n opstartbare WinPE en Windows
+$$STRm003=^Ctrl+W Windows Opstart Menu      [Ctrl+W]\n Windows Opstart menu
+$$STRm0WI=^ctrl+I Windows Installatie Menu  [Ctrl+I] (%CALL% aanwezig)\n Windows installeren op een harde schijf met behulp van een ISO-bestand.
+$$STRm012=^Ctrl+M GEHEUGEN TEST Menu        [Ctrl+M]\n Werkgeheugen/Ramgeheugen Testen
+$$STRm005=^Ctrl+F8 Terug naar het menu Extra [Ctrl+F8]\n Ga terug naar het menu Extra
+$$STRhelp=^F1 Help                         [F1]\n Hulp voor het gebruik van Easy2Boot
+
+# GFX menu-items
+$$STRmG16=ANTIVIRUS Menu\n AntiVirus Programma's
+$$STRmG22=BACK-UP Menu Menu\n Back-up Menu
+$$STRmG18=DOS Menu\n MS-DOS en FreeDOS
+$$STRmG20=LINUX Menu\n Linux ISO's
+$$STRmG03=Windows Opstart Menu\n Windows Opstart menu
+$$STRmG26=WINPE Menu\n opstartbare WinPE en Windows
+$$STRmG24=HULPPROGRAMMA'S Menu\n Utilities en Memtest
+$$STRmGWI=Windows Installatie Menu\n Windows installeren op een harde schijf met behulp van een ISO-bestand.
+$$STRmG12=GEHEUGEN TEST Menu\n Werkgeheugen/Ramgeheugen Testen
+$$STRmGAT=DIRECT OPSTART Menu (\\_ISO\\AUTO)
+$$STRm0BL=BACKUP Linux Menu\n Linux Backup menu
+$$STRmG05=Terug naar het menu Extra\n Ga terug naar het menu Extra
+$$STRhelG=Help\n Hulp voor het gebruik van Easy2Boot
+
+# Anderen
+$$STRm014=Overschakelen naar Grub4dos v0.4.6 (voor USB 2.0-stuurprogramma)\n Laad grub4dos v0.4.6.\n Vervolgens kunt u de grub4dos USB-stuurprogramma installeren.\n Gebruik de USB-driver als u een buggy BIOS heeft.
+$$STRm015=Installeer snel Grub4dos USB 2.0 driver\n Vervangt BIOS USB boot code.\n Gebruik indien opgestart met behulp van Plop of als u een Buggy BIOS heeft.\n bv Dit werkt niet met USB sticks > 137GB.
+# Chkpci mnu
+$$STRm007=Alle systeem PCI id\n Alle PCI-id's
+$$STRm008=Toon Mass Storage Controller PCI-id\n Beeldscherm disk controller PCI-id's
+$$STRm009=Lijst bijpassende XP DriverPack.ini \n Controleer welke 32-bit XP-driver zal worden gebruikt
+$$STRm010=Lijst bijpassende Win2K DriverPack.ini \n Controleer welke 32-bit Win 2000 driver zal worden gebruikt
+$$STRm011=Lijst bijpassende Win2K3 DriverPack.ini \n Controleer welke 32-bit Win 2003 driver zal worden gebruikt
+$$STRm0FD=FreeDos (vanaf een floppy image)\n Opstarten vanaf een floppy image
+# \ _ISO \ UTILITIES_MEMTEST \ MNU \ Memtest86-51.mnu VERSION=4.3.7 (gebruik UEFI voor de meest recente versie)
+$$STRmm02=Passmark Memtest86\n Test Memory\n http://www.memtest86.com
+$$STRmm03=Passmark Memtest86 (One Pass)\n Test Memory\n http://www.memtest86.com
+$$STRmm04=Passmark Memtest86 (Boot Trace ingeschakeld)\n Test Memory\n http://www.memtest86.com
+$$STRmm05=Passmark Memtest86 (Start slechts één CPU)\n Test Memory\n http://www.memtest86.com
+# \ _ISO \ UTILITIES_MEMTEST \ memtest.img.txt
+$$STRt001=Memtest86+\n Test Memory
+
+# ----- .hdr Bestanden -----
+
+$$STRh0F7=^F7 Boot vanaf eerst HDD         [F7]\n Boot aan de eerste interne harde schijf (HDD0).
+$$STRh0F8=^F8 Herstart hoofdmenu           [F8]\n Voer uit als de E2B inhoud is veranderd.\n Herstart het hoofdmenu en leegt\n de fastload Cache (indien ingeschakeld).
+$$STRh1BM=^F8 Terug naar het hoofdmenu     [F8]\n Ga terug naar het hoofdmenu
+$$STRh1RB=^F9 Herstart                     [F9]\n Start het systeem opnieuw op.
+$$STRh110=^F10 Uitzetten                   [F10]\n Schakel het systeem.
+$$STRh1MW=^Ctrl+I Terug naar het Windows installatie Menu [Ctrl+I]\n Keer terug naar Windows Menu
+# GFX menu
+$$STRhGF7=Boot vanaf de eerste harde schijf\n Boot aan de eerste interne harde schijf (HDD0).
+$$STRhGF8=Herstart hoofdmenu\n Voer uit als de E2B inhoud is veranderd.\n Herstart het hoofdmenu en leegt\n de fastload Cache (indien ingeschakeld).
+$$STRhGBM=Terug naar hoofdmenu\n Ga terug naar het hoofdmenu
+$$STRhGRB=Herstart\n Start het systeem opnieuw op.
+$$STRhG10=Schakel\n Schakel het systeem uit.
+$$STRhGMW=Terug naar Windows Installatie Menu\n Keer terug naar Windows Menu
+
+$$STRh0MD=Stel standaard menu-item en time-out in\n U kunt het standaard menu-item\n en timeout countdown waarde\n in stellen.
+$$STRh1MD=standaard instellen Menu-item nummer (0-99): 
+$$STRh2MD=Set Menu Timeout in Seconds (0=uit): 
+$$STRmc64=--- 64-bit CPU (%TMEM%MB) ---
+$$STRmc32=--- 32-bit CPU (%TMEM%MB) ---
+$$STRmFS1=\x05 gecached MENU (fastload) \x05\n Met Rebuild hoofdmenu om dit menu\n actualiseren zodat eventuele recente veranderingen zal beïnvloeden.
+$$STRhMFD=Uitschakelen fastload\n Het hoofdmenu zal niet worden gecached.
+$$STRhMFE=inschakelen fastload\n Het hoofdmenu wordt gecached.\n Alle toekomstige laarzen in de cache menu \n gebruiken n Gebruik Rebuild hoofdmenu om het menu te vernieuwen.
+$$STRhMFL=hernieuwen fastload gecached MENU\n Run als u de inhoud van de USB-schijf zijn veranderd.\n of hernoemen \FASTLOAD.YES naar \FASTLOAD.NO\n de functie fastload uit te schakelen.
+$$STRmg14=Grub4dos v0.4.5c\n Load grub4dos v0.4.5.\n Probeer als er problemen met de 0.4.6 versie.
+
+
+# ---- ---- MenuWinInstall.lst GFX menu is 2
+$$STRl0x1=^Alt+1 Installeer XP - Stap 1       [Alt+1]\n Als u DPMS gebruikt, hoeft u niet op F6 te drukken\n U moet opnieuw opstarten en Easy2Boot opnieuw uitvoeren voor stap 2.
+$$STRl1x1=Installeer XP - Stap 1\n Als u DPMS gebruikt, hoeft u niet op F6 te drukken\n U moet opnieuw opstarten en Easy2Boot opnieuw uitvoeren voor stap 2.
+$$STRl0x2=^Alt+2 Installeer XP - Stap 2       [Alt+2] (512+systemen)\n 2e fase van de setup (meest betrouwbare)\n Voer dit uit om de windows XP installatie te voltooien\n Dit vereist ten minste 512 MB RAM om het ISO-bestand uit te pakken.
+$$STRl1x2=Installeer XP - Stap 2 (512+systemen)\n 2e fase van de setup (meest betrouwbare)\n Voer dit uit om de windows XP installatie te voltooien\n Dit vereist ten minste 512 MB RAM om het ISO-bestand uit te pakken.
+$$STRl0x3=^Alt+3 Installeer XP - Stap 2       [Alt+3] (Lage RAM systemen)\n Sneller - Gebruik deze stap voor systemen met weinig RAM (<512)\n Installeerd direct vanaf WinVBlock.. Werkt niet op alle\n systemen, bijv. sommige Atom CPU-gebaseerde systemen.
+$$STRl1x3=Installeer XP - Stap 2 (Low RAM systemen)\n Sneller=Gebruik deze stap voor systemen met weinig RAM (<512)\n Installeerd direct vanaf WinVBlock.. Werkt niet op alle\n systemen, bijv. sommige Atom CPU-gebaseerde systemen.
+$$STRl0PE=^X Installeer XP met WinPE      [X]\n Windows XP installeren op uw harde schijf met behulp van WinPE.\n Je moet ook een WinPE ISO of Windows installatie ISO-bestand hebben\n (WinPE v2/3/4 of Vista Installatie ISO of hoger).
+$$STRl1PE=Installeer XP met WinPE\n Windows XP installeren op uw harde schijf met behulp van WinPE.\n Je moet ook een WinPE ISO of Windows installatie ISO-bestand hebben\n (WinPE v2/3/4 of Vista Installatie ISO of later) .
+$$STRl0LD=^L Lijst Disk Ctrl PCI id's     [L]\n Maak een notitie van de genoemde PCI-id's en controleer ze vervolgens tegen\n de TXTSETUP.OEM inzendingen (zie Tutorial 30).
+$$STRl1LD=Lijst Disk Controller PCI-id\n Maak een notitie van de genoemde PCI-id's en controleer ze tegen\n de TXTSETUP.OEM inzendingen (zie Tutorial 30).
+$$STRl0IV=^V Installeer Vista [V] (%CV% versies aanwezig)\n installatie van Windows Vista vanaf een ISO-bestand.
+$$STRl1IV=Installeer Vista\n Installeer Windows Vista vanaf ISO-bestand.
+$$STRl0I7=^7 installeer Windows 7         [7] (%C7% versies aanwezig)\n Installeer Windows 7 vanaf een ISO-bestand.
+$$STRl1I7=Installeer Windows 7\n Installeer Windows 7 vanaf een ISO-bestand.
+$$STRl082=^R Installeer Server 2008 R2    [R] (%C28% versies aanwezig)\n Installeer Server 2008 R2 vanaf een ISO-bestand.
+$$STRl182=Installeer Server 2008 R2\n Installeer Server 2008 R2 vanaf een ISO-bestand.
+$$STRl0I8=^8 Installeer Windows 8         [8] (%C8% versies aanwezig)\n Installeer Windows 8 vanaf een ISO-bestand
+$$STRl1I8=Installeer Windows 8\n Installeer Windows 8 vanaf een ISO-bestand
+$$STRl012=^S Installeer Server 2012       [S] (%C12% versies aanwezig)\n Installeer Windows 2012 vanaf een ISO-bestand.
+$$STRl112=Installeer Server 2012\n Installeer Windows 2012 vanaf een ISO-bestand.
+$$STRl010=^T Installeer Windows 10        [T] (%C10% versies aanwezig)\n Installeer Windows 10 vanaf een ISO-bestand.
+$$STRl110=Installeer Windows 10\n Installeer Windows 10 vanaf een ISO-bestand.
+
+# --------- String GRUB4DOS batch-bestanden (.g4b) -----------
+
+# XPStep1.g4b
+$$STRb001=XP te installeren - STAP 1\n==========================\n\n$[0104]BELANGRIJK: U moet na de installatie opnieuw opstarten vanaf USB en stap 2 uitvoeren\n
+$$STRb002=64-bit XP ISO gedetecteerd!\nU moet op F6 drukken om een 64-bit Firadisk stuurprogramma te laden
+$$STRb003=ISO gedetecteerd als Windows%OSTYPE%(gebruik "XP", "2K3" of "2K 'in ISO bestandsnaam als onjuist)
+$$STRb004=Als dit niet juist is, dan kunt u het type hier invoeren, gebruik: xp 2k of 2k3 nu:
+$$STRb005=gaat op zoek naar Windows %OSTYPE% drivers
+$$STRb006=DPMS2 Options (32-bits)\n=======================\n1=SRS Driver+FiraDisk=default=FiraDisk+OEM drivers\n2=SRS Driver+FiraDisk+WinVBlock=default=FiraDisk+OEM drivers
+$$STRb007=3=SRS Driver+WinVBlock+FiraDisk=default=WinVBlock+OEM's (> 512 only)
+$$STRb008=Auto-Detect SATA/AHCI/RAID 32-bit Mass Storage Drivers ([Y=2]/N/1/2/3):
+$$STRb009=Auto-Detect SATA/AHCI/RAID 32-bit Mass Storage Drivers ([Y=2]/N/1/2):
+$$STRb010=$[0104] LET OP: Als u nu werkt vanaf een USB-SCHIJF, Antwoord dan Yes op de volgende vraag ....
+$$STRb011=Laad XP ISO in het geheugen (aanbevolen) ([Y]/N):
+$$STRb012=Laad XP ISO in het geheugen (druk op Y als u opstart vanaf een USB-schijf of als u BSOD crash problemen heeft) (Y/[N]):
+$$STRb013=KIES aub een installatie zonder toezicht BESTAND ...
+$$STRb014=U moet op F6 drukken wanneer dat wordt gevraagd,\nthen druk op S om WinVBlock (32-bit) uit te voeren,\nthen druk op S om FiraDisk te selecteren (32-bit) bestuurder,\nthen druk op S om je AHCI driver te selecteren (indien selecteren aanwezig)\n
+$$STRb015=U moet op F6 wanneer dat wordt gevraagd,\nthen druk op S om WinVBlock (64-bit) bestuurder,\nthen druk op S om FiraDisk te selecteren (64-bit) bestuurder,\nthen druk op S om je AHCI driver te selecteren (indien selecteren aanwezig)\n
+$$STRb016=\nVoorbeelden:\nAtom Netbook=WinVBlock+ICH7R/DH\nDQ67 serie 6=FiraDisk+Desktop\\Workstation\\Server Express
+$$STRb017=Druk nu op [Enter] en druk vervolgens op F6 als daarom wordt gevraagd door XP Setup en laad de drivers ...
+$$STRb018=Tip: Als FiraDisk geeft problemen, reboot en probeer Optie 3 (WinVBlock)\nAls u nog steeds problemen, gebruik optie 2, maar drukt u op F6 en voeg alle genoemde door XP Setup drivers.\n
+$$STRb019=$[0104] Let op: U moet een van de 'Install XP=STAP 2' te gebruiken opties na een reboot (512MB+is het veiligst).
+$$STRb020=$[0104] LET OP: WinVBlock (optie 3) is alleen geschikt voor systemen met meer dan 512MB geheugen\nGebruik alleen de 'Install XP=STAP 2 (512+systemen)' optie op de volgende reboot.\n
+$$STRb021=spatiebalk=Pauze, ENTER=Begin nu=beginnen in 5 seconden...
+$$STRb022=Geen Unattend bestand wordt gebruikt
+$$STRb023=$[0104]FOUT:! WINNT variabele werd niet correct ingesteld in%MFOLDER%/%GEKOZEN%.Auto\nControleer gebruik\n!BAT\nset WINNT.SIF=12345678\n\n\nset WINNT=12345678.SIF\n\n
+$$STRb024=$[0102]OPMERKING: XP ISO zal worden met behulp%WINNT%als bestand Winnt.sif
+$$STRb025=$[0104]DPMS optie niet beschikbaar (DriverPack bestanden niet aanwezig)!
+$$STRb026=$[0104]Missing /%grub%/dpms/DRIVERPACK.INI bestand\nRename de DriverPack_MassStorage_wnt5_x86-32.ini bestand DrivePack.ini.
+$$STRb027=$[0102]OPMERKING: XP ISO zal worden met behulp%WINNT%als bestand Winnt.sif
+$$STRb028=$[0104]WAARSCHUWING: WINNT variabele werd niet correct ingesteld in%MFOLDER%/%ISO%.Auto\nControleer gebruik\n!BAT\nset WINNT.SIF=12345678\n\n\nset WINNT=12345678.SIF\n\n!
+$$STRb029=$[0102]%WINNT%.CMD zal na genoemd installeren
+$$STRb030=$[0102]INFORMATIE: Memory Size
+
+# XPStep2.g4b
+$$STRbx21=XP te installeren - STAP 2\n==========================
+$$STRbx22=Laden %ISO% in het geheugen = even geduld ...
+
+# XPStep2LowRam.g4b
+$$STRbLR1=XP te installeren - STAP 2 LowRAM (alleen voor lage RAM Systemen <512)\n======================================================================
+$$STRbLR2=$[0104]VERWIJDER de USB-Drive niet! = Rebooten van de harde schijf ...
+
+# XPWINNT.g4b
+$$STRT001=Selecteer een Windows XP-ISO-bestand\n====================================
+$$STRT002=nu kiezen voor een WINPE 'Helper' ISO\n=====================================\nwe moeten tijdelijk boot te WinPE om te lopen WINNT32.EXE\nVoer geef een WinPE of Windows installeren ISO (Vista of moet later, 32-bits)
+$$STRT003=welke map is de WinPE ISO in (1-10, Esc=Afbreken)? :
+$$STRT004=nu kiezen voor een WinPE 'Helper' ISO\n=====================================\nfrom%PEPATH%
+$$STRT005=hardeschijfpartitie SIZE\n========================\n\nEasy2Boot kan veeg de harde schijf en maak een nieuwe partitie\noch kan een bestaande partitie \nformatteren noch kan installeren op een bestaande partitie.
+$$STRTA05=\nVoer instellen van een standaardformaat voor nu.\nU zal worden gevraagd of u de harde schijf formatteren later ...
+$$STRTB05=Standaard Disk 0 1 partitie in MB (0=MAX, ESC=Afbreken):
+$$STRT006=Kies het bestand Unattend.txt\n=============================\nfrom%mijnpad%
+
+# RunVista.g4b
+$$STRbV01=Selecteer een bestand Unattend.xml\n==================================
+$$STRbV02=Gebruik Easy2Boot XML-bestand (standaard)
+$$STRbV03=$[0104]WAARSCHUWING: Om Windows te installeren vanaf een USB harde schijf die u nodig hebt ook een E2B HELPER USB Flash drive\nAls u niet hebt krijg je een 'DVD-station stuurprogramma ontbreekt' bericht\nNeem lees de Easy2Boot Tutorial voor meer details.
+$$STRbV04=Druk op C om door te gaan of druk op [Enter] om terug te keren:
+$$STRbV05=$[0104]USB Drive heeft WINHELPER.USB bestand, maar geen Autounattend.xml!
+
+# RunWin8.g4b
+$$STRb801=Selecteer een bestand Unattend.xml\n==================================\n\nOpmerking: Uw eigen XML-bestanden moeten bevatten de juiste sleutel\n en ze moeten LOADISO (zie voorbeeld bestand).\n\n $[0104] 0=(standaard) Voor lopen Win8/10 u normaal gesproken nodig hebt om een ​​Product Key opgeven
+$$STRb802=Kies een product key (standaard) = de juiste sleutel is meestal vereist
+$$STRb803=Selecteer een Product Key bestand\n================================
+$$STRb805=Vul uw eigen sleutel
+$$STRb806=$[0104]Goederen Keys moet in AAAAA-BBBBB-CCCCC-DDDDD-EEEEE formaat (29 tekens)
+$$STRb807=Vul uw 5x5 Product Key:
+$$STRb8rp=Druk op een toets voor alleen Windows Repair...\n
+
+# PickAFile.g4b
+$$STRbp01=Kies (ESC=Afbreken) ...
+$$STRbp02=$[0102]Met behulp van de enige bestand aanwezig ...
+$$STRbp03=Kies een aantal
+$$STRPKEY=Druk op een toets om door te gaan...
+
+# QRUN.g4b
+$$STRberr=$[0104]FOUT:%ISOC%IS niet aangrenzend (of is beschadigd of ontbreekt)\nControleer lopen RMPrepUSB=CTRL+F2 of lopen MAKE_THIS_DRIVE_CONTIGUOUS.cmd om alle bestanden te defragmenteren!.
+$$STRbpt1=$[0104] WAARSCHUWING:.. DEZE E2B schijf van partitietabel IS OVER worden overschreven\n Er is een klein risico van verlies van alle bestanden op de E2B DRIVE\n een backup van de MBR IS GEMAAKT\n
+$$STRbpt2=$[0104] U kunt de originele E2B partities van Windows\n met behulp van de '\\E2B\\RestoreE2B.cmd' script op de USB-schijf te herstellen (zie www.easy2boot.com voor details).\n
+$$STRbpt3=\nOm boot met behulp van UEFI, reboot en selecteer de UEFI:xxxx boot optie van uw UEFI opstartmenu\nOm terugschakelen naar Easy2Boot, boot in niet-UEFI-modus (Legacy of CSM Mode)\nand selecteer de Easy2Boot menu optie.
+$$STRbpt4=OK om de E2B partities ([Y]/N) te vervangen:
+$$STRbsug=CHANGE BESTANDSEXTENSIE\n=======================\n\nTip:? Om deze vraag te vermijden, niet gebruiken niet .iso als het bestand extensie.\n Gebruik in plaats daarvan .isodefault (set NOSUG=1)\n\n $[0x0E] Type Y snel naar%SUGJE%\n gebruiken
+$$STRbsuf=Met %SUGJE% bestandsextensie? (Y/[N]): 
+
+$$STRl600=^6 Installeer Server 2016       [6] (%C16% versies aanwezig)\n Installeer Windows 2016 vanaf een ISO-bestand.
+$$STR16G0=Installeer Server 2016\n Installeer Windows 2016 vanaf een ISO-bestand.
+$$STRhS16=Server 2016 te installeren \x20
+
+$$STRmldk=List BIOS Disks\n List the partitions detected by grub4dos and the BIOS
+

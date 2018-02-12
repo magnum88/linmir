@@ -1,0 +1,305 @@
+!BAT
+
+# load getstr batch file into memory
+#load module if not already loaded
+debug 0
+delmod -l getstr.g4b || insmod /%grub%/getstr.g4b
+debug 1
+
+errorcheck off
+#remove animated icon fd3 (and fd2)
+map --unmap=3 > nul
+map --unmap=2 > nul
+map --rehook > nul
+
+# fill (rd) with 0's , 0x82d0 is rd-base mem address, Fn24 is memset - fill memory  <addr> <string> <size>
+#OLD map (md)0x300+200 (rd) > nul ;; read 0x82d0 > nul ;; call Fn.24  %@retval% 0x20  102400 > nul  
+call Fn.24  0x60000 0x20  102400 > nul ;; map (md)0x300+200 (rd) > nul
+if exist ()/_ISO/e2b/firadisk/RUNXP.cmd dd if=(rd)+1 of=()/_ISO/e2b/firadisk/RUNXP.cmd > nul
+
+# pick an ISO
+getstr.g4b $$STRb001
+echo -e %STR%
+
+if not "%XPISO%"=="" set ISO=%XPISO% && goto :skpxpi
+# list all files in the folder so the user can pick one
+/%grub%/PickaFile.g4b %MFOLDER% .ISO
+echo
+# check if user aborted
+if "%CHOSEN%"==""  echo Aborting... && /%grub%/configX.g4b (bd)/%grub%/menuWinInstall.lst
+set ISO=%CHOSEN%
+:skpxpi
+
+set WINNT=
+if exist PICKAUTO goto :skpwnt
+:: check for AUTO batch file
+if exist %MFOLDER%/%ISO%.AUTO call %MFOLDER%/%ISO%.AUTO
+getstr.g4b $$STRb027
+if exist %MFOLDER%/%ISO%.AUTO call echo -e %STR%
+getstr.g4b $$STRb028
+if exist %MFOLDER%/%ISO%.AUTO if not exist WINNT call echo -e %STR%  && pause
+getstr.g4b $$STRb029
+if exist %MFOLDER%/%WINNT%.CMD dd if=()%MFOLDER%/%WINNT%.CMD of=()/_ISO/e2b/firadisk/RUNXP.cmd > nul && call echo -e %STR%
+echo
+:skpwnt
+if not exist PICKAUTO goto :skpwna
+getstr.g4b $$STRb013
+echo -e %STR%
+# list all files in the folder so the user can pick one AUTO file (winnt.sif)
+/%grub%/PickaFile.g4b %MFOLDER% .AUTO
+echo
+# check if user aborted
+getstr.g4b $$STRb022
+if "%CHOSEN%"==""  echo -e %STR% && goto :skpwna
+call %MFOLDER%/%CHOSEN%
+getstr.g4b $$STRb023
+if not exist WINNT call echo -e %STR% && pause
+getstr.g4b $$STRb024
+if exist WINNT call echo -e %STR%
+if exist %MFOLDER%/%WINNT%.CMD dd if=()%MFOLDER%/%WINNT%.CMD of=()/_ISO/e2b/firadisk/RUNXP.cmd > nul && echo -e $[0102]%WINNT%.CMD will be called after install
+echo
+:skpwna
+
+
+
+
+
+#get size of boot device in GB in SG (allow for 2TB drives - max grub4dos +ve number is 0x7FFFFFFFFFFFFFFF 1TB)
+geometry (bd) > (md)0x333+1
+cat --locate=/512 --replace=\x00 (md)0x333+1 > nul
+cat --locate=nt/Size= (md)0x333+1 > nul
+set /A a=%?%+8 > nul
+cat --skip=%a% (md)0x333+1 | set a=
+set /a a=%a%>>2 > nul
+set /a a=%a%/2048 > nul
+set /a SG=%a%/1024 > nul
+set /a SG=%SG%<<2 > nul
+if "%SG%"=="0" set SG=1
+
+set /a MEMSIZE=*0x8298&0xFFFFFFFF>>10 > nul
+cat --length=0 %MFOLDER%/%ISO% > nul
+set /a FSize=*0x8290>>20 > nul
+
+if %FSize%>=%MEMSIZE% set NOFIT=1
+getstr.g4b $$STRb030
+call echo -e %STR%=%MEMSIZE%MB   %ISO%=%FSize%MB   Boot disk=%SG%GB
+echo
+
+
+set FIRA=
+if not exist (bd)/%grub%/DPMS/dpms2.g4b goto :skipfira
+getstr.g4b $$STRb025
+ls (bd)/%grub%/DPMS/D/M/ > nul || echo -e %STR% && echo && goto :skipfira
+getstr.g4b $$STRb026
+if not exist (bd)/%grub%/DPMS/driverpack.ini call echo -e %STR% && pause && /%grub%/configX.g4b (bd)/%grub%/menuWinInstall.lst
+
+#check if ISO is 64bit
+getstr.g4b $$STRb002
+call Fn.11 "%ISO%" "64" && echo -e %STR% && pause --wait=3  > nul && goto :skipfira
+
+#check for OS - set OSTYPE to xp or 2k or 2k3 - leave blank for any driver which matches PCI ID (best fit)
+set OSTYPE=
+call Fn.11 "%ISO%" "2K" && set OSTYPE=2k
+call Fn.11 "%ISO%" "2k" && set OSTYPE=2k
+call Fn.11 "%ISO%" "2k3" && set OSTYPE=2k3
+call Fn.11 "%ISO%" "2K3" && set OSTYPE=2k3
+call Fn.11 "%ISO%" "XP" && set OSTYPE=xp
+call Fn.11 "%ISO%" "XP" && set OSTYPE=xp
+if "%OSTYPE%"=="" set OSTYPE=xp
+getstr.g4b $$STRb003
+call echo -e %STR%
+getstr.g4b $$STRb004
+call set /l /p:3 ask=%STR%
+echo
+if not "%ask%"=="xp" if not "%ask%"=="2k3" if not "%ask%"=="2k" set ask=
+if not "%ask%"=="" set OSTYPE=%ask%
+getstr.g4b $$STRb005
+call echo -e %STR%
+echo
+pause --wait=2 > nul
+
+
+# FIRA=0= no ramdisk drivers  FIRA=1=firadisk only, FIRA=2=firadisk+winvblk
+
+getstr.g4b $$STRb006
+call echo -e %STR%
+
+:: 0=SATA drivers only (will probably BSOD!)
+
+getstr.g4b $$STRb007
+if %MEMSIZE%>=%FSize% echo -e %STR%
+echo
+getstr.g4b $$STRb008
+if %MEMSIZE%>=%FSize% set /u /p FIRA=%STR%
+getstr.g4b $$STRb009
+if %MEMSIZE%<=%FSize% set /u /p FIRA=%STR%
+echo
+if "%FIRA%"=="" set FIRA=2
+if "%FIRA%"=="Y" set FIRA=2
+if not "%FIRA%"=="1" if not "%FIRA%"=="2" if not "%FIRA%"=="0" if not "%FIRA%"=="3" set FIRA=
+:: make F6 disks - if no OEM driver found disks will load Firadisk and WinVblock, else OEM+Firadisk or OEM+Winvblock
+if not "%FIRA%"=="" call /%grub%/DPMS/dpms2.g4b 2 || echo -n
+:: if no disk 0 then map 1 as 0
+if not "%FIRA%"=="" ls (0)/ > nul || map (1) (0)
+:skipfira
+
+
+#hd0 is USB
+#hd1 is real HDD if only one HDD
+if "%FIRA%"=="" map --mem (bd)/%grub%/NewWinVBlock.ima.gz (fd0) > nul
+if "%FIRA%"=="" map --mem (bd)/%grub%/NewWinVBlock.ima.gz (fd1) > nul
+
+echo
+
+::if we cannot load ISO into memory then don't ask user
+if "%NOFIT%"=="1" set ask=N && goto :skipmem
+
+::if boot device is over 70GB assume it is a hard disk!
+##if %SG%>=71 set ask=Y
+
+getstr.g4b $$STRb010
+if "%FIRA%"=="2" echo -e %STR%
+if "%FIRA%"=="1" echo -e %STR%
+if exist FIRA echo
+getstr.g4b $$STRb011
+
+## always load into memory unless user says no
+set ask=Y
+set /u /p:5 ask=%STR% 
+
+##if %SG%>=71 set /u /p:2 ask=%STR% 
+###if boot device is not HDD...
+##if %SG%<=70 set ask=N
+##getstr.g4b $$STRb012
+##if %SG%<=70 set /u /p:4 ask=%STR%
+
+echo -e \r
+
+
+:skipmem
+errorcheck on
+if /i "%ask%"=="Y"     map --mem %MFOLDER%/%ISO% (0xff) && set ISOMEM=M || map  %MFOLDER%/%ISO% (0xff) > nul && set ISOMEM=
+#if /i "%ask%"=="Y" set ISOMEM=M
+if not /i "%ask%"=="Y" map  %MFOLDER%/%ISO% (0xff) > nul && set ISOMEM=
+set ask=
+
+
+# hd0 and hd1 cannot be same disk, so we can't just map hd1 as hd0
+# All drives must be unique - otherwise XP Setup will change disk signature of HDD as soon as it loads!
+set /a HDCNT=*0x475 & 0xff - 1 > nul
+set topmap=(hd%HDCNT%) > nul
+if %HDCNT%>=15 echo -e TROUBLE! I detected %HDCNT% disks and card readers in this system (only maximum of 14 allowed)!!!! && pause
+if %HDCNT%>=1 map (hd0) %topmap% > nul && map (hd1) (hd0) > nul && echo Mapping (hd0) to %topmap% and (hd1) to (hd0)
+if %HDCNT%>=2 map (hd2) (hd1) > nul && if %HDCNT%>=3 map (hd3) (hd2) > nul && if %HDCNT%>=4 map (hd4) (hd3) > nul  && if %HDCNT%>=5 map (hd5) (hd4) > nul 
+if %HDCNT%>=6 map (hd6) (hd5) > nul && if %HDCNT%>=7 map (hd7) (hd6) > nul && if %HDCNT%>=8 map (hd8) (hd7) > nul
+if %HDCNT%>=9 map (hd9) (hd8) > nul && if %HDCNT%>=10 map (hd10) (hd9) > nul && if %HDCNT%>=11 map (hd11) (hd10) > nul
+if %HDCNT%>=12 map (hd12) (hd11) > nul && if %HDCNT%>=13 map (hd13) (hd12) > nul && if %HDCNT%>=14 map (hd14) (hd13) > nul
+# USB drive is at top, remove it from the count
+map --harddrives=%HDCNT%
+
+
+#poss. DELL fix
+map --e820cycles=3
+
+if "%FIRA%"=="" goto :skpf
+if not exist (fd0)/txtsetup.oem goto :fd0
+#set name of ISO in txtsetup.oem for FiraDisk - otherwise BSOD 0x7B!
+#chenall's ntboot http://chenall.net/post/ntboot/
+set BADTXT=
+set fira.opt=cdrom,vmem=find:%MFOLDER%/%ISO%;
+cat --locate=###E2B### --number=1 (fd0)/TXTSETUP.OEM > nul || set BADTXT=1
+set offset=%?%
+write --offset=%offset% (fd0)/TXTSETUP.OEM value=Parameters,StartOptions,REG_SZ,"%fira.opt%"\r\n; > nul
+cat --skip=%offset% --locate=/ --replace=\\ (fd0)/TXTSETUP.OEM > nul
+
+:fd0
+if not exist (fd1)/txtsetup.oem goto :skpf
+cat --locate=###E2B### --number=1 (fd1)/TXTSETUP.OEM > nul || set BADTXT=1
+set offset=%?%
+write --offset=%offset% (fd1)/TXTSETUP.OEM value=Parameters,StartOptions,REG_SZ,"%fira.opt%"\r\n; > nul
+cat --skip=%offset% --locate=/ --replace=\\ (fd1)/TXTSETUP.OEM > nul
+:skpf
+
+
+#REMINDER: WinVBlock driver causes 'Damaged CD' error if an extra floppy device (2)-(127) is present (as used by FiraDisk)
+:: setup memory area for firadisk string REQUIRED FOR FIRADISK or will get BSOD 0x7B error in AHCI system!
+:: Drive mapping as floppy 2-127 causes WinVBlock to give 'Damaged CD' error message just after format
+:: So if we are using WinVBlock, don't add (99) device! 
+if "%BADTXT%"=="1" if not "%FIRA%"=="3" map --mem (md)0x3000+4 (99) > nul
+
+#hook all mapped drives to BIOS
+map --hook > nul
+
+#set path of ISO for FiraDisk driver using memory (WinVBlock does not like this so only do it if something went wrong!)
+if "%BADTXT%"=="1" if not "%FIRA%"=="3" write (99) [FiraDisk]\nStartOptions=cdrom,vmem=find:%MFOLDER%/%ISO%;\n\0 > nul
+
+root (0xff) > nul
+
+set BIT64=
+call Fn.11 "%ISO%" "64" && set BIT64=1
+if not exist FIRA clear
+
+getstr.g4b $$STRb014
+if not exist FIRA if "%BIT64%"==""  echo -e %STR%
+getstr.g4b $$STRb015
+if not exist FIRA if "%BIT64%"=="1" echo -e %STR%
+getstr.g4b $$STRb016
+if not exist FIRA echo -e %STR%
+echo
+getstr.g4b $$STRb017
+if not exist FIRA pause %STR%
+
+getstr.g4b $$STRb018
+if "%FIRA%"<="2" echo -e %STR%
+getstr.g4b $$STRb019
+if "%FIRA%"=="2" echo -e %STR%
+getstr.g4b $$STRb020
+if "%FIRA%"=="3" echo -e %STR%
+
+# turn off errorcheck or get we error if file doesn't exist
+errorcheck off
+
+set PREINST=
+# check for WINNT.SIF and OemPreInstall=Yes in the ISO - this prevents firadisk and SATA drivers from loading!
+ls /$oem$/ > nul && set OEM=O
+cat --locatei=oempreinstall /i386/winnt.sif > nul
+cat --locatei=yes --length=20 --skip=%?% /i386/winnt.sif > nul && set PREINST=P
+if "%PREINST%"=="" goto :F9
+
+echo
+::echo ISOMEM="%ISOMEM%" "%PREINST%_%OEM%"
+if "%PREINST%"=="P" echo -e \n\n\n$[0106]WARNING: E2B CANNOT INSTALL FROM THIS ISO UNLESS IT IS PATCHED!\n---------------------------------------------------------------
+echo
+echo -e %ISO%
+echo
+if "%PREINST%"=="P"  echo -e $[0106]CAUSE:   The file WINNT.SIF contains the OEMPREINSTALL=YES parameter.\n
+if "%OEM%"=="O"      echo -e $[0106]WARNING: If patched, the $OEM$ folder will not be copied, so some features may be missing!\nTIP:     Prepare a .imgPTN file using WinSetupfromUSB for best results.
+set ask=
+if not "%ISOMEM%"=="M" if "%PREINST%"=="P" echo -e \n$[0106]To avoid modifying the ISO file, use A=Abort, run Step 1 and answer Y\nto load the ISO file into memory first.\n\nWARNING: ISO FILE WILL BE PERMANENTLY MODIFIED IF YOU ANSWER YES!
+echo
+if "%PREINST%_%ISOMEM%"=="P_" set /p ask=Permanently patch the ISO file to make E2B work? (Y/[N]/A) : 
+if "%PREINST%_%ISOMEM%"=="P_M" set ask=Y
+if /i "%ask%"=="A" map --unmap=0:0xff > nul && map --unhook > nul && root (bd) > nul && /%grub%/configX.g4b (bd)/%grub%/menuWinInstall.lst
+if /i "%ask%"=="Y" cat --locatei=oempreinstall --replace=; /i386/winnt.sif > nul && set /p:5 ask=INFO:    "OEMPREINSTALL=Yes" HAS NOW BEEN COMMENTED OUT
+if /i "%ask%"=="R" reboot
+if /i "%ask%"=="C" commandline
+echo
+if /i not "%ask%"=="Y" set /p:5 ask=WARNING: E2B WILL BE UNABLE TO INSTALL DRIVERS OR COMPLETE GUI STAGE 2!
+echo
+
+:F9
+set ask=
+echo
+getstr.g4b $$STRb021
+if exist FIRA set /u /p:5 ask=%STR%
+if "%ask%"=="D" commandline
+if "%ask%"=="C" commandline
+if "%ask%"=="A" map --unmap=0:0xff > nul && map --unhook > nul && root (bd) > nul && /%grub%/configX.g4b (bd)/%grub%/menuWinInstall.lst
+
+rootnoverify (hd0,0)
+
+debug off
+#get rid of 'press any key' prompt
+cat --locate=BINBOOTFIX.BIN --number=1 --replace=BINXXX (0xff)+0x1000 > nul
+
+chainloader (0xff)/i386/setupldr.bin > nul || chainloader (0xff)/I386/SETUPLDR.BIN > nul || chainloader (0xff) > nul

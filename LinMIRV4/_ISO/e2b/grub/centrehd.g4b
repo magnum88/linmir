@@ -1,0 +1,112 @@
+!BAT
+# Input:  Variable name as %1  and  CENTREHD  - e.g. set CENTREHD=63 ;; set HEADING=My Heading ;; call centrehd.g4b HEADING
+# Output: Variable stripped of spaces in front and behind, then centred with total of 58 chars
+# e.g. HEADING=\x20  FRED                          \x20
+# >>   HEADING=\x20           FRED                                               \x20
+
+if not exist %1 exit
+if "%CENTREHD%%%RTL%"=="" exit
+setlocal
+
+insmod %0 > nul
+set H=%1
+# set H to the value of variable
+call call echo -e %%%^H%%% | set H=
+
+:loop
+if "%H:~-1,1%"==" " set H=%H:~0,-1%
+if "%H:~-1,1%"==" " goto :loop
+
+echo %H% > (md)0x300+1
+cat --locate=\x00 --number=1 (md)0x300+1 > nul
+set /a L=%?% > nul
+
+if exist RTL if not exist CENTREHD goto :RALIGN
+
+set /a L=%CENTREHD%-%L%-2 > nul
+call :adjust
+set /a L=%L%/2 > nul
+# Add spaces after text to pad
+:lp1
+if %L%>=0 set "H= %H%" && set /a L=%L%-1 > nul
+if %L%>=0 goto :lp1
+
+set H=\x20%H%
+# add spaces after text
+echo %H% > (md)0x300+1
+cat --locate=\x00 --number=1 (md)0x300+1 > nul
+#set /a L=60-%?% > nul
+#set /a L=81-%?% > nul
+# to not cause wrap-around for 24-high fonts, use 68 (v1.80)
+set /a L=68-%?% > nul
+
+:lp2
+# add one space to end of line until long enough!
+if %L%>=0 set H=%H% 
+set /a L=%L%-1 > nul
+if %L%>=0 goto :lp2
+
+set H=%H%\x20
+#echo 0         1         2         3         4         5         6        7
+#echo [123456789012345678901234567890123456789012345678901234567890123456789]
+#echo [%H%]
+#echo
+delmod %~nx0 > nul
+endlocal && set %1=%H%
+goto :eof
+
+:adjust
+# adjust for UTF-8 etc.
+#look for 3-byte UTF-8 characters and >0x80 2-byte sequences = BEWARE  %xxx%*2  doesnt work in batch file because %* is a special variable!
+cat --locate=\xEF\xBA (md)0x300+1 > nul
+set /a L=%@retval%+%@retval%+%L% > nul
+cat --locate=\xEF\xBB (md)0x300+1 > nul
+set /a L=%@retval%+%@retval%+%L% > nul
+cat --locate=\xDA (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xD9 (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xD8 (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xDB (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xCC (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xE2\x80 (md)0x300+1 > nul
+set /a L=%@retval%+%@retval%+%L% > nul
+cat --locate=\xD7 (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xD6 (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xEF\xAC (md)0x300+1 > nul
+set /a L=%@retval%+%@retval%+%L% > nul
+cat --locate=\xD0 (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xD1 (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xD2 (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\xCC (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+# add extra for \\ and \<space> in string
+cat --locate=\x5c\x5c (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+cat --locate=\x5c\x20 (md)0x300+1 > nul
+set /a L=%@retval%+%L% > nul
+goto :eof
+
+# ------------ RALIGN -----------
+
+# Right align the heading
+:RALIGN
+set /a L=%RTL%-%L% > nul
+call :adjust
+# Add spaces to pad to RTL length
+:lp1r
+if %L%>=0 set "H= %H%" && set /a L=%L%-1 > nul
+if %L%>=0 goto :lp1r
+set H=\x20\x20%H%
+delmod %~nx0 > nul
+endlocal && set %1=%H%
+goto :eof
+

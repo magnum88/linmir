@@ -1,0 +1,30 @@
+[Version]
+Signature="$Windows NT$"
+Class=SCSIAdapter
+ClassGUID={4D36E97B-E325-11CE-BFC1-08002BE10318}
+Provider=WinVBlock
+DriverVer = 06/08/2014,1.0.0
+
+;truncated: winvblock integrated in txtsetup.sif - x86 only
+
+[Manufacturer]
+WinVBlock=WinVBlockDriver
+
+[WinVBlockDriver]
+"WinVBlock Bus wvblk32"=wvblk32,DETECTEDInternal\wvblk32, Detected\wvblk32, Root\WinVBlock, Detected\WinVBlock
+
+[wvblk32]
+AddReg=DisablePrefetcher
+
+[DisablePrefetcher]
+HKLM,"System\CurrentControlSet\Control\Session Manager\Memory Management\PrefetchParameters",EnablePrefetcher,0x00010001,0x1
+HKLM,"System\CurrentControlSet\Control\CrashControl",AutoReboot,0x00010001,0x0
+
+[wvblk32.Services]
+AddService=wvblk32,0x00000002,Service
+
+[Service]
+ServiceType=0x00000001
+StartType=0x00000000
+ErrorControl=0x00000001
+ServiceBinary=%12%\wvblk32.sys

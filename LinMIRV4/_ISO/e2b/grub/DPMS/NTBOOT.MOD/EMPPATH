@@ -1,0 +1,36 @@
+!BAT
+debug 0
+setlocal
+set *
+set tmp=%~2
+set length=%@retval%
+set n=-1
+call :check_emp %tmp% || endlocal && set %~1=%~2 && exit
+
+:start
+if not "%tmp:~-1%"==" " && goto :check_blank
+set tmp=%tmp:~,-1%
+set length=%@retval%
+goto :start
+
+:check_blank
+if "%n%"=="%length%" && goto :end
+set /a n=%n% + 1 > nul
+call if "%^tmp:~%%n%%,1%"==" " || goto :check_next
+set /a m=%n% - 1 > nul
+call if "%^tmp:~%%m%%,1%"=="\" && goto :check_next
+call set newpath=%newpath%\%^tmp:~%%n%%,1%
+goto :check_blank
+
+:check_next
+call set newpath=%newpath%%%^tmp:~%%n%%,1%
+goto :check_blank
+
+:end
+endlocal && set %~1=%newpath%
+exit
+
+:check_emp
+if "%~2"=="" && exit 1
+exit
+

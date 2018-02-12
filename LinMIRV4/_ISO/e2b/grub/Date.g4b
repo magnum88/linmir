@@ -1,0 +1,108 @@
+!BAT
+::datefunc for grub4dos by chenall 2011-10-08/ SSi 2013-01-16  www.rmprepusb.com
+::
+:: Usage: date.g4b 2013-01-23    sets date
+::        date.g4b               prompts user for new date
+::
+:: WARNING: LIMITED SENSE CHECKING IS DONE - must be valid yyyy-mm-dd format
+::        date.g4b 2013-1-1      	is invalid!
+::        date.g4b 2013-02-31    	is accepted and will be programmed!
+::        date.g4b 2013-02-03 SHOW   	reads back the date after it has been set and displays it
+
+setlocal
+set *
+debug off
+set edi=0x60000
+set esi=0x60004
+set ebp=0x60008
+set esp=0x6000C
+set ebx=0x60010
+set bx=0x60010
+set edx=0x60014
+set dx=0x60014
+set ecx=0x60018
+set cx=0x60018
+set eax=0x6001C
+set ax=0x6001C
+set gs=0x60020
+set fs=0x60024
+set es=0x60028
+set ds=0x6002c
+set ss=0x60030
+set eip=0x60034
+set cs=0x60038
+set eflags=0x60003c
+::(Clock Service——INT 1AH) 
+::04H Read Date
+::Entrance parameters: AH = 04H
+::Export parameters: CH = BCD code format of the century
+::CL = BCD code format year
+::DH = BCD code format of the Month
+::DL = BCD code format of the day
+::CF = 0 - clock go in, otherwise, the clock stopped
+
+call :BIOS_INT 1A ax=0x400
+
+:: get variable from command line into date
+set date=%*
+if exist date && goto :SET_DATE
+call Fn.0 0 "%%04X%%04X" *%cx% *%dx% | set date=
+echo -n The current date is: %date:~0,4%-%date:~4,2%-%date:~6%
+set date=
+set /p date=Enter the new date (yyyy-mm-dd) : 
+if "%date%"=="" exit
+
+:SET_DATE  
+::05H
+
+set yyyy=%date:~0,4%
+::echo Year="%yyyy%"
+set mm=%date:~5,2%
+::echo Month="%mm%"
+set dd=%date:~8,2%
+::echo %date:~8,2%
+::set
+::echo Day="%dd%"
+if "%yyyy%"=="" echo  -e \nNo Year! && goto :usage
+if "%mm%"==""   echo  -e \nNo Month! && goto :usage
+if "%dd%"==""   echo  -e \nNo Day! && goto :usage
+if %yyyy%<=1990 echo  -e \nBad Year %yyyy%! && goto :usage
+if %mm%>=13     echo  -e \nBad Month "%mm%"! && goto :usage
+if %dd%>=32     echo  -e \nBad Day "%dd%"! && goto :usage
+
+call :BIOS_INT 1A ax=0x500 cx=0x%date:~0,4% dx=0x%date:~5,2%%%date:~8,2%
+
+call :BIOS_INT 1A ax=0x400
+call Fn.0 0 "%%04X%%04X" *%cx% *%dx% | set date=
+if /i "%2"=="show" echo -n The date is now: %date:~0,4%-%date:~4,2%-%date:~6%
+
+exit
+
+
+
+:BIOS_INT
+echo -n > (md)0x300+1
+write %cs% -1
+write %ss% -1
+write %esp% -1
+write %eflags% -1
+write %ds% -1
+write %es% -1
+write %fs% -1
+write %gs% -1
+write %eip% 0xFFFF%1CD
+shift 1
+:xx
+if "%2"=="" goto :realmode_run
+write %%%1% %2
+shift 1
+shift 1
+goto :xx
+
+:realmode_run
+call Fn.53 0x60000
+exit
+
+:usage
+echo Please use yyyy-mm-dd format (e.g. 2014-03-29).
+exit

@@ -1,0 +1,44 @@
+!BAT
+set PTN=%1
+if not "%PTN:~0,1%"=="(" echo -e \n %0 %1 - BAD ARGUMENT! && pause --wait=3 && goto :eof
+set PT=
+set PTYPE=
+set P1=
+# get partition type
+parttype %PTN%
+set /A P1=%@retval% > nul
+set /A PT=%P1%&0xef > nul
+if "%PT%"=="0xF" pause --wait=3 Extended partition entry! && exit
+if "%PT%"=="" pause BAD Partition Type! && exit
+if /i %PT%==0x0b set PTYPE=FAT32
+if /i %PT%==0x0c set PTYPE=FAT32
+if /i %PT%<=0x06 && if /i %PT%>=4 set PTYPE=FAT16
+if /i %PT%==0x0e set PTYPE=FAT16
+if /i %PT%==0x01 set PTYPE=FAT12
+if /i %PT%==0x07 set PTYPE=NTFS_EXFAT_HFS
+
+echo %PTYPE% %P1%
+cat --hex --length=0x40 %PTN%+1
+
+#if FAT16 then make FS valid - 11&12hex are number of root entries which should always be 512 (0200 hex) for FAT16
+#if FAT32 then make FS version valid - 2a&2bhex are version bytes (type 0.0) - change to 0 to restore
+#if NTFS of exFAT then just changing the ID name will suffice
+
+if "%PTYPE%"=="FAT16" cat --locate=\xaa\xaa --skip=0x11 --length=2 --replace=\x00\x02 %PTN%+1 > nul && echo Restored bytes 0x11 and 0x12 && goto :h1
+if "%PTYPE%"=="FAT32" cat --locate=\xaa\xaa --skip=0x2a --length=2 --replace=\x00\x00 %PTN%+1 > nul && echo Restored bytes 0x2a and 0x2b && goto :h1
+if "%PTYPE%"=="" pause Partition type %P1% not recognised! && goto :h1
+
+#unhide NTFS and exFAT + others
+cat --locate=s    --replace=S    --skip=3 --length=8 %PTN%+1 > nul
+cat --locate=ibm  --replace=IBM  --skip=3 --length=8 %PTN%+1 > nul
+cat --locate=fat  --replace=FAT  --skip=3 --length=8 %PTN%+1 > nul
+
+:h1
+# show status after unhide command
+debug 1
+unhide %PTN%
+set PT=
+set PTYPE=
+set P1=
+cat --hex --length=0x40 %PTN%+1
+set PTN=

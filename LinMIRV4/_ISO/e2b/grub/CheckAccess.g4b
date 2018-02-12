@@ -1,0 +1,64 @@
+!BAT
+
+# check can access last sector - warn if problem (allow for >1TB drives)
+if not "%_BOOT:~1,1%"=="h" goto :EOF
+setlocal
+set result=0
+debug 0
+echo -n %_BOOT% > (md)0x3000+1
+cat --locate=, --replace=)\x00 (md)0x3000+1
+cat (md)0x3000+1 | set driv=
+if "%driv%"=="" goto :skipca
+dd if=%driv%+1 of=(md)0x3000+1 > nul
+
+:: in case number is > 0x80000000 divide by 4
+set /a s1=*0x6001c6 & 0xffffffff>>2
+set /a l1=*0x6001ca & 0xffffffff>>2
+set /a s2=*0x6001d6 & 0xffffffff>>2
+set /a l2=*0x6001da & 0xffffffff>>2
+set /a s3=*0x6001e6 & 0xffffffff>>2
+set /a l3=*0x6001ea & 0xffffffff>>2
+set /a s4=*0x6001f6 & 0xffffffff>>2
+set /a l4=*0x6001fa & 0xffffffff>>2
+
+set s=%s1% && set l=%l1%
+if %s2%>=%s% set s=%s2% && set l=%l2%
+if %s3%>=%s% set s=%s3% && set l=%l3%
+if %s4%>=%s% set s=%s4% && set l=%l4%
+
+set /a lba=%s%+%l%-1
+set /a s=%lba%>>19
+# multiply by 4 again
+set /a lba=%lba%<<2
+echo Last Sector of last partition of %driv% is %lba% (%s%GB)   %redir%
+#grub4dos accesses 127 sectors, so reduce by 127 in case of bad bios which can't handle access beyond end of disk
+set /a lba=%lba%-254
+echo -n Checking %driv% sector %lba% is accessible...   %redir%
+# don't abort if error
+errorcheck off
+
+cat --length=16 --hex %driv%%%lba%+1 > nul && set result=1
+
+set l=
+set s3=
+set l3=
+set l4=
+set l1=
+set l2=
+set s1=
+set s2=
+
+if "%result%"=="1" echo BIOS OK %redir% || echo -e \n$[0xc]BIOS BAD (possible 137GB BIOS limit?) \nWARNING: THIS BIOS MAY HAVE PROBLEMS ACCESSING SOME FILES ON THIS DRIVE!\n
+if not "%result%"=="1" echo -e If you have problems booting any payload file,\ntry the 'Install fast Grub4dos USB Driver' option,\nbefore selecting the payload file from the E2B menu.\n
+if not "%result%"=="1" pause Press a key to continue... && echo
+
+#set GRUB_USB=Y for grub4dos 0.4.6a with USB driver for buggy USB code in BIOSes
+# Removed because of bugs in USB driver (lose hd0 if SSD drive)
+#if  not "%result%"=="1" set GRUB_USB=Y
+
+:skipca
+
+endlocal && set GRUB_USB=%GRUB_USB%
+
+
+

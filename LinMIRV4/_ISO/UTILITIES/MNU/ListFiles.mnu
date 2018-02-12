@@ -1,0 +1,59 @@
+# Add this to the UTILITIES menu to view files and folders in any directory
+
+title ls \n ls (DIR)
+
+echo -e \x201 = /_ISO/MAINMENU
+echo -e \x202 = /_ISO/ANTIVIRUS
+echo -e \x203 = /_ISO/AUTO
+echo -e \x204 = /_ISO/BACKUP
+echo -e \x205 = /_ISO/DOS
+echo -e \x206 = /_ISO/LINUX
+echo -e \x207 = /_ISO/UTILITIES
+echo -e \x208 = /_ISO/WINPE
+echo -e \x209 = /_ISO/WINDOWS/SVRK8R2
+echo -e 10 = /_ISO/WINDOWS/SVR2012
+echo 11 = /_ISO/WINDOWS/SVR2016
+echo 12 = /_ISO/WINDOWS/VISTA
+echo 13 = /_ISO/WINDOWS/WIN7
+echo 14 = /_ISO/WINDOWS/WIN8
+echo 15 = /_ISO/WINDOWS/WIN10
+echo 16 = /_ISO/WINDOWS/XP
+
+set ASK=
+set DIR=
+echo
+echo e.g. 12 
+echo e.g. /_ISO
+echo
+set /p ASK=? : 
+errorcheck off
+#if not exist ASK configfile (md)0x3000+0x50
+
+if %ASK%==1 set DIR=/_ISO/MAINMENU/
+if %ASK%==2 set DIR=/_ISO/ANTIVIRUS/
+if %ASK%==3 set DIR=/_ISO/AUTO/
+if %ASK%==4 set DIR=/_ISO/BACKUP/
+if %ASK%==5 set DIR=/_ISO/DOS/
+if %ASK%==6 set DIR=/_ISO/LINUX/
+if %ASK%==7 set DIR=/_ISO/UTILITIES/
+if %ASK%==8 set DIR=/_ISO/WINPE/
+if %ASK%==9 set DIR=/_ISO/WINDOWS/SVR2K8R2/
+if %ASK%==10 set DIR=/_ISO/WINDOWS/SVR2012/
+if %ASK%==11 set DIR=/_ISO/WINDOWS/SVR2016/
+if %ASK%==12 set DIR=/_ISO/WINDOWS/VISTA/
+if %ASK%==13 set DIR=/_ISO/WINDOWS/WIN7/
+if %ASK%==14 set DIR=/_ISO/WINDOWS/WIN8/
+if %ASK%==15 set DIR=/_ISO/WINDOWS/WIN10/
+if %ASK%==16 set DIR=/_ISO/WINDOWS/XP/
+
+if not exist DIR set DIR=%ASK%
+
+if not "%DIR:~-1,1%"=="/" set DIR=%DIR%/
+
+errorcheck off
+#if not exist DIR  (md)0x3000+0x50
+clear
+call /%grub%/ListDir.g4b
+debug 0
+errorcheck off
+boot

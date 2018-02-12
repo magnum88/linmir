@@ -1,0 +1,67 @@
+!BAT
+insmod /%grub%/getstr.g4b
+
+errorcheck off
+#remove animated icon fd3 (and fd2)
+map --unmap=3 > nul
+map --unmap=2 > nul
+map --rehook > nul
+
+# pick an ISO
+getstr.g4b $$STRbx21
+echo -e %STR%
+
+#echo XP INSTALL - STEP 2
+#echo ===================
+echo
+if not "%XPISO%"=="" set ISO=%XPISO% && goto :skpxpi
+# list all files in the folder so the user can pick one
+/%grub%/PickaFile.g4b %MFOLDER% .ISO
+echo
+# check if user aborted
+if "%CHOSEN%"==""  echo Aborting... && /%grub%/configX.g4b (bd)/%grub%/menuWinInstall.lst
+set ISO=%CHOSEN%
+:skpxpi
+
+# load winvblock anyway!
+map --mem (bd)/%grub%/NewWinVBlock.ima.gz (fd0) > nul
+map --mem (bd)/%grub%/NewWinVBlock.ima.gz (fd1) > nul
+
+#hd0 is USB
+#hd1 is real HDD
+# note: --mem is used first - if not enough memory then retry try without loading iso into ramdrive (but may get BSOD)
+# we must load the ISO into memory, so it will be slow to load here ...
+getstr.g4b $$STRbx22
+call echo -e %STR%
+#echo -e Loading %ISO% into memory - please wait...
+
+#map (hd0) (hd) > nul
+#map (hd1) (hd0) > nul
+
+map --mem %MFOLDER%/%ISO% (0xff) || map  %MFOLDER%/%ISO% (0xff) > nul
+
+# If user installs to hd2 then we must shift all drives or else ntldr/boot.ini will try to boot to wrong drive
+set /a HDCNT=*0x475 & 0xff - 1 > nul
+set topmap=(hd%HDCNT%)
+clear
+if %HDCNT%>=1 map (hd0) %topmap% > nul && map (hd1) (hd0) && echo Mapping (hd0) to %topmap% and (hd1) to (hd0)
+if %HDCNT%>=2 map (hd2) (hd1) > nul && if %HDCNT%>=3 map (hd3) (hd2) > nul && if %HDCNT%>=4 map (hd4) (hd3) > nul  && if %HDCNT%>=5 map (hd5) (hd4) > nul && if %HDCNT%>=6 map (hd6) (hd5) > nul && if %HDCNT%>=7 map (hd7) (hd6) > nul && if %HDCNT%>=8 map (hd8) (hd7) > nul
+
+map --hook > nul
+map --rd-size=2048 > nul
+map --mem (rd)+4 (0x55) > nul
+map --rehook > nul
+write (0x55) #!GRUB4DOS\x00v=1\x00%MFOLDER%/%ISO%\x00\xA0\x00 > nul
+root (hd0,0) > nul || root (hd0,1) > nul || root (hd0,2) > nul || rootnoverify (hd0,0) > nul
+
+getstr.g4b $$STRb021
+set /u /p:5 ask=%STR%
+# SPACEBAR=Pause, ENTER=Start now - STARTING IN 5 SECONDS...
+if "%ask%"=="D" commandline
+if "%ask%"=="C" commandline
+if "%ask%"=="A" map --unmap=0:0xff > nul && map --unhook > nul && root (bd) > nul && /%grub%/configX.g4b (bd)/%grub%/menuWinInstall.lst
+
+chainloader (hd0)+1 > nul
+::pause --wait=2 You may unplug this USB drive - now booting from hard disk...
+exit
+

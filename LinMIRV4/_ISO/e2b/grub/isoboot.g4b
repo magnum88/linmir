@@ -1,0 +1,985 @@
+!BAT
+# 2015-06-05 support new type of parted magic ISO
+
+# transfer to \_ISO\isoboot.g4b if it exists
+if not exist ISOBOOT if exist \_ISO\isoboot.g4b set ISOBOOT=1 && \_ISO\isoboot.g4b
+set ISOBOOT=
+
+debug 1
+set ME=%~pnx0
+set isot=
+set initrd=
+set initrd0=
+set try=
+set kernel=
+set seed=
+
+
+# Usage: isoboot.g4b ask /_ISO/MAINMENU
+if not /i "%1"=="ask" goto :skippick
+call /%grub%/pickafile.g4b %2 .iso
+set ISOC=%2/%CHOSEN%
+set CHOSEN=
+:skippick
+
+if "%ISOC:~0,2%"=="()" set ISOC=%ISOC:~2%
+set ISOSCAN=%ISOC%
+# get ISO path and filename without leading (hdx,y) part - so we can pass it to linux
+if "%ISOC:~0,3%"=="(hd" set ISOSCAN=%ISOC:~7%
+
+# get filename part only as FNAME
+echo %ISOC% > (md)0x220+1
+errorcheck off
+echo
+cat --locate=\x20 (md)0x220+1 > nul && pause --wait=5 WARNING: SPACES IN FILENAMES MAY CAUSE PROBLEMS - PLEASE RENAME ISO FILE!
+errorcheck on
+
+#cat --locatei=".iso" (md)0x220+1 > nul
+#set /a dot=%?% > nul
+#call set FNAME=%^ISOC:~0,%dot%%%
+#cat --locatei="/" (md)0x220+1  > nul
+#set /a dots=%?%+1 > nul
+#call set FNAME=%^FNAME:~%dots%,%dot%%%
+#set dot=
+#set dots=
+
+call :.getfname %ISOC%
+
+clear
+echo
+echo ISOBOOT: Trying to identify a linux ISO from the filename %FNAME%... %redir%
+debug 1
+uuid () > nul
+set UUID=%?%
+echo %FNAME% > (md)0x220+1
+# LOOK FOR STRINGS IN FILENAMES
+cat --locatei="ubuntu"    --number=1 (md)0x220+1 > nul && set a=:.isoubu
+cat --locatei="linuxmint" --number=1 (md)0x220+1 > nul && set a=:.isomint
+cat --locatei="fedora"    --number=1 (md)0x220+1 > nul && set a=:.isofed
+cat --locatei="kali"      --number=1 (md)0x220+1 > nul && set a=:.isokali
+cat --locatei="opensuse"  --number=1 (md)0x220+1 > nul && set a=:.isosuse
+cat --locatei="sysresc"   --number=1 (md)0x220+1 > nul && set a=:.isosysres
+cat --locatei="knoppix"   --number=1 (md)0x220+1 > nul && set a=:.isoknop
+cat --locatei="debian"    --number=1 (md)0x220+1 > nul && set a=:.isodeb
+cat --locatei="tails"     --number=1 (md)0x220+1 > nul && set a=:.isotails
+cat --locatei="gpart"     --number=1 (md)0x220+1 > nul && set a=:.isogpart
+cat --locatei="centos"    --number=1 (md)0x220+1 > nul && set a=:.isocent
+cat --locatei="pclinux"   --number=1 (md)0x220+1 > nul && set a=:.isopclinux
+cat --locatei="zorin"     --number=1 (md)0x220+1 > nul && set a=:.isozorin
+cat --locatei="arch"      --number=1 (md)0x220+1 > nul && set a=:.isoarch
+cat --locatei="avg"       --number=1 (md)0x220+1 > nul && set a=:.isoavg
+cat --locatei="porteus"   --number=1 (md)0x220+1 > nul && set a=:.isoport
+cat --locatei="slax"      --number=1 (md)0x220+1 > nul && set a=:.isoslax
+cat --locatei="slackw"    --number=1 (md)0x220+1 > nul && set a=:.isoslack
+cat --locatei="makulu"    --number=1 (md)0x220+1 > nul && set a=:.isomakulu
+cat --locatei="antix"     --number=1 (md)0x220+1 > nul && set a=:.isoantix
+cat --locatei="crunchba"  --number=1 (md)0x220+1 > nul && set a=:.isocrunch
+cat --locatei="acronis"   --number=1 (md)0x220+1 > nul && set a=:.isoacronis
+cat --locatei="paladin"   --number=1 (md)0x220+1 > nul && set a=:.isopaladin
+cat --locatei="pmagic"    --number=1 (md)0x220+1 > nul && set a=:.pmagic
+cat --locatei="ophcrack"  --number=1 (md)0x220+1 > nul && set a=:.ophcrack
+cat --locatei="bitdefen"  --number=1 (md)0x220+1 > nul && set a=:.bitdef
+
+
+#Qubes_OS installer nor working - no iso cheat code?
+#cat --locatei="qubes"     --number=1 (md)0x220+1 > nul && set a=:.isoqubes
+
+#Bitdefender
+#cat --locatei="bitdef"    --number=1 (md)0x220+1 > nul && set a=:.isobitdef
+#sabayon - no cheat code?
+#cat --locatei="sabayon"   --number=1 (md)0x220+1 > nul && set a=:.isosaba
+#magiea - no cheat code for ISO?
+#cat --locatei="mageia"    --number=1 (md)0x220+1 > nul && set a=:.isomageia
+#freebsd - no cheat code?
+#cat --locatei="freebsd"   --number=1 (md)0x220+1 > nul && set a=:.isofbsd
+
+
+if "%a%"=="" goto :xerr
+echo
+
+map --read-only %ISOC% (0xff) > nul || echo -e $[0147]\n%ISOC% IS NOT CONTIGUOUS!\nPlease make the file contiguous or it may not boot correctly.\n && map --mem %ISOC% (0xff)
+map --hook
+root (0xff) > nul
+call %a% %ISOC%
+
+
+:xerr
+debug -1
+echo -e $[0xe4]\n\nSorry, %ISOC% is not supported by ISOBOOT!\n
+debug -1
+pause --wait=4
+debug 0
+errorcheck off
+root %_BOOT% > nul || root (bd)/ > nul
+errorcheck on
+goto :eof
+
+
+# --- BOOT FROM ISO USING CHEAT CODES ---
+
+
+:.bitdef
+set SQUASH=rescue/livecd.squashfs
+set common=root=/dev/ram0  real_root=/dev/loop0 loop=%SQUASH% cdroot_marker=%SQUASH% initrd udev cdroot scandelay=2
+set silent=quiet splash
+set silent=
+set lang=en
+set kernel=/boot/kernel.i386-pc
+set initrd=/boot/initfs.i386-pc
+echo -e kernel %kernel% %common% %silent% isoboot=%ISOSCAN% lang=%lang% vga=ask > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+set lang= && set silent= && set common= && set SQUASH=
+goto :ISOBOOT
+
+
+:.ophcrack
+set kernel=/boot/bzImage
+set initrd=/boot/rootfs.gz
+echo -e kernel %kernel% rw root=/dev/null vga=normal lang=en_US kmap=us autologin > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+
+if not exist (bd)/tables echo -e $[0147]WARNING: NO \TABLES FOLDER found on E2B drive!\nPlease extract from the ISO and place on the E2B USB drive. && pause
+
+set LIVE=
+set ISOSCAN=
+goto :ISOBOOT
+
+
+:.pmagic
+
+set try=/pmagic/bzImage
+if exist %try% set kernel=%try%
+set try=/pmagic/initrd.img
+if exist %try% set initrd=%try%
+#new 2015 version
+set try=/pmagic/fu.img
+if exist %try% set initrd=/pmagic/initrd.img %try% /pmagic/m32.img 
+if exist %try% set kernel=%kernel% load_ramdisk=1 prompt_ramdisk=0 rw gfxpayload=text loglevel=9 
+
+echo
+echo -e Live (persistent) mode (for 512MB-1G based systems).\nThe USB drive must remain attached to the system during this session.
+echo -e You can then save settings on exit.
+echo -e For Live Mode (persistence) - the file /pmagic/pmodules/PMAGIC_XXXX_XX_XX.SQFS\nmust exist on the E2B USB DRIVE.
+echo -e You can copy the SQFS file from iso/pmagic/pmodules to the \nE2B drive's /pmagic/pmodules folder using Parted Magic File Manager.
+echo -e The SQFS file can be of 0 bytes in size as long as the filename is identical to the one in the ISO.
+set LIVE=
+echo
+set /p ask=Do you want LIVE boot (Y/[N]) : 
+if /i "%ask%"=="Y" set LIVE=boot=live
+
+set keymap=
+if "%LANG%"=="GERMAN"       set keymap=keymap=de-latin1 de_DE
+if "%LANG%"=="SPANISH"      set keymap=keymap=es es_ES
+if "%LANG%"=="FRENCH"       set keymap=keymap=fr-latin1 fr_FR
+if "%LANG%"=="ITALIAN"      set keymap=keymap=it it_IT
+if "%LANG%"=="PORTU_BRAZIL" set keymap=keymap=br-abnt2 pt_BR
+if "%LANG%"=="POLISH"       set keymap=keymap=pl pl_PL
+if "%LANG%"=="SIMP_CHINESE" set keymap=keymap=us zh_CN
+if "%LANG%"=="TRAD_CHINESE" set keymap=keymap=us zh_CN
+
+echo -e kernel %kernel% iso_filename=%ISOSCAN% eject=no edd=on vga=normal vmalloc=512MiB %keymap% %LIVE% > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+
+set LIVE=
+set keymap=
+set ISOSCAN=
+
+goto :ISOBOOT
+
+
+# ---
+
+:.isopaladin
+#  menu label ^Sumuri Paladin Live Session  5.01
+#  kernel /casper/vmlinuz
+#  append  file=/cdrom/preseed/xubuntu.seed boot=casper noprompt initrd=/casper/initrd.lz quiet splash vga=792 --
+  
+set try=/casper/vmlinuz
+if exist %try% set kernel=%try%
+set try=/casper/initrd.lz
+if exist %try% set initrd=%try%
+
+set common=iso-scan/filename=%ISOSCAN%
+# locale=en_UK.UTF-8 
+
+echo -e kernel %kernel% file=/cdrom/preseed/xubuntu.seed boot=casper %common% noprompt  vga=792 -- > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+:.isoqubes
+#Qubes install - can't see image to install (iso not mounted)
+#  kernel mboot.c32
+#  append xen.gz              --- vmlinuz stage2=hd:LABEL="Qubes R1 x86_64 DVD":/images/install.img repo=file:/mnt/stage2 --- initrd.img
+#  append xen.gz console=none --- vmlinuz inst.stage2=hd:LABEL=Qubes\x20R2\x20x86_64 quiet --- initrd.img
+  
+set try=/isolinux/vmlinuz
+if exist %try% set kernel=%try%
+set try=/isolinux/initrd.img
+if exist %try% set initrd=%try%
+
+set LBL="Qubes R1 x86_64 DVD"
+set LBL="Qubes\\x20R2\\x20x86_64\\x20DVD"
+set common=
+#set common=LANG=en_US.UTF-8 SYSFONT=latarcyrheb-sun16 KEYTABLE=de rhgb max_loop=255
+#echo -e kernel %kernel% iso-scan/filename=%SCAN% root=live:CDLABEL=%LBL% nosplash rootfstype=auto ro rd.live.image  rhgb rd.luks=0 rd.md=0 rd.dm=0 > (md)0x220+1
+#echo -e kernel  %kernel% %common% stage2=cdrom:CDLABEL=%LBL%:/images/install.img repo=file:/mnt/stage2 iso-scan/filename=%ISOSCAN% isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN% > (md)0x220+1
+
+echo -e kernel  %kernel% %common% inst.stage2=hd:LABEL=%LBL% repo=file:/mnt/stage2 iso-scan/filename=%ISOSCAN% isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN% > (md)0x220+1
+#echo -e kernel  %kernel% %common% stage2=hd:LABEL=%LBL%:/images/install.img repo=file:/mnt/stage2 iso-scan/filename=%ISOSCAN% isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN% > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+:.isoacronis
+chainloader (0xff)
+boot
+
+
+:.isobitdef
+#BitDefenderRescueCD_v2.0.0_5_10_2010.iso - nned to extract boot and rescue folder to USB root! No ISO cheat code
+
+set SQUASH=rescue/livecd.squashfs
+set common=root=/dev/ram0 isoboot=%ISOSCAN%  real_root=/dev/loop0 loop=%SQUASH% cdroot_marker=%SQUASH% initrd udev cdroot scandelay=2
+set silent=quiet splash
+set silent=
+set lang=en
+
+set try=/boot/kernel.i386-pc
+if exist %try% set kernel=%try%
+set try=/boot/initfs.i386-pc
+if exist %try% set initrd=%try%
+
+echo -e kernel  %kernel% %common% %silent% lang=%lang% iso-scan/filename=%ISOSCAN% isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN% > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+:.isocrunch
+#	menu label Live Session 11-20130506-i686
+#	kernel /live/vmlinuz
+#	append initrd=/live/initrd.img boot=live config quiet
+
+set try=/live/vmlinuz
+if exist %try% set kernel=%try%
+set try=/live/initrd.img
+if exist %try% set initrd=%try%
+
+echo -e kernel %kernel% boot=live config  findiso=%ISOSCAN%  > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isoantix
+#LABEL antiX-13.2_386-full (4 November 2013) - needs fromhd if VM
+#	KERNEL /antiX/vmlinuz
+#	APPEND quiet antiX=MLX 
+#	INITRD /antiX/initrd.gz
+
+#14-a3-RD_386-full.iso - needs bdev if VM
+
+set try=/antiX/vmlinuz
+if exist %try% set kernel=%try%
+set try=/antiX/initrd.gz
+if exist %try% set initrd=%try%
+
+#toram
+
+echo
+set /p ask=Are you running as HDD0 from a Virtual Machine or non-USB drive (Y/[N]) : 
+if /i "%ask%"=="Y" set VM=fromhd=/dev/sda1 bdev=/dev/sda1
+
+# using buuid instead of bdev does not work!
+#if /i "%ask%"=="Y" set VM=fromhd=/dev/sda1 buuid=%UUID%
+
+echo -e kernel %kernel% antiX=MLX fromiso=%ISOSCAN%  %VM%  > (md)0x220+1
+#echo -e kernel %kernel% antiX=MLX vga=791 xres=1024x768 fromiso=%ISOSCAN%  %VM%  > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+	
+
+:.isomakulu
+#	menu label MakuluLinux (default) cinnamon debian 1.1
+#    kernel /live/vmlinuz quiet
+#    append initrd=/live/initrd.img boot=live ip=frommedia union=aufs 
+# NOT WORK!
+#	menu label MakuluLinux (default) MakuluLinux_Xfce_5.iso Makulu_E17_4.0.iso
+#    kernel /live/vmlinuz quiet
+#    append initrd=/live/initrd.img boot=live ip=frommedia union=aufs config=openssh-server 
+
+set try=/live/vmlinuz
+if exist %try% set kernel=%try%
+set try=/live/initrd.img 
+if exist %try% set initrd=%try%
+
+# toram nomodeset config=openssh-server 
+
+
+
+
+
+echo -e kernel %kernel% boot=live ip=frommedia union=aufs  findiso=%ISOSCAN%  > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+:.isofbsd
+# ???
+goto :ISOBOOT
+
+
+:.isoslax
+#MENU LABEL Run Slax 7.0.8
+#KERNEL /slax/boot/vmlinuz
+#APPEND vga=normal initrd=/slax/boot/initrfs.img load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 slax.flags=perch,xmode
+
+
+set try=/slax/boot/vmlinuz
+if exist %try% set kernel=%try%
+set try=/slax/boot/vmlinu
+if exist %try% set kernel=%try%
+
+set try=/slax/boot/initrfs.img
+if exist %try% set initrd=%try%
+set try=/slax/boot/initrd.gz
+if exist %try% set initrd=%try%
+set try=/slax/boot/initr.gz
+if exist %try% set initrd=%try%
+ 
+echo -e kernel %kernel% from=%ISOSCAN% load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 slax.flags=perch,xmode  > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+
+:.isoslack
+#label huge.s
+#  kernel /kernels/huge.s/bzImage
+#  append initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 nomodeset SLACK_KERNEL=huge.s
+#label hugesmp.s
+#  kernel /kernels/hugesmp.s/bzImage
+#  append initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 nomodeset SLACK_KERNEL=hugesmp.s
+#label kms.s
+#  kernel /kernels/huge.s/bzImage
+#  append initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 SLACK_KERNEL=huge.s
+#label kmssmp.s
+#  kernel /kernels/hugesmp.s/bzImage
+#  append initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 SLACK_KERNEL=hugesmp.s
+#label speakup.s
+#  kernel /kernels/hugesmp.s/bzImage
+#  append initrd=initrd.img load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 SLACK_KERNEL=hugesmp.s
+
+set try=/kernels/huge.s/bzImage
+if exist %try% set kernel=%try%
+
+set try=/isolinux/initrd.img
+if exist %try% set initrd=%try%
+ 
+echo -e kernel %kernel% from=%ISOSCAN% load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 nomodeset SLACK_KERNEL=huge.s  > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isoport
+#KERNEL vmlinuz
+#APPEND initrd=initrd.xz changes=/porteus timezone=Europe/London kmap=gb,us
+
+set try=/boot/syslinux/vmlinuz
+if exist %try% set kernel=%try%
+
+set try=/boot/syslinux/initrd.xz
+if exist %try% set initrd=%try%
+ 
+echo -e kernel %kernel% from=%ISOSCAN% changes=/porteus timezone=Europe/London kmap=gb,us  > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+:.isomageia
+#kernel /boot/vmlinuz
+#append initrd=/boot/cdrom/initrd.gz root=mgalive:LABEL=Mageia-4.1-KDE4-LiveCD splash quiet rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 vga=788 
+
+set try=/boot/vmlinuz
+if exist %try% set kernel=%try%
+
+set try=/boot/cdrom/initrd.gz
+if exist %try% set initrd=%try%
+
+echo
+echo -e $[1174]WARNING: THIS MAY  NOT WORK ON NTFS E2B DRIVES (use FAT32).
+echo
+
+set LBL=Mageia-4.1-KDE4-LiveCD
+
+# isofrom=$ruuid:$isofile
+ 
+echo -e kernel %kernel% isofrom=%UUID%:%ISOSCAN% iso-scan/filename=%ISOSCAN% isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN% root=mgalive:LABEL=%LBL% nosplash   rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 vga=788  > (md)0x220+1
+
+#echo -e kernel %kernel%  iso-scan/filename=%ISOSCAN% root=mgalive:LABEL=%LBL% nosplash   rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 vga=788  > (md)0x220+1
+#echo -e kernel %kernel%  iso-scan/filename=%ISOSCAN% root=mgalive:LABEL=%~n1 nosplash    rd.luks=0 rd.lvm=0 rd.md=0 rd.dm=0 vga=788  > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+:.isozorin
+# menu label ^Try Zorin OS without installing
+# kernel /casper/vmlinuz
+#  append  file=/cdrom/preseed/lubuntu.seed boot=casper initrd=/casper/initrd.lz quiet splash --
+# Z8
+#  kernel /casper/vmlinuz
+#  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz quiet splash --
+
+  
+set try=/casper/vmlinuz
+if exist %try% set kernel=%try%
+set try=/casper/vmlinuz.efi
+if exist %try% set kernel=%try%
+set try=/casper/vmlinuz0
+if exist %try% set kernel=%try%
+set try=/casper/initrd.img
+if exist %try% set initrd=%try%
+set try=/casper/initrd0.img
+if exist %try% set initrd=%try%
+set try=/casper/initrd.gz
+if exist %try% set initrd=%try%
+set try=/casper/initrd.lz
+if exist %try% set initrd=%try%
+
+set seed=
+if exist /preseed/custom.seed set seed=file=/cdrom/preseed/custom.seed
+if exist /preseed/lubuntu.seed set seed=file=/cdrom/preseed/lubuntu.seed
+if exist /preseed/ubuntu.seed set seed=file=/cdrom/preseed/ubuntu.seed
+
+echo
+cat --locate=in-os-9 (md)0x220+1 > nul || echo -e $[1174]WARNING: THIS MAY NOT WORK IF NOT ZORIN 9 (or later)
+echo
+
+#zorin9 works
+echo kernel %kernel% %seed% boot=casper iso-scan/filename=%ISOSCAN% locale=en_US.UTF-8 -- > (md)0x220+1
+# splash=silent quiet splash
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+  
+
+:.isopclinux
+
+#kernel vmlinuz
+#append livecd=livecd initrd=initrd.gz root=/dev/rd/3 quiet vga=788 keyb=us splash=silent
+set try=/isolinux/vmlinuz
+if exist %try% set kernel=%try%
+set try=/isolinux/vmlinuz0
+if exist %try% set kernel=%try%
+set try=/isolinux/initrd.img
+if exist %try% set initrd=%try%
+set try=/isolinux/initrd0.img
+if exist %try% set initrd=%try%
+set try=/isolinux/initrd.gz
+if exist %try% set initrd=%try%
+
+echo
+echo -e $[1174]WARNING: THIS MAY  NOT WORK ON NTFS E2B DRIVES (use FAT32).
+echo
+
+echo kernel %kernel% fromusb livecd=livecd initrd=initrd.gz root=/dev/rd/3 vga=788 keyb=us  bootfromiso=%ISOSCAN% > (md)0x220+1
+# splash=silent quiet
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isocent
+#CentOS-7.0-1406-x86_64-DVD.iso'
+#linux (loop)/isolinux/vmlinuz noeject inst.stage2=hd:/dev/sdb2:/$isofile
+#initrd (loop)/isolinux/initrd.img
+
+#CentOS-7.0-1406-x86_64-GnomeLive.iso'
+#linux (loop)/isolinux/vmlinuz0 root=live:CDLABEL=CentOS-7-live-GNOME-x86_64 iso-scan/filename=$isofile rd.live.image
+#initrd (loop)/isolinux/initrd0.img
+
+set try=/isolinux/vmlinuz
+if exist %try% set kernel=%try%
+set try=/isolinux/vmlinuz0
+if exist %try% set kernel=%try%
+set try=/isolinux/initrd.img
+if exist %try% set initrd=%try%
+set try=/isolinux/initrd0.img
+if exist %try% set initrd=%try%
+
+echo kernel %kernel% boot=live config union=aufs noswap noprompt ip=frommedia toram=filesystem.squashfs findiso=%ISOSCAN% > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+	
+	
+:.isogpart
+#GParted Live
+#gparted-live-0.18.0-1-amd64.iso"
+#linux (loop)/live/vmlinuz boot=live config union=aufs noswap noprompt ip=frommedia toram=filesystem.squashfs findiso=$isofile
+#initrd (loop)/live/initrd.img
+
+set try=/live/vmlinuz
+if exist %try% set kernel=%try%
+set try=/live/initrd.img
+if exist %try% set initrd=%try%
+
+echo kernel %kernel% boot=live config union=aufs noswap noprompt ip=frommedia toram=filesystem.squashfs findiso=%ISOSCAN% > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isoavg
+#avg_antivirus.iso 
+#  linux (loop)/isolinux/vmlinuz max_loop=255 vga=791 init=linuxrc iso-scan/filename=/isos/avg_antivirus.iso 
+#  initrd (loop)/isolinux/initrd.lzm 
+
+set try=/isolinux/vmlinuz
+if exist %try% set kernel=%try%
+set try=/isolinux/initrd.lzm
+if exist %try% set initrd=%try%
+
+echo kernel %kernel%  max_loop=255 vga=791 init=linuxrc iso-scan/filename=%ISOSCAN% > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isotails
+#tails-i386-1.0.iso
+#linux (loop)/live/vmlinuz fromiso=/dev/disk/by-uuid/5e5ca198-7e43-a0dc-91eb-98ebec1274b5/isos/tails-i386-1.0.iso boot=live config live-media=removable nopersistent noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 splash noautologin module=Tails truecrypt quiet
+#initrd (loop)/live/initrd.img
+
+#old version
+#boot=live config live-media=removable apparmor=1 security=apparmor nopersistent noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 splash noautologin module=Tails  quiet
+#v1
+#findiso=%ISO% boot=live config live-media=removable noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 splash nox11autologin module=Tails quiet splash
+
+set try=/live/vmlinuz
+if exist %try% set kernel=%try%
+set try=/live/initrd.img
+if exist %try% set initrd=%try%
+
+# WONT BOOT IN VM if add live-media=removable
+# can use either findiso or fromiso (but not both)
+#findiso=%ISOSCAN%
+#fromiso=/dev/disk/by-uuid/%UUID%%%ISOSCAN%
+
+echo kernel %kernel%  findiso=%ISOSCAN% boot=live config  nopersistent noprompt timezone=Etc/UTC block.events_dfl_poll_msecs=1000 nosplash noautologin module=Tails > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isodeb
+#debian - Stock install medium
+#Note: To install debian from any stock install medium on a hard disk(or usb stick), 
+#it's necessary to use a different initramfs instead of the default one on the installation medium(it is located at (loop)/install.amd/initrd.gz). 
+#If you boot with the default one, the debian-installer will unable to find or mount the proper iso image for installation. 
+#Please download the initramfs for hard disk installation from an official mirror site, 
+#put it in the same directory with the image file and give it a suitable name(debian-7.7.0-amd64-DVD-1.hdd.initrd.gz in this example).
+#debian-7.7.0-amd64-DVD-1.iso'
+#	set initrdfile='/boot/iso/debian-7.7.0-amd64-DVD-1.hdd.initrd.gz'
+#	linux (loop)/install.amd/vmlinuz vga=791 iso-scan/ask_second_pass=true iso-scan/filename=$isofile
+#	initrd $initrdfile
+#
+#debian-live-7.6.0-amd64-xfce-desktop.iso'
+#	linux (loop)/live/vmlinuz boot=live config fromiso=/dev/sdb2/$isofile
+#	initrd (loop)/live/initrd.img
+#
+#debian-7.5.0-amd64-netinst.iso
+#linux (loop)/install.amd/vmlinuz fromiso=/dev/disk/by-uuid/5e5ca198-7e43-a0dc-91eb-98ebec1274b5/isos/debian-7.5.0-amd64-netinst.iso boot=live vga=788 -- quiet
+#initrd (loop)/install.amd/initrd.gz
+
+set try=/live/vmlinuz
+if exist %try% set kernel=%try%
+set try=/install.amd/vmlinuz
+if exist %try% set kernel=%try%
+set try=/live/vmlinuz1
+if exist %try% set kernel=%try%
+
+set try=/live/initrd.img
+if exist %try% set initrd=%try%
+set try=/install.amd/initrd.gz
+if exist %try% set initrd=%try%
+set try=/install.amd/initrd.img
+if exist %try% set initrd=%try%
+set try=/live/initrd1.img
+if exist %try% set initrd=%try%
+
+
+# old 2009 ISO
+#boot=live persistent username=kdenlive hostname=kdenlive.org union=aufs 
+
+if "%initrd%"=="/live/initrd1.img" && echo kernel %kernel% fromiso=/dev/disk/by-uuid/%UUID%%%~pnx1 boot=live persistent username=kdenlive hostname=kdenlive.org union=aufs  > (md)0x220+1
+if not "%initrd%"=="/live/initrd1.img" && echo kernel %kernel% fromiso=/dev/disk/by-uuid/%UUID%%%~pnx1 boot=live live-config vga=788 -- quiet > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+:.isoknop
+#KNOPPIX_V7.0.4DVD-2012-08-20-EN.iso"
+#linux (loop)/boot/isolinux/linux bootfrom=/dev/sda1$iso_path acpi=off keyboard=us language-us
+#initrd (loop)/boot/isolinux/minirt.gz
+
+#V7.2
+# options lang=en apm=power-off nomce libata.force=noncq hpsa.hpsa_allow_any=1 loglevel=1
+# kernel /boot/isolinux/linux ramdisk_size=100000 init=/etc/init apm=power-off nodma vga=normal nomce lang=es keyboard=es xkeyboard=es bootfrom=/iso/ADRIANE-KNOPPIX_V7.2.0CD-2013-06-16-EN.iso noprompt 
+
+set opt=
+
+set try=/isolinux/linux
+if exist %try% set kernel=%try%
+set try=/isolinux/rescue32
+if exist %try% set kernel=%try%
+
+set try=/boot/isolinux/linux
+if exist %try% set kernel=%try%
+set try=/boot/isolinux/minirt.gz
+if exist %try% set initrd=%try%
+#7.2  - add nodma if problems
+if exist %try% set opt=nomce libata.force=noncq hpsa.hpsa_allow_any=1 loglevel=1 
+
+set try=/isolinux/minirt.gz
+if exist %try% set initrd=%try%
+
+echo kernel %kernel% bootfrom=/dev/sdb1%~pnx1 %opt% acpi=off keyboard=us language-us noprompt noeject > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isosysres
+
+# eset 1.0.9 - need to extract casper to \sysrescue on E2B drive!  ISO cheat codes don't work!
+set try=/casper/vmlinuz
+if exist %try% set kernel=%try%  boot=casper persistent live-media-path=/sysrescue/casper changes=/eset/save.dat isoloop=%ISOSCAN%  vga=ask  --
+if exist try echo -e $[0104]WARNING: \casper folder must be extracted from ISO file and copied to \sysrescue folder on drive (\sysrescue\casper\*.sqfs files must be present)...
+#from=%ISOSCAN% changes=/eset/save.dat live-media=/dev/disk/by-uuid/%UUID% live-media-path=/live 
+#isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN%
+#findiso=%ISOSCAN%  iso-scan/filename=%ISOSCAN%  isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN%
+#kernel /casper/vmlinuz boot=casper live-media=/dev/disk/by-label/eSysRescueLiveCD initrd=/casper/initrd.lz quiet splash --
+set try=/casper/initrd.lz
+if exist %try% set initrd=%try%
+
+
+##systemrescuecd-x86-3.7.0.iso  64-bit
+#linux (loop)/isolinux/rescue64 setkmap=us isoloop=$isofile
+#initrd (loop)/isolinux/initram.igz
+#systemrescuecd-x86-3.7.0.iso  32-bit
+#linux (loop)/isolinux/rescue32 setkmap=us isoloop=$isofile
+#initrd (loop)/isolinux/initram.igz
+
+set try=/isolinux/rescue64
+if exist %try% set kernel=%try% setkmap=us isoloop=%ISOSCAN%
+set try=/isolinux/rescue32
+if exist %try% set kernel=%try% setkmap=us isoloop=%ISOSCAN%
+
+set try=/isolinux/initram.igz
+if exist %try% set initrd=%try%
+
+echo kernel %kernel%  > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isoslack
+#slackware64-14.1-install-dvd
+#	linux (loop)/kernels/huge.s/bzImage printk.time=0
+#	initrd (loop)/isolinux/initrd.img
+
+set try=/kernels/huge.s/bzImage
+if exist %try% set kernel=%try%
+
+set try=/isolinux/initrd.img
+if exist %try% set initrd=%try%
+
+echo kernel %kernel% printk.time=0 > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+	  
+	  
+	  
+:.isokali
+#KALI kali-linux-1.0.7-amd64
+#	linux (loop)/live/vmlinuz boot=live findiso=$isofile noconfig=sudo username=root hostname=kali
+#	initrd (loop)/live/initrd.img
+
+set try=/live/vmlinuz
+if exist %try% set kernel=%try%
+
+set try=/live/initrd.img
+if exist %try% set initrd=%try%
+
+echo kernel %kernel% boot=live findiso=%ISOSCAN% noconfig=sudo username=root hostname=kali > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+:.isosuse
+#livecd openSUSE-13.1-KDE-Live-x86_64
+#	linux (loop)/boot/x86_64/loader/linux isofrom_device=$imgdevpath isofrom_system=$isofile LANG=en_US.UTF-8
+#	initrd (loop)/boot/x86_64/loader/initrd
+#openSUSE-13.1-DVD-x86_64.iso'
+#	linux (loop)/boot/x86_64/loader/linux install=hd:$isofile
+#	initrd (loop)/boot/x86_64/loader/initrd
+#openSUSE-13.1-KDE-Live-x86_64.iso"
+#    linux (loop)/boot/x86_64/loader/linux isofrom_device=/dev/disk/by-uuid/$uuid isofrom_system=$isofile LANG=zh_CN.UTF-8
+#    initrd (loop)/boot/x86_64/loader/initrd
+# suserescue (not working)
+#kernel boot/i386/loader/linux
+#append initrd=boot/i386/loader/initrd ramdisk_size=512000 ramdisk_blocksize=4096 splash=silent quiet preloadlog=/dev/null showopts 
+
+	
+set try=/boot/x86_64/loader/linux
+if exist %try% set kernel=%try%
+set try=/boot/i386/loader/linux
+if exist %try% set kernel=%try%
+
+set try=/boot/x86_64/loader/initrd
+if exist %try% set initrd=%try%
+set try=/boot/i386/loader/initrd
+if exist %try% set initrd=%try%
+
+echo
+echo -e $[1174]WARNING: THIS MAY NOT WORK ON NTFS E2B DRIVES (use FAT32 or make file contiguous).
+echo
+
+#echo kernel %kernel% isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN% LANG=en_US.UTF-8 ramdisk_size=512000 ramdisk_blocksize=4096 preloadlog=/dev/null showopts  > (md)0x220+1
+
+echo kernel %kernel% isofrom_device=/dev/disk/by-uuid/%UUID% isofrom_system=%ISOSCAN% LANG=en_US.UTF-8 > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isosaba
+#Sabayon_Linux_14.05_amd64_KDE
+#	linux (loop)/boot/sabayon root=/dev/ram0 aufs cdroot locale=en_US loop=/livecd.squashfs looptype=squashfs isoboot=$isofile
+#	initrd (loop)/boot/sabayon.igz
+
+#aufs cdroot splash vga=791 quiet --
+
+set try=/boot/sabayon
+if exist %try% set kernel=%try%
+
+set try=/boot/sabayon.igz
+if exist %try% set initrd=%try%
+
+#14.10 Minimal (not booting)
+# aufs cdroot splash vga=791 quiet -- 
+#echo kernel %kernel% root=/dev/ram0 aufs cdroot vga=791 locale=en_US isoboot=%ISOSCAN% -- > (md)0x220+1
+
+#14.11 xfce
+# aufs cdroot splash vga=791 quiet -- 
+
+echo kernel %kernel% isoboot=%ISOSCAN% aufs cdroot splash vga=791 quiet -- > (md)0x220+1
+
+#echo kernel %kernel% root=/dev/ram0 aufs cdroot vga=791 locale=en_US loop=/livecd.squashfs looptype=squashfs isoboot=%ISOSCAN% -- > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+:.isofed
+
+#Fedora-Live-Desktop-x86_64-20-1.iso" 
+#linux (loop)/isolinux/vmlinuz0 root=live:CDLABEL=Fedora-Live-Desktop-x86_64-20-1 rootfstype=auto ro rd.live.image quiet rhgb rd.luks=0 rd.md=0 rd.dm=0 iso-scan/filename=${isofile} 
+#initrd (loop)/isolinux/initrd0.img
+#linux (loop)/isolinux/vmlinuz0 boot=isolinux iso-scan/filename=$isofile root=live:LABEL=$isolabel ro rd.live.image quiet rhgb
+#initrd (loop)/isolinux/initrd0.img
+
+
+set try=/isolinux/vmlinuz
+if exist %try% set kernel=%try%
+set try=/isolinux/vmlinux
+if exist %try% set kernel=%try%
+set try=/isolinux/vmlinux0
+if exist %try% set kernel=%try%
+set try=/isolinux/vmlinuz0
+if exist %try% set kernel=%try%
+
+set try=/isolinux/initrd.img
+if exist %try% set initrd=%try%
+set try=/isolinux/initrd0.img
+if exist %try% set initrd=%try%
+
+
+
+# CDLABEL must match ISO volume label (usually file name)
+# NTFS not supported! FAT32 or ext2/3/4
+# ISOC must not have spaces
+# use \x25 for % sign (%x20 = space for kernel command line)  0x5c=\
+
+#root=live:/fedora.iso  ??
+
+echo
+echo -e $[1174]WARNING: THIS MAY  NOT WORK ON NTFS E2B DRIVES (use FAT32).
+echo -e $[1174]WARNING: THIS MAY  NOT WORK IF THE ISO VOLUME LABEL DOES NOT MATCH THE FILE NAME.
+echo -e $[1174]WARNING: THIS WILL NOT WORK IF THE ISO VOLUME LABEL CONTAINS SPACES.
+echo
+
+echo -e kernel %kernel%  iso-scan/filename=%ISOSCAN% root=live:CDLABEL=%~n1 nosplash rootfstype=auto  live-config.timezone=America/Los_Angeles ro rd.live.image  rhgb rd.luks=0 rd.md=0 rd.dm=0 > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+
+:.isomint
+set try=/casper/vmlinuz
+if exist %try% set kernel=%try%
+set try=/casper/vmlinuz.efi
+if exist %try% set kernel=%try%
+set try=/casper/vmlinux.efi
+if exist %try% set kernel=%try%
+
+set try=/live/vmlinuz
+if exist %try% set kernel=%try%
+
+set try=/casper/initrd.lz
+if exist %try% set initrd=%try%
+set try=/live/initrd.img
+if exist %try% set initrd=%try%
+
+set seed=
+set try=/preseed/linuxmint.seed
+if exist %try% set seed=file=/cdrom%try%
+set try=/preseed/mint.seed
+if exist %try% set seed=file=/cdrom%try%
+
+#cinnamon 
+if not exist seed && echo kernel %kernel% config  boot=live live-media-path=/live iso-scan/filename=%ISOSCAN% -- > (md)0x220+1
+if exist seed     && echo kernel %kernel%   %seed% boot=casper  iso-scan/filename=%ISOSCAN% -- > (md)0x220+1
+echo initrd %initrd%  >> (md)0x220+1
+goto :ISOBOOT
+
+
+
+
+:.isoubu
+
+set try=/casper/vmlinuz
+if exist %try% set kernel=%try%
+set try=/casper/vmlinuz.efi
+if exist %try% set kernel=%try%
+set try=/casper/vmlinux.efi
+if exist %try% set kernel=%try%
+set try=/casper/initrd.lz
+if exist %try% set initrd=%try%
+  
+# possible options
+# locale=en_US.UTF-8
+# quiet
+
+set seed=file=/cdrom/preseed/ubuntu.seed
+if exist /preseed/custom.seed set seed=file=/cdrom/preseed/custom.seed
+if exist /preseed/lubuntu.seed set seed=file=/cdrom/preseed/lubuntu.seed
+if exist /preseed/xubuntu.seed set seed=file=/cdrom/preseed/xubuntu.seed
+set pae=
+cat --locatei="14.04" --number=1 (md)0x220+1 > nul && set pae=forcepae
+
+set locale=en_US.UTF-8
+#en_GB.UTF-8
+if "%LANG%"=="DUTCH" set locale=nl_NL.UTF-8
+if "%LANG%"=="FRENCH" set locale=fr_FR.UTF-8
+if "%LANG%"=="GERMAN" set locale=de_DE.UTF-8
+if "%LANG%"=="GERMAN_ALT" set locale=de_DE.UTF-8
+if "%LANG%"=="GERMAN_SWISS" set locale=de_CH.UTF-8
+if "%LANG%"=="FRENCH_SWISS" set locale=fr_CH.UTF-8
+if "%LANG%"=="ITALIAN" set locale=it_IT.UTF-8
+if "%LANG%"=="POLISH" set locale=pl_PL.UTF-8
+if "%LANG%"=="ROMANIAN" set locale=ro_RO.UTF-8
+if "%LANG%"=="RUSSIAN" set locale=ru_RU.UTF-8
+if "%LANG%"=="SPANISH" set locale=es_ES.UTF-8
+if "%LANG%"=="SWEDISH" set locale=sv_SE.UTF-8
+if "%LANG%"=="SIMP_CHINESE" set locale=zh_CN.UTF-8
+if "%LANG%"=="TRAD_CHINESE" set locale=zh_TW.UTF-8
+
+#Japanese
+#echo kernel %kernel% %seed% noprompt boot=casper iso-scan/filename=%ISOSCAN% locale=ja_JP.UTF-8  splash  -- debian-installer/language=ja keyboard-configuration/layoutcode?=jp keyboard-configuration/modelcode?=jp106 timezone=Asia/Tokyo utc=no %pae% > (md)0x220+1
+
+echo kernel %kernel% %seed% noprompt boot=casper iso-scan/filename=%ISOSCAN% locale=%locale%  splash -- > (md)0x220+1
+echo initrd %initrd% >> (md)0x220+1
+goto :ISOBOOT
+
+
+:.isoarch
+set isot=
+set initrd=
+set initrd0=
+set try=
+
+set try=/arch/boot/intel_ucode.img
+if exist %try% set initrd0=%try%
+ 
+
+set t64=
+cat --locatei="dual" --number=1 (md)0x220+1 > nul || goto :arch36
+echo
+set /p t64=Boot 32-bit or 64-bit version ([3]/6) : 
+clear
+if not "%t64%"=="6" goto :arch32
+
+:arch36
+
+:: 64-bit
+
+set try=/arch/boot/x86_64/vmlinuz
+if exist %try% set kernel=%try%
+set try=/arch/boot/x86_64/archiso.img
+if exist %try% set initrd=%try%
+
+set try=/boot/vmlinuz_x86_64
+if exist %try% set kernel=%try%
+set try=/boot/initramfs_x86_64.img
+if exist %try% set initrd=%try%
+set try=/arch/boot/x86_64/archiso.img
+if exist %try% set initrd=%try%
+
+if exist t64 goto :runk
+
+:arch32
+:: 32-bit
+set try=/arch/boot/i686/vmlinuz
+if exist %try% set kernel=%try%
+set try=/arch/boot/i686/archiso.img
+if exist %try% set initrd=%try%
+
+:runk
+echo kernel %kernel% archisolabel=ARCH_201411 archisobasedir=arch img_dev=/dev/disk/by-uuid/%UUID% img_loop=%ISOSCAN% earlymodules=loop > (md)0x220+1
+## iso_loop_dev=$imgdevpath iso_loop_path=%ISOSCAN% 
+echo initrd %initrd0% %initrd% >> (md)0x220+1
+
+:ISOBOOT
+set ISOSCAN=
+set ISOC=
+echo %redir%
+echo %redir%
+echo -e Booting using ISO Cheat Codes (source: %~0 in batch file %ME%) %redir%
+echo %redir%
+errorcheck off
+if "%initrd%-%initrd0%"=="-" pause ERROR: No initrd file found! && root (bd)/ && configfile (md)0xa000+0x50
+if "%kernel%"==""            pause ERROR: No kernel file found! && root (bd)/ && configfile (md)0xa000+0x50
+echo
+
+echo -e Grub4dos command lines are: %redir%
+echo %redir%
+echo ------ %redir%
+cat (md)0x220+1 %redir%
+echo ------ %redir%
+echo %redir%
+if not exist redir if not exist NOSUG pause Press a key to boot...
+:skipm
+
+errorcheck on
+configfile (md)0x220+1 %redir%
+root (bd)/ && configfile (md)0xa000+0x50
+exit
+
+:.getfname
+# get filename into FNAME
+set FNAME=%~n1
+goto :eof

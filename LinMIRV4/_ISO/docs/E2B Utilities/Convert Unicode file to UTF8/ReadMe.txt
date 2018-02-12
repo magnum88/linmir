@@ -1,0 +1,1 @@
+Drag-and-Drop a unicode text file onto the UNICODEToUTF8.cmd file to convert it to a UTF-8 file.

@@ -1,0 +1,19 @@
+#!/bin/sh
+###############################################################################
+#########################INITIALISATION DES VARIABLES##########################
+###############################################################################
+# Date actuelle pour le nommage des dossiers de sauvegarde
+DATEA=`date +%d%m%y`
+# Repertoires du serveur distant a sauvegarder
+SOURCES="/home/partage/commun"
+TARGET="/Commun/"
+# Machine distante
+REMMACHINE='192.168.1.7'
+# Utilisateur distant
+REMUSER="admin"
+
+rsync -az -e ssh --password-file=/home/.rsync_passwd --stats --filter "- *~" ${SOURCES}  ${REMUSER}@${REMMACHINE}:${TARGET}
+
+
+echo "SAUVEGARDE TERMINEE AVEC SUCCES !!" 
+

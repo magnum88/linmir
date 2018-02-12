@@ -1,0 +1,93 @@
+!BAT
+
+:: SSi
+:: This allows you to test different PCI IDs and with different versions of DriverPacks
+:: Just run this batch file from a grub4dos prompt and check the output for each PCI ID 
+
+set p=%~dp0
+
+set TESTCASE="PCI\VEN_10DE&DEV_0266&CC_0101"="nvlegacy" ; D/M/N "NVATABUS.sys" "NVIDIA nForce Legacy"
+echo CHECK only HP TX132 N driver picked
+call :testit
+
+set TESTCASE="PCI\VEN_1002&DEV_4376"="amdide" ; D/M/AM "amdide.sys" "AMD PCI SATA/IDE"
+echo CHECK only ne driver picked
+call :testit
+
+set TESTCASE="PCI\VEN_1002&DEV_4379"="Si3112r" ; D/M/S5 "Si3112r.sys" "Silicon Image 3x12 SATARaid"
+echo CHECK only ne driver picked
+call :testit
+
+set TESTCASE="PCI\VEN_1095&DEV_3132"="3132R5C" ; D/M/SC "SI3132R5.sys" "Silicon Image 3132 SoftRaid5 for BIOS 7223"
+echo CHECK SI3132R5.sys driver present
+call :testit
+
+
+set TESTCASE="PCI\VEN_1095&DEV_3132&SUBSYS_000F182D"="SI3132B5" ; D/M/SB5 "SI31322.sys" "Silicon Image 3132 SATALink for BIOS 7405"
+echo CHECK SI31322 driver present
+call :testit
+
+
+:: M4 has 64 in name
+set TESTCASE="PCI\VEN_11AB&DEV_6440"="mv64xx" ; D/M/M4 "mv64xx.sys" "Marvell 64xx/63xx SAS"
+echo CHECK mv64xx.sys driver present
+call :testit
+
+:: L  (has txtsetup(xxxx).oem instead of txtsetup.oem!)
+set TESTCASE="PCI\VEN_1000&DEV_0030"="symmpiv" ; D/M/L "symmpi.sys" "LSI Logic SAS 3000/VMware v10 (WXP)"
+call :testit
+
+::: I7 ****  FORCE ICH7
+set TESTCASE="PCI\VEN_8086&DEV_3B29&CC_0106"="iastor7" ; D/M/I7 "iastor7.sys" "Intel ICH7"
+call :testit
+
+
+:: I4  ***** FORCE I4 (multiple Config lines)
+set TESTCASE="PCI\VEN_8086&DEV_1D02&CC_0106"="iastorA" ; D/M/I4 "iastorA.sys" "Intel C60"
+call :testit
+
+
+:: I4a ***** FORCE I4 (multiple Config lines)
+set TESTCASE="PCI\VEN_8086&DEV_1D60&CC_0106"="iastorS" ; D/M/I4 "iastorS.sys" "Intel C60 SATA MODE"
+call :testit
+
+:: *** NO OEM DRIVER **
+set TESTCASE=NONE
+call :testit
+
+:: V   VMWARE SCSI with [Config.VMSCSI] section (note: PCI ID is not in txtsetup.oem!)
+set TESTCASE="PCI\VEN_104B&DEV_1040"="VMSCSI" ; D/M/V "VMSCSI.sys" "VMWARE SCSI"
+call :testit
+
+:: IT2 with two config lines
+set TESTCASE="PCI\VEN_1283&DEV_8212"="ITEATAPI" ; D/M/IT "iteatapi.sys" "ITE IT8211 ATA ATAPI"
+call :testit
+
+:: AM8
+set TESTCASE="PCI\VEN_1022&DEV_7801&CC_0106"="ahcix80x"    ; D/M/AM8 "ahcix868.sys" "AMD AHCI Compatible RAID SB8xx (WXP)"
+call :testit
+
+:: SS
+set TESTCASE="PCI\VEN_1039&DEV_1182"="SISRAID2" ; D/M/SS "SISRAID2.sys" "SIS 182/1182 RAID"
+call :testit
+
+:: AS  (contains dll_
+set TESTCASE="PCI\VEN_1B21&DEV_0602"="asahxp32" ; D/M/AS "asahxp32.sys" "Asmedia 106x SATA Controller"
+call :testit
+
+:: S1 (contains dll= and Note)
+set TESTCASE="PCI\VEN_1095&DEV_0680&SUBSYS_36801095"="pnp680r" ; D/M/S1 "pnp680r.sys" "Silicon Image 0680 Ultra-133 Medley ATA Raid"
+call :testit
+
+set TESTCASE=
+
+exit
+ 
+:testit
+call %p%dpms2.g4b
+pause
+if exist (1)/txtsetup.oem cat (1)/txtsetup.oem
+echo 
+if exist (1)/txtsetup.oem ls (1)/
+pause
+exit

@@ -1,0 +1,24 @@
+iftitle [if exist /%grub%/DPMS/chkpci] $$STRm007
+/%grub%/DPMS/chkpci
+pause
+configfile (md)0x3000+0x50 || configfile /menu.lst
+
+iftitle [if exist /%grub%/DPMS/chkpci] $$STRm008
+/%grub%/DPMS/chkpci -srs
+pause
+configfile (md)0x3000+0x50 || configfile /menu.lst
+
+iftitle [if exist /%grub%/DPMS/chkpci && if exist /%grub%/DPMS/DriverPack.ini] $$STRm009
+/%grub%/DPMS/chkpci -w:xp -u /%grub%/DPMS/DriverPack.ini
+pause
+configfile (md)0x3000+0x50 || configfile /menu.lst
+
+iftitle [if exist /%grub%/DPMS/chkpci && if exist /%grub%/DPMS/DriverPack.ini] $$STRm010
+/%grub%/DPMS/chkpci -w:w2k -u /%grub%/DPMS/DriverPack.ini
+pause
+configfile (md)0x3000+0x50 || configfile /menu.lst
+
+iftitle [if exist /%grub%/DPMS/chkpci && if exist /%grub%/DPMS/DriverPack.ini] $$STRm011
+/%grub%/DPMS/chkpci -w:w2k3 -u /%grub%/DPMS/DriverPack.ini
+pause
+configfile (md)0x3000+0x50 || configfile /menu.lst

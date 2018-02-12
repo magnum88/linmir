@@ -1,0 +1,18 @@
+title $$STRmm02
+kernel $HOME$/Memtest86-51.kernel
+boot
+
+title $$STRmm03
+kernel $HOME$/Memtest86-51.kernel onepass
+boot
+
+title $$STRmm04
+kernel $HOME$/Memtest86-51.kernel btrace
+boot
+
+title $$STRmm05
+kernel $HOME$/Memtest86-51.kernel makxcpus=1
+boot
+
+	
+	

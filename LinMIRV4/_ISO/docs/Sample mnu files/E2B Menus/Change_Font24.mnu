@@ -1,0 +1,17 @@
+# revision 2 for E2B v1.78+
+title Change 24-high Font (grub4dos 0.4.6a)\n Choose a large font
+set CHOSEN=
+call /%grub%/PickaFile.g4b /_ISO/docs/Fonts .f24
+if "%CHOSEN%"=="" configfile (md)0xa000+0x50
+clear
+set FONT=%CHOSEN%
+errorcheck off
+font --font-high=24 /_ISO/docs/Fonts/%CHOSEN%
+set FONT=
+set CHOSEN=
+set STR=
+configfile (md)0xa000+0x50
+
+title Reset fonts \n Reload menu
+set DONEMENU=
+configfile /%grub%/menu.lst

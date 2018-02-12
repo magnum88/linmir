@@ -1,0 +1,14 @@
+
+title SlackOS Persistent
+uuid () > nul
+set UUID=%?%
+/%grub%/QRUN.g4b force.isodefault $HOME$/slackware64-live-mate-current.iso
+kernel /boot/generic load_ramdisk=1 prompt_ramdisk=0 rw printk.time=0 kbd=us tz=US/Pacific locale=en_US.utf8 xkb= persistence=/slackos-rw vga=791 livemedia=$HOME$/slackware64-live-mate-current.iso
+initrd /boot/initrd.img 
+boot
+
+#nop  no persistence
+#nop=wipe
+#livemedia=/dev/sdX:/path/to/live.iso
+#persistence=<path>
+  

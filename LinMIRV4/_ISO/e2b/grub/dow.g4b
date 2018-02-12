@@ -1,0 +1,47 @@
+!BAT
+#    dayofweek(y, m, d)	/* 1 <= m <= 12,  y > 1752 (in the U.K.) */
+#    {
+#        static int t[] = {0, 3, 2, 5, 0, 3, 5, 1, 4, 6, 2, 4};
+#        if (mm < 3) y = y - 1; 
+#        return (y + y/4 - y/100 + y/400 + t[m-1] + d) % 7;
+#    }
+
+set dow=
+setlocal
+
+set y=%1
+set m=%2
+set d=%3
+set /a y=%y%+0 > nul
+set /a m=%m%+0 > nul
+set /a d=%d%+0 > nul
+if "%y%"=="0" exit
+if "%m%"=="0" exit
+if "%d%"=="0" exit
+
+if %m%==1 set t=0
+if %m%==2 set t=3
+if %m%==3 set t=2
+if %m%==4 set t=5
+if %m%==5 set t=0
+if %m%==6 set t=3
+if %m%==7 set t=5
+if %m%==8 set t=1
+if %m%==9 set t=4
+if %m%==10 set t=6
+if %m%==11 set t=2
+if %m%==12 set t=4
+
+set y1=%y%
+if %m%<=2 set /a y1=%y1%-1 > nul
+set /a x=%y1%/4 > nul
+set /a xx=%y1%/100 > nul
+set /a xxx=%y1%/400 > nul
+#echo   1983 + 495 - 19 + 4 + 5 + 30
+#echo %y1% + %x% - %xx% + %xxx% + %t% + %d%
+set /a xxxx=%y1% + %x% - %xx% + %xxx% + %t% + %d% > nul
+set /a dow = %xxxx% % 7 > nul
+#echo dow=%dow%
+
+endlocal && set dow=%dow%
+

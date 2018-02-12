@@ -1,0 +1,8 @@
+# Boot from an NT6 Windows .VHD or .VHDx file
+# The VHD can be located on any partition
+# E2B will boot VHD or WIM files if you just place them in an E2B folder, so this menu only needed if not in a standard location
+
+title Boot Windows To Go\n Boot from VHD using NTBOOT
+set ISOC=/WinToGo10.VHD
+/%grub%/NTBOOT NT6=%ISOC% NTLDR=/%grub%/DPMS/NTBOOT.MOD/bootmgr
+boot

@@ -1,0 +1,213 @@
+# To change the language edit the \_ISO\e2b\grub\xxx\STRINGS.txt file
+
+if exist /_ISO/WinMenu.g4b call /_ISO/WinMenu.g4b || if exist /_ISO/WinMenu.bmp splashimage /_ISO/WinMenu.bmp
+
+if exist NOWMENU set MFOLDER=/_ISO/MAINMENU && configfile (md)0xa000+0x50
+if not "%GFX%"=="" gfxmenu /_ISO/%GFX%
+if not "%DEFM_WIN%"=="" default %DEFM_WIN%
+if "%HCOLOUR%"=="" set HCOLOUR=0133
+if "%HELPTEXT%"=="" set HELPTEXT=\x20Visit www.easy2boot.com
+set HDG=$$STRlWIN
+if "%HDG%"=="" set HDG=\x20                --- INSTALL A WINDOWS OS ---                \x20
+if not "%CENTREHD%_%RTL"=="_" call /%grub%/centrehd.g4b HDG
+if not exist HEADPOS set HEADPOS=0000
+set HP=0000 $[0004]                                                                \necho -n -e -P:
+#write (md)0x220+1 !BAT\necho -n -e -P:%HP%%%^HEADPOS% $[\x25HCOLOUR\x25]%HPAD%\x25HDG\x25\necho -n -P:%HBTM% $[\x25FCOLOUR\x25]%HELPTEXT%\0 >> (md)0x3000+0x50
+write (md)0x220+1 !BAT\necho -n -e -P:%HP%%%^HEADPOS% $[\x25HCOLOUR\x25]%HPAD%%HDG%\necho -n -P:%HBTM% $[\x25FCOLOUR\x25]%HELPTEXT%\0 >> (md)0x3000+0x50
+initscript (md)0x220+1
+set HP=
+set HDG=
+
+
+if not "%pwd%"=="" password %pwd% 
+echo debug 0 >> (md)0x3000+0x50
+#autonumber boot entries with a space after the number
+write 0x8274 %AUTONUM% > nul
+debug 0
+set KL=
+set FILEPATH=
+set FILENAME=
+set FILEDIR=
+set FILE_1=
+
+set /a M=*0x8298 & 0xffffffff>>10+1 && set /a M1=*0x82c0>>10+1
+set /a M=%M% + %M1% 
+set /a TMEM=%M% && set M= && set M1=
+
+# fill (rd) with 0's - (should be already done by menu.lst)
+#OLD map (md)0x300+200 (rd) > nul ;; read 0x82d0  > nul ;; call Fn.24  %@retval% 0x20  102400  > nul  
+call Fn.24  0x60000 0x20  102400 > nul ;; map (md)0x300+200 (rd) > nul
+# invalidate .xml files in the root of both drives - don't stop on errors
+#if not "%XWP%"=="1" echo Wiping /Unattend.xml files...
+if not "%XWP%"=="1" debug 0
+if not "%XWP%"=="1" errorcheck off
+if not "%XWP%"=="1" cat ()/Unattend.xml > nul
+if exist CD goto :MW1
+if not "%XWP%"=="1" if exist ()/Unattend.xml     dd if=(rd)+1 of=()/Unattend.xml > nul
+if not "%XWP%"=="1" if exist ()/Unattend.xml     dd if=(bd)/_ISO/e2b/firadisk/empty.xml of=()/Unattend.xml > nul
+:MW1
+# echo device if WINHELPER.USB and set root to device...
+if not "%XWP%"=="1" set AUX=
+#if not "%XWP%"=="1" find --devices=h --set-root /WINHELPER.USB && set AUX=1
+if not "%XWP%"=="1" if exist (hd1,0)/WINHELPER.USB root (hd1,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd0,0)/WINHELPER.USB root (hd0,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd2,0)/WINHELPER.USB root (hd2,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd3,0)/WINHELPER.USB root (hd3,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd4,0)/WINHELPER.USB root (hd4,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd5,0)/WINHELPER.USB root (hd5,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd6,0)/WINHELPER.USB root (hd6,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd7,0)/WINHELPER.USB root (hd7,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd8,0)/WINHELPER.USB root (hd8,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="" if exist (hd9,0)/WINHELPER.USB root (hd9,0) && set AUX=1
+if not "%XWP%"=="1" if "%AUX%"=="1" if not exist /AutoUnattend.xml echo USB DRIVE HAS WINHELPER.USB file but no AutoUnattend.xml! && pause
+
+if not "%XWP%"=="1" if "%AUX%"=="1" echo Wiping /Unattend.xml WINHELPER.USB Auxiliary files...
+if not "%XWP%"=="1" if "%AUX%"=="1" cat ()/Unattend.xml > nul
+if not "%XWP%"=="1" if "%AUX%"=="1" if exist ()/Unattend.xml     dd if=(rd)+1 of=()/Unattend.xml > nul
+if not "%XWP%"=="1" if "%AUX%"=="1" if exist ()/Unattend.xml     dd if=(bd)/_ISO/e2b/firadisk/empty.xml of=()/Unattend.xml > nul
+if not "%XWP%"=="1" root (bd) > nul
+if not "%XWP%"=="1" errorcheck on
+set XWP=1
+
+debug 0
+
+#dont unmap fd3 in case animation playing
+#map --unhook
+#map --unmap=0:0xff
+
+map --unmap=0:2
+map --unmap=4:0xff
+map --hook
+
+#Cxx values are filecount values
+#only display folders with ISO files in them!
+
+iftitle [if %C7%>=1 && if "%GFX%"==""] $$STRl0I7
+#^7 Install Windows 7      [7] (%C7% present)\n Install Windows 7 from an ISO file.
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/VistaMn.g4b .automenu Win7
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+iftitle [if %C7%>=1 && if not "%GFX%"==""] $$STRl1I7
+#Install Windows 7\n Install Windows 7 from an ISO file.
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/VistaMn.g4b .automenu Win7
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+iftitle [if %C8%>=1 && if "%GFX%"==""] $$STRl0I8
+#^8 Install Windows 8      [8] (%C8% present)\n Install Windows 8 from an ISO file
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/Win8Mn.g4b .automenu Win8
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+iftitle [if %C8%>=1 && if not "%GFX%"==""] $$STRl1I8
+#Install Windows 8\n Install Windows 8 from an ISO file
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/Win8Mn.g4b .automenu Win8
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+iftitle [if %C12%>=1 && if "%GFX%"==""] $$STRl012
+#^S Install Server 2012    [S] (%C12% present)\n Install Windows 2012 from an ISO file.
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/Win8Mn.g4b .automenu SVR2012
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+iftitle [if %C12%>=1 && if not "%GFX%"==""] $$STRl112
+#Install Server 2012\n Install Windows 2012 from an ISO file.
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/Win8Mn.g4b .automenu SVR2012
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+# WINDOWS 10
+
+iftitle [if %C10%>=1 && if "%GFX%"==""] $$STRl010
+#^S Install Windows 10
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/Win8Mn.g4b .automenu WIN10
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+iftitle [if %C10%>=1 && if not "%GFX%"==""] $$STRl110
+#Install Win 10
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/Win8Mn.g4b .automenu WIN10
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+# SVR2016
+iftitle [if %C16%>=1 && if "%GFX%"==""] $$STRl600
+#^S Install SVR2016
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/Win8Mn.g4b .automenu SVR2016
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+iftitle [if %C16%>=1 && if not "%GFX%"==""] $$STR16G0
+#Install SVR2016
+set LBACKMENU=/%grub%/MenuWinInstall.lst
+/%grub%/Win8Mn.g4b .automenu SVR2016
+if exist RTL /%grub%/rtl.g4b
+configfile (md)0x3000+0x50
+boot
+
+title
+root () > nul && /%grub%/configX.g4b (bd)/%grub%/MenuWinInstall.lst
+
+iftitle [if not "%GFX%"=="" if not exist NOF7HD] $$STRhGF7
+#Boot to first HDD\n Boot to the first internal Hard Disk (HDD0).
+if not exist CD map (hd0) (hd1)
+if not exist CD map (hd1) (hd0)
+if not exist CD map --hook
+chainloader (hd0)+1
+rootnoverify (hd0)
+
+iftitle [if "%GFX%"=="" if not exist NOF7HD] $$STRh0F7
+#^F7 Boot to first HDD      [F7]\n Boot to the first internal Hard Disk (HDD0).
+if not exist CD map (hd0) (hd1)
+if not exist CD map (hd1) (hd0)
+if not exist CD map --hook
+chainloader (hd0)+1
+rootnoverify (hd0)
+
+
+iftitle [if "%GFX%"=="" if not exist NOF8B] $$STRh1BM
+#^F8 Back to Main Menu      [F8]\n Return to the Main menu.
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xA000+0x50 || configfile (bd)/%grub%/menu.lst
+
+iftitle [if not "%GFX%"=="" if not exist NOF8B] $$STRhGBM
+#Back to Main Menu\n Return to the Main menu.
+set MFOLDER=/_ISO/MAINMENU
+configfile (md)0xA000+0x50 || configfile (bd)/%grub%/menu.lst
+
+
+iftitle [if "%GFX%"=="" if not exist NOF9R] $$STRh1RB
+#^F9 Reboot                 [F9]\n Reboot the system
+reboot
+
+iftitle [if not "%GFX%"=="" if not exist NOF9R] $$STRhGRB
+#Reboot\n Reboot the system
+reboot
+
+iftitle [if "%GFX%"=="" if not exist NOF10H] $$STRh110
+#^F10 Power Off              [F10]\n Switch off the system
+halt
+
+iftitle [if not "%GFX%"=="" if not exist NOF10H] $$STRhG10
+#Power off\n Switch off the system.
+halt

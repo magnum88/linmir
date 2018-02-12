@@ -1,0 +1,80 @@
+#!/bin/bash
+
+#############################################
+# Script de sauvegarde pour FTP             #
+# ------------------------------------------#
+# Ce script sauvegadre tout les fichiers    #
+# qui sont dans le répertoire $PATH_SAVE à  #
+# l'exeption du répertoire $PATH_BACK_FILES.#
+# Ce script sauvegarde aussi les bases de   #
+# données MYSQL.                            #
+#############################################
+
+#############################################
+# Definition des variables                  #
+#############################################
+
+
+# Dates
+DATE_JOUR=`date +%y%m%d` # Date du jour
+#DATE_MOINS3=`date --date '7 days ago' +%y%m%d` # Date 7 jours avant, pour effacer les vieux backups
+
+# Chemin des répertoires
+PATH_DESTINATION="/var/www/adf/adfcongres" # Répertoire qui sera sauvegardé
+
+
+# Paramètre FTP
+FTP_HOST="adf-vt-prod-php01.cybersrv.net"
+FTP_USER="adfcongres_ixyl"
+FTP_PASS="QMOKZ.3HG?39G"
+
+FILE1="inscrit.csv"
+FILE2="entetecde.csv"
+FILE3="lignescde.csv"
+
+#############################################
+# Transfert recupe sur FTP                  #
+#############################################
+echo "reception des Fichiers CYBERSCOPE"
+echo "`date +%X` Debut de la reception FTP" 
+
+
+ftp -in <<EOF
+  open ${FTP_HOST}
+  user ${FTP_USER} ${FTP_PASS}
+  bin
+  verbose
+  prompt
+  lcd ${PATH_DESTINATION}
+  get ${FILE1}
+  get ${FILE2}
+  get ${FILE3}
+  bye
+EOF
+
+if [ "$RESULT" != "0" ]; then
+	echo "`date +%X` [$0] -->ERREUR FTP, reception NON effectué." 
+	echo "************************************************************" 
+	echo "`date +%X` Fin du script de reception après erreur         " 
+	echo "************************************************************" 
+	exit $RESULT
+else
+	echo "`date +%X` Reception FTP effectuée avec succès" 
+fi
+
+
+
+
+#############################################
+# Bloquage des droits et purge              #
+#############################################
+
+
+
+echo "************************************************************" 
+echo "`date +%X` Fin du script de reception FTP                   " 
+echo "************************************************************" 
+echo "" 
+echo "" 
+
+exit 0

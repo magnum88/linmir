@@ -1,0 +1,17 @@
+# Menu by Sergio for androidx86 marshmallow version
+# Extract contents to \ax86 folder on E2B drive
+# Use RMPrepUSB to create ext2 ext3 or ext4 data.img file and move to \ax86\data.img
+# Copy this .mnu file to any E2B menu folder (e.g. \_ISO\LINUX)
+# file/folder names are case-sensitive!
+# On first boot - 'system initializing, please wait...'
+# Delete either 64-bit or 32-bit menu as required
+
+title Android Remix Marshmallow with persistence (64-bit)\n Boot to android x86 (use \ax86 folder)
+kernel /ax86/kernel root=/dev/ram0 androidboot.hardware=android_x86_64 androidboot.selinux=permissive VGA=788 DATA=/ax86/data.img SRC=/ax86
+initrd /ax86/initrd.img
+boot
+
+title Android Remix Marshmallow with persistence (34-bit)\n Boot to android x86 (use \ax86 folder)
+kernel /ax86/kernel root=/dev/ram0 androidboot.hardware=android_x86 androidboot.selinux=permissive VGA=788 DATA=/ax86/data.img SRC=/ax86
+initrd /ax86/initrd.img
+boot

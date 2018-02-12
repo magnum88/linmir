@@ -1,0 +1,551 @@
+echo %@time% menu.lst START > (md)0x9999+3
+
+# --------   DO NOT CHANGE THIS FILE - use \_ISO\MyE2B.cfg to change the settings  ------
+
+# move variables to different location (must use 2014-10 or later grub4dos) - prevents ?_BOOT from getting corrupted by bad BIOSes on disk error  0x280,0000 = 40MB
+# only use if bad bios!
+#write 0x307ff4 0x2800000 && set ?_BOOT=%?_BOOT% && set grub=%grub%
+
+# turn off cursor
+call Fn.70 0
+# clear is done later (no need for this one  v1.82)
+### clear
+
+# check if we are using grub4dos 0.4.6 - if GRUB_USB=Y then switch to 0.4.6 and initialise USB driver - GRUB_DUN means we have done the usb --init command
+set GV=
+help usb > (md)0x300+1
+cat --locate="usb --delay" (md)0x300+1 > nul && set GV=046
+if "%GV%"=="" echo WARNING: GRUB4DOS 0.4.5 %redir%
+read 0x8278 > nul
+set v=%@retval%
+if "%GV%"=="" && checkrange 20150209:-1 read 0x8278 > nul || echo -e \n\n$[0xdf]WARNING: Grub4dos 0.4.5 \\grldr file is an old version \[%v%\].\n\nE2B may not work correctly (copy all E2B files to this drive to update it).\nGrub4dos 0.4.5 version must be 2015-02-09 or later!\n\n && pause Press a key to continue using old version...
+if "%GV%"=="046" && checkrange 20160326:-1 read 0x8278 > nul || echo -e \n\n$[0xdf]WARNING: Grub4dos 0.4.6 \\grldr file is an old version \[%v%\].\n\nE2B may not work correctly (copy all E2B files to this drive to update it).\nGrub4dos 0.4.6 version should be 2016-03-26 or later!\n\n && pause Press a key to continue using old version...
+set v=
+
+#Are we booting from a CD?
+set CD= && if "%?_BOOT%"=="(cd)" set CD=1
+
+set NOHD1=
+geometry (hd1) > nul || set NOHD1=1
+if not exist CD if exist NOHD1 if not exist _BOOT echo -e \n\n$[0xdf]INFORMATION: System Hard Disk (hd1) not detected by BIOS!\nSome payload files may not work correctly.\n\n && debug -1 && pause --wait=2
+set NOHD1=
+debug normal
+
+# save ?_BOOT as _BOOT in case it gets corrupted by bad BIOS
+if "%_BOOT%"=="" set _BOOT=%?_BOOT%
+
+# clear all variables except for a few
+set * && set grub=%grub% && set DONEMENU=%DONEMENU% && set DL=%DL% && set LANG=%LANG% && set GRUB_DUN=%GRUB_DUN% && set _BOOT=%_BOOT% && set RTL=%RTL% && set redir=%redir% && set redirp=%redirp% && set GV=%GV% && set DONEPWD=%DONEPWD%
+
+#uninstall hotkey and lose all preset definitions
+/%grub%/hotkey -u > nul 
+
+# _BOOT/?_BOOT = disk&partition that contained the file \grldr that was used to boot to grub4dos, e.g. (hd0,0)   - note: this is NOT the same as (bd) which is set to whatever partition contained the menu.lst file.
+#if we booted as floppy instead of hd then stop!
+if "%_BOOT:~0,2%"=="(f" pause ERROR: This drive booted as a floppy disk - please change BIOS settings to boot as a hard disk or read E2B FAQ! && commandline
+
+map --unhook > nul
+map --unmap=0:0xff > nul
+root (bd)/ > nul
+
+
+# find grub folder...
+if not exist /%grub%/E2B_GRUB.txt set grub=
+if not exist grub if exist /_ISO/e2b/grub/E2B_GRUB.txt set grub=_ISO/e2b/grub
+if not exist grub if exist /grub/E2B_GRUB.txt set grub=grub
+if not exist grub if exist /e2b/grub/E2B_GRUB.txt set grub=e2b/grub
+if not exist grub if exist /_ISO/grub/E2B_GRUB.txt set grub=_ISO/grub
+# try to find grub folder anywhere in system
+if not exist grub echo -n -e $[0xdf] WARNING: CAN'T FIND E2B 'grub' FOLDER && pause --wait=2 Looking on all partitions...
+if not exist grub find --set-root /_ISO/e2b/grub/E2B_GRUB.txt > nul && set grub=_ISO/e2b/grub
+if not exist grub echo -e \n\n$[0x4f] SORRY, CAN'T FIND //_ISO//e2b//grub//E2B_GRUB.txt FILE - CANNOT CONTINUE && pause
+if not exist grub commandline
+
+
+#get E2B DEVICE DISK - e.g. hd0 or hd3 - for use with partnew command
+set E2BDEV=%_BOOT:~1,4%
+if "%E2BDEV:~3,1%"=="," set E2BDEV=%E2BDEV:~0,3%
+#if _BOOT not cd or hd then assume hd0 (_BOOT corrupted!)
+if not "%E2BDEV:~0,2%"=="hd" && if not "%E2BDEV:~0,2%"=="cd" set E2BDEV=hd0
+if "%E2BDEV%"=="cd)" set E2BDEV=cd
+set ask=
+if not "%E2BDEV%"=="hd0" if "%E2BDEV:~0,2%"=="hd" echo -e $[0xdf]\n\nWARNING: The LinMir drive has been detected as %E2BDEV% (it should be hd0).\nPartition 4 (%E2BDEV%,3) will be destroyed if you continue!\nNot all payloads will work correctly.\n
+if not "%E2BDEV%"=="hd0" if "%E2BDEV:~0,2%"=="hd" set /p ask=Press C and then ENTER if you really want to continue : 
+if not "%E2BDEV%"=="hd0" if "%E2BDEV:~0,2%"=="hd" echo && if /i not "%ask%"=="C" commandline
+set ask=
+
+#check hd0 is OK to modify partitions on, otherwise partnew could wipe the internal hard disk partition!
+set PN=
+if not exist CD if exist (hd0,0)/%grub%/E2B_GRUB.txt  set PN=1
+if not exist PN if not exist CD if exist (hd0,1)/%grub%/E2B_GRUB.txt  set PN=1
+if not exist PN if not exist CD if exist (hd0,4)/%grub%/E2B_GRUB.txt  set PN=1
+if not exist PN if not exist CD if exist (hd0,5)/%grub%/E2B_GRUB.txt  set PN=1
+if not exist PN if not exist CD if exist (hd0,6)/%grub%/E2B_GRUB.txt  set PN=1
+if not exist PN if not exist CD if exist (hd0,7)/%grub%/E2B_GRUB.txt  set PN=1
+if not exist PN if not exist CD if exist (hd0,8)/%grub%/E2B_GRUB.txt  set PN=1
+if not exist PN if not exist CD if exist (hd0,9)/%grub%/E2B_GRUB.txt  set PN=1
+if not exist PN if not exist CD if exist (hd0,0)/WINHELPER.USB  set PN=1
+if not exist PN if not exist CD && find && root && echo grub=%grub%  _BOOT=%_BOOT%  E2BDEV=%E2BDEV% && ls (%E2BDEV%,0)/%grub%/E2B_GRUB.txt && echo && blocklist (%E2BDEV%,0)/%grub%/E2B_GRUB.txt && echo && echo (hd0,0) && ls (hd0,0)/ && echo && echo && set /p A=ERROR: hd0 does not seem to be an E2B or WINHELPER drive! || commandline
+set PN=
+
+# call config file to get variables!
+echo %@time% menu.lst Loading E2B.cfg >> (md)0x9999+3
+if exist /%grub%/E2B.cfg call /%grub%/E2B.cfg || echo /%grub%/E2B.cfg is MISSING!\nPress a ENTER to continue... && pause
+#call users MyE2B.cfg
+set MYE2B=
+echo %@time% menu.lst Start loading \_ISO\MyE2B.cfg >> (md)0x9999+3
+if exist /_ISO/MyE2B.cfg  set MYE2B=1 && call /_ISO/MyE2B.cfg
+echo %@time% menu.lst Finished loading \_ISO\MyE2B.cfg >> (md)0x9999+3
+#clear old variables
+set black= && set blue= &&  set green= && set cyan= &&   set red= &&   set magenta= && set brown= &&    set lgray= &&  set lgrey=
+set dgrey= && set dgray= && set lblue= && set lgreen= && set lcyan= && set lred= &&    set lmagenta= && set yellow= && set white=
+# check if user trying to use old variables
+if exist HDG_WIN set HDG_WIN= && set HDGE=1
+if exist HDG_7 set HDG_7= && set HDGE=1
+if exist HDG_8 set HDG_8= && set HDGE=1
+if exist HDG_2012 set HDG_2012= && set HDGE=1
+if exist HDG_AUTO set HDG_AUTO= && set HDGE=1
+if exist HDRAUTO set HDRAUTO= && set HDGE=1
+if exist HDRAUTOH set HDRAUTOH= && set HDGE=1
+if exist HDGE pause ERROR: Sorry, HDG_xxxx and HDRAUTOx variables are no longer supported in MyE2B.cfg file
+set HDGE=
+
+# ensure HEADPOS ends in xx00 if centering headings
+if not exist HEADPOS set HEADPOS=0000
+if exist CENTREHD if not "%CENTREHD%"=="1" if "%HEADPOS:~2,2%"=="00" set HEADPOS=%HEADPOS:~0,2%00
+
+#The clear fills the screen so the bitmap is displayed if call Fn.70 3 is used
+clear
+# display booting message if redirp is not set
+echo Booting LinMir %VER% - please wait...  %redirp%
+if exist MYE2B echo Using settings in /_ISO/MyE2B.CFG %redir%
+set MYE2B=
+set B64=
+set day= ;; set month= ;; set year=
+
+#set language folder and call language menu.lst if it exists
+if "%LANG%"=="" set LANG=ENG
+if "%DL%"=="" if exist ()/_ISO/Menu.lst set DL=1 && configfile ()/_ISO/Menu.lst
+if "%DL%"=="" if exist ()/%grub%/%LANG%/Menu.lst set DL=1 && configfile ()/%grub%/%LANG%/Menu.lst
+# check language folder is valid
+#\_ISO\STRINGS.txt overrides everything!
+set STR=
+set STRtemp=
+if exist /_ISO/STRINGS.txt set STR=/_ISO/STRINGS.txt
+if not exist STR if not exist /%grub%/%LANG%/STRINGS.txt set STRtemp=1
+if "%STRtemp%"=="1" echo ERROR: /%grub%/%LANG%/STRINGS.txt does not exist!
+if "%STRtemp%"=="1" set LANG=ENG && pause --wait=3 Resetting language to ENG
+if "%STRtemp%"=="1" if not exist /%grub%/%LANG%/STRINGS.txt pause --wait=3 ERROR: /%grub%/%LANG%/STRINGS.txt does not exist!
+if "%STR%"=="" set STR=/%grub%/%LANG%/STRINGS.txt
+:: get strings into memory
+cat %STR% > (md)0x880+0x80 && echo Using strings from %STR% file %redir%
+if "%STR%"=="/_ISO/STRINGS.txt" echo -e $[0xdf]WARNING: USE %STR% FOR TESTING ONLY! && set /p:3 STR=sss > nul
+set STR=
+set STRtemp=
+# Always use ENG as backup in case some strings missing from old language files
+if not "%LANG%"=="ENG" if not exist /_ISO/STRINGS.txt cat /%grub%/ENG/STRINGS.txt >> (md)0x880+0x80
+###if exist /_ISO/STRINGS.txt cat /%grub%/ENG/STRINGS.txt >> (md)0x880+0x80
+
+#clear unused variables
+set DL=
+#initialise memory areas so they are not confused by grub4dos as compressed files!
+echo fffffffffffffff > (md)0x800+1
+echo fffffffffffffff > (md)0x220+1
+echo fffffffffffffff > (md)0x3000+1
+echo fffffffffffffff > (md)0x6000+1
+echo fffffffffffffff > (md)0xA000+1
+
+# Display BIOS date
+call Fn.0 0 0xFFFF5 | echo BIOS %redir%
+
+echo %@time% menu.lst Start CheckAccess >> (md)0x9999+3
+# Warn if buggy BIOS!
+if exist CHECKBIOS call /%grub%/CheckAccess.g4b
+set CHECKBIOS=
+echo %@time% menu.lst Finish CheckAccess >> (md)0x9999+3
+
+
+if "%GRUB_USB%"=="Y" if "%GV%"=="" if exist  /%grub%/grldr_046 pause --wait=1 Switching to grub4dos 0.4.6 ... && chainloader /%grub%/grldr_046 > nul && boot
+if "%GRUB_USB%"=="Y" if "%GV%"=="046" if "%GRUB_DUN%"=="" usb --init && set GRUB_DUN=1 && pause --wait=2
+# Switch to grub4dos 0.4.5c ALWAYS if 045 set
+if "%GRUB_USB%"=="045" if exist /%grub%/grldr_045 && cat --locate="usb --delay" (md)0x200+0x50 > nul && chainloader /%grub%/grldr_045 > nul && boot
+# set debug message level for 0.4.6
+errorcheck off
+debug 0
+if "%GV%"=="046" debug msg=1 > nul
+# if 046 2016-02, set highlight bar for full width
+if "%GV%"=="046" setmenu --highlight-full > nul
+errorcheck on
+debug normal
+set GV=
+
+#load users keyboard map settings
+if not "%DONEMENU%"=="1" if exist KBD if exist /%grub%/%KBD% call /%grub%/%KBD% %redir%
+set KBD=
+
+#test for SPACEBAR keypress
+call Fn.20
+set /A key=%@retval%&0xff > nul
+# if spacebar, absorb key press and pause
+if not "%DONEMENU%"=="1" if %key%==0x20 call Fn.19 && pause PAUSED: Press [SPACE] key twice quickly to stop at next point...
+set key=
+
+#GRAPHICSMODE - use 640x480 and default background if cannot set mode
+if not "%DONEMENU%"=="1" if "%GFX%"=="" graphicsmode -1 %GMODE% > nul || if not "%DONEMENU%"=="1" if "%GFX%"=="" graphicsmode -1 640 > nul && if exist /%grub%/Background.bmp.gz set MYWBMPGZ=/%grub%/Background.bmp.gz
+set GMODE=
+
+
+echo %@time% menu.lst Start loading Fontfile >> (md)0x9999+3
+# load fontfile to support chinese, etc. characters, default height = FONTH=16, default font unifont.hex.gz, FONT defines additional user font
+set FF=
+set FF1=
+if not exist FONTH set FONTH=16
+if exist FONT24 set FONTH=24
+# LOAD DEFAULT FONT
+if "%FONTH%"=="24" if exist ()/%grub%/sft.f24 set FF=()/%grub%/sft.f24
+if "%FONTH%"=="24" if exist ()/%grub%/terminalbold.f24 set FF1=()/%grub%/terminalbold.f24
+if "%FONTH%"=="16" if exist ()/%grub%/unifont.hex.gz set FF=()/%grub%/unifont.hex.gz
+if exist FONT24 set FF1=%FONT24%
+set FONT24=
+# reset to use the BIOS FONTS and get ready to load new font
+if "%FONTH%"=="16" if not exist DONEMENU font
+set FS=
+if not exist NOUNIFONT if not exist DONEMENU if exist FF echo Loading fontfile %FF% (height=%FONTH%)...  %redir%
+if not exist NOUNIFONT if not exist DONEMENU if exist %FF% font --font-high=%FONTH% %FF% > nul && set FS=1 && echo Font %FF% loaded %redir%
+if not exist NOUNIFONT if not exist DONEMENU if not exist FS if exist %FF%  font %FF% > nul  && echo Font %FF% loaded %redir%
+set FS=
+if not exist NOUNIFONT if not exist DONEMENU if exist FF1 echo Loading fontfile %FF1% (height=%FONTH%)...  %redir%
+if not exist NOUNIFONT if exist FF1 if exist %FF1% if not exist DONEMENU font --font-high=%FONTH% %FF1% > nul && set FS=1 && echo Font %FF1% loaded %redir%
+if not exist NOUNIFONT if exist FF1 if exist %FF1% if not exist DONEMENU if not exist FS font %FF% > nul  && echo Font %FF1% loaded %redir%
+set FF1=
+set FF=
+
+# LOAD USER FONT if specified
+if not exist DONEMENU if exist FONT if not exist %FONT% echo  $[0xdf] WARNING: FONT=%FONT% file NOT FOUND! && set FONT= && pause
+###if exist FONT if "%FONTH%"=="16" font 
+set FS=
+if not exist DONEMENU if exist FS echo Loading user font file %FONT%... %redir%
+if not exist DONEMENU if exist FONT font --font-high=%FONTH% %FONT% > nul && set FS=1 && echo Font %FONT% loaded %redir%
+if not exist DONEMENU if not exist FS if exist FONT font %FONT% > nul && set FS=1 && echo Font %FONT% loaded %redir%
+set FS=
+
+# if BIOSFONT is defined then reload BIOS ROM fonts for chars 0-ff (get thicker characters)
+if not exist DONEMENU if exist BIOSFONT if "%FONTH%"=="16" echo Loading BIOS fonts... %redir% && font > nul && echo BIOS Font loaded %redir%
+set FONTH=
+set FONT=
+set NOUNIFONT=
+set BIOSFONT=
+
+echo %@time% menu.lst Finished loading Font files >> (md)0x9999+3
+
+#if not "%DONEMENU%"=="1" clear
+#echo Booting LinMir %VER% (2) and loading background image - please wait... %redir%
+echo %@time% menu.lst Booting (2) - Loading background (and STAMPs) >> (md)0x9999+3
+
+#test for SPACEBAR keypress
+call Fn.20
+set /A key=%@retval%&0xff > nul
+# if spacebar, absorb key press and pause
+if not exist DONEMENU if %key%==0x20 call Fn.19 && pause PAUSED: Press [SPACE] key twice quickly to stop at next point...
+set key=
+
+#WALLPAPER
+if  exist /%grub%/Background.bmp.gz set BG=/%grub%/Background.bmp.gz
+if  exist %MYWBMP% set BG=%MYWBMP%
+if  exist %MYWBMPGZ% set BG=%MYWBMPGZ%
+# check if fill color used for background
+if "%MYWBMP:~0,2%"=="0x" splashimage --fill-color=%MYWBMP% > nul 
+if "%GFX%"=="" if not "%DONEMENU%"=="1" if not "%BG%"=="" if not "%MYWBMP:~0,2%"=="0x" splashimage %BG% > nul && echo Using %BG% as Wallpaper %redirp%
+set MYWBMP= && set MYWBMPGZ= && set BG=
+#in case wallpaper fails to load (e.g. splashimage tries to loads jpg with old grub4dos version), set previous graphicsmode
+graphicsmode > nul
+
+#STAMP - overwrite wallpaper with stamps (hangs if not in graphics mode)
+if exist STAMP1 if /i not "%GFX%"=="none" splashimage --offset=%STAMP1% > nul
+if exist STAMP2 if /i not "%GFX%"=="none" splashimage --offset=%STAMP2% > nul
+if exist STAMP3 if /i not "%GFX%"=="none" splashimage --offset=%STAMP3% > nul
+if exist STAMP4 if /i not "%GFX%"=="none" splashimage --offset=%STAMP4% > nul
+if exist STAMP5 if /i not "%GFX%"=="none" splashimage --offset=%STAMP5% > nul
+if exist STAMP6 if /i not "%GFX%"=="none" splashimage --offset=%STAMP6% > nul
+if exist STAMP7 if /i not "%GFX%"=="none" splashimage --offset=%STAMP7% > nul
+if exist STAMP8 if /i not "%GFX%"=="none" splashimage --offset=%STAMP8% > nul
+if exist STAMP9 if /i not "%GFX%"=="none" splashimage --offset=%STAMP9% > nul
+if exist STAMP10 if /i not "%GFX%"=="none" splashimage --offset=%STAMP10% > nul
+set STAMP1= && set STAMP2= && set STAMP3= && set STAMP4= && set STAMP5= && set STAMP6= && set STAMP7= && set STAMP8= && set STAMP9= && set STAMP10=
+
+#test for SPACEBAR keypress
+call Fn.20
+set /A key=%@retval%&0xff > nul
+# if spacebar, absorb key press and pause
+if %key%==0x20 call Fn.19 && pause PAUSED: Press SPACEBAR twice quickly to stop at next point...
+set key=
+
+#display wallpaper if call Fn.70 3 used in MyE2B.cfg
+clear
+
+#Check for u keypress and load usb driver
+call Fn.20
+set /A key=%@retval%&0xdf > nul
+if "%GV%"=="046" if %key%==0x55 call Fn.19 && usb --init
+if "%GV%"=="046" if %key%==0x55 echo && pause --wait=3 Key U detected - grub4dos USB 2.0 driver was loaded
+set GV=
+
+echo %@time% menu.lst Loading hotkey app >> (md)0x9999+3
+#HOTKEY  -A switch causes jump to first-letter
+if exist AUTOMENU set AUTOMENU= || set AUTOMENU=-A
+#hotkey not supported by gfxmenu
+if  "%GFX%"=="" set DOHOT=1
+if /i "%GFX%"=="none" set DOHOT=1
+debug 0
+if "%DOHOT%"=="1" /%grub%/hotkey %AUTOMENU% > nul && echo Hotkey %AUTOMENU% loaded > nul
+set AUTOMENU=
+#set up animation
+errorcheck off
+if exist ANIMATE if "%DOHOT%"=="1" echo %@time% menu.lst Loading animation %ANIMATE% >> (md)0x9999+3
+if exist ANIMATE if "%DOHOT%"=="1" if exist ANIMFD3 map --mem --read-only %ANIMFD3% (fd3)
+if exist ANIMATE if "%DOHOT%"=="1" if exist ANIMFD3 map --hook
+if exist ANIMATE if "%DOHOT%"=="1" splashimage --animated=%ANIMATE% > nul && set ANIMATE= && set ANIMFD3=
+errorcheck on
+set DOHOT=
+
+#echo Booting LinMir %VER% (3) - please wait... %redir%
+echo %@time% menu.lst Booting (3) menusetting >> (md)0x9999+3
+
+set NEWGRUB=
+# detect new setmenu command
+cat --locate="setmenu --param" (md)0x200+0x100 > nul && set NEWGRUB=1
+if not exist NEWGRUB && if exist RTL pause --wait=3 WARNING: This version of grub4dos does not fully support right-to-left languages (%LANG%) %redirp%
+#will restore max menu grub4dos default (screws up though!)
+#/%grub%/menusetting.gz u
+# set menu position (clears the screen so use clear afterwards to fill the screen with background colour)
+if "%GFX%"=="" if not "%DONEMENU%"=="1" /%grub%/menusetting.gz   %wdspace% %lnspace% %bdwidth% %tophelp% %noitems% %topstart% %menuw% %rstart%
+# calculate padding for headings
+if not exist HPAD call /%grub%/SetHPAD.g4b %rstart%
+# HPAD now has correct number of spaces for padding the headings
+# If want centering of headings, set CENTERHD to menu width
+if "%CENTREHD%"=="1" set CENTREHD=%menuw%
+if "%RTL%"=="1" set /a RTL=%menuw% > nul
+# if AUTONUM not turned off adjust width
+#if exist RTL if not exist AUTONUM set /a RTL=%menuw%-4 > nul
+# use new right-align command if available
+if exist NEWGRUB setmenu --left-align
+if exist NEWGRUB if exist RTL setmenu --right-align
+#remove cursor help text 
+if exist NEWGRUB setmenu --keyhelp=61=0xe && setmenu --ver-off
+#autonumber all menu entries with a space (20) and a number (01)
+if "%AUTONUM%"=="" set AUTONUM=0x2001
+write 0x8274 %AUTONUM% > nul
+#clear variables
+set NEWGRUB=
+set wdspace= && set lnspace= && set topstart= && set rstart= && set noitems= && set menuw= && set bdwidth= && set tophelp=
+
+#only run somethings once or will screw up the menu!
+#set so we don't load bitmap or set graphics mode again (saves time) or run menusetting program
+set DONEMENU=1
+
+# must clear here as menusetting blanks screen and loses background if wdspace and lnspace are not n
+clear
+
+#echo Booting LinMir %VER% (4) - counting files - please wait... %redirp%
+echo %@time% menu.lst Booting (4) (check ptn 4) >> (md)0x9999+3
+
+debug 0
+# check and make empty table entry in 4th position in ptn table
+if not exist CD parttype (%E2BDEV%,3) ;; set /A check=%@retval%
+if not exist CD if %check%==0 partnew (%E2BDEV%,3) 0 0 0
+if not exist CD if %check%==0xaf echo -e $[0xdf]\nTip: You can use a MyE2B.cfg file to erase partition 4 and avoid this message in future.\n
+if not exist CD if %check%==0xeb echo -e $[0xdf]\nTip: You can use a MyE2B.cfg file to erase partition 4 and avoid this message in future.\n
+if not exist CD if not %check%==0 echo MBR (LBA0) && echo ---------- && cat --hex --length=0x40 --skip=0x1be (hd0)0+1 && echo -e \x20$[0x7e]--> PTN 4 EXISTS HERE \^\^
+if not exist CD if not %check%==0 echo -e \n$[0x4f]ERROR: PARTITION TABLE ENTRY #4 (Type=%check%) MUST BE EMPTY!\n && set /p ask=Press C and [Enter] to delete it :  &; if /i "%ask%"=="C" /_ISO/e2b/grub/delptn3.g4b
+if not exist CD if not %check%==0 if /i not "%ask%"=="C" configfile /menu.lst
+set ask=
+
+# check for Write-protect
+if not exist CD partnew (%E2BDEV%,3) 7 1 5 > nul
+if not exist CD parttype (%E2BDEV%,3) > nul
+set /a check=%@retval%
+if not exist CD if %check%==0 pause --wait=5 WARNING: E2B DRIVE IS WRITE PROTECTED OR USING Plop! Move WP switch and press F8 to reload E2B Menu.
+# clear it again now
+if not exist CD partnew (%E2BDEV%,3) 0 0 0 > nul
+if not exist CD if %check%==0 set CD=WP
+
+
+# check and make empty 3rd position (no warning as only some .mnu files need this)
+if not exist CD parttype (%E2BDEV%,2) ;; set /a check=%@retval%
+#if 3rd ptn type is 0 then ensure all CHS values are 0 or grubinst.exe will not install to it!
+if not exist CD if %check%==0 partnew (%E2BDEV%,2) 0 0 0
+set check=
+
+# turn off page mode so it doesn't pause when console screen is full!
+pager off
+
+# DO NOT CHANGE!
+set MFOLDER=/_ISO/MAINMENU
+#if LBACKMENU is blank there will be no Back F8 menu entry
+set LBACKMENU=
+
+set STALE=
+cat --locate=YES ()/FASTLOAD.YES > nul && set STALE=1
+
+# set count of Windows ISO files to 0 before counting
+set CALL=0
+#count Windows ISOs in \_ISO\WINDOWS folders - but not if FASTLOAD is enabled
+echo %@time% menu.lst Starting counting Windows ISO Files >> (md)0x9999+3
+if not exist STALE call /%grub%/countfiles.g4b
+echo %@time% menu.lst Finished counting Windows ISO Files >> (md)0x9999+3
+#always count if WINCOUNT is set in MyE2B.cfg (allows $$$$.mnu file for new splashimage to be added)
+if exist WINCOUNT if exist STALE call /%grub%/countfiles.g4b
+
+# Store windows counts in GETWCNT.G4B (E2B v1.80) - note: special code due to redirect always writing to file!
+echo -e !BAT\necho -e !BAT\\nset CALL=%CALL% \\&\\& set CXP=%CXP% \\&\\& set CV=%CV% \\&\\& set C7=%C7% \\&\\& set C8=%C8% \\&\\& set C28=%C28% \\&\\& set C12=%C12% \\&\\& set C10=%C10% \> /%grub%/GETWCNT.G4B\n\x00 > (md)0x300+1
+if not exist CD && if not "%CALL%"=="0" && if exist /FASTLOAD.YES call (md)0x300+1
+
+# clear out FASTLOAD.MNU
+if not exist CD && if exist /FASTLOAD.NO echo REFRESH               > /FASTLOAD.NO
+# Load the FASTLOAD MENU if enabled by user
+# if cache is valid and we are cached (YES) then set FST=1
+set FST= && cat --locate=title --number=1 ()/%grub%/FASTLOAD.MNU > nul && cat --locate=YES ()/FASTLOAD.YES > nul && set FST=1
+# if FASTLOAD.MNU cache is invalid then must refresh it (can happen if user updates with new version)
+if not exist CD && if exist /FASTLOAD.YES cat --locate=title --number=1 ()/%grub%/FASTLOAD.MNU > nul ||  echo REFRESH > /FASTLOAD.YES 
+ 
+if "%FST%"=="1" echo -e \n$[0xdf]Loading PRE-CACHED FASTLOAD MENU... %redir% 
+if "%FST%"=="1" if "%redir%"=="" echo && pause --wait=2 > nul
+# get Windows counts into environment
+if "%FST%"=="1" call /%grub%/GETWCNT.G4B
+if "%FST%"=="1" cat ()/%grub%/FASTLOAD.MNU > (md)0xA000+0x50
+if "%FST%"=="1" cat (md)0xA000+0x50 > (md)0x3000+0x50
+#beep the speaker to say we are ready! use 1-3 beeps
+if "%FST%"=="1" if exist beep if %beep%>=1 /%grub%/bios int=0x10 eax=0xe07 ebx=0x0 > null
+if "%FST%"=="1" if exist beep if %beep%>=2 /%grub%/bios int=0x10 eax=0xe07 ebx=0x0 > null
+if "%FST%"=="1" if exist beep if %beep%>=3 /%grub%/bios int=0x10 eax=0xe07 ebx=0x0 > null
+if "%FST%"=="1" set beep=
+if "%FST%"=="1" call Fn.70 2 
+if "%FST%"=="1" set FST= && set MFOLDER=/_ISO/MAINMENU && configfile (md)0xA000+0x50
+
+#  --- START BUILDING MAIN MENU IN MEMORY ---
+
+# copy menu to start of menu.lst in ramdrive
+
+echo
+echo ###### MAIN MENU ####### > (md)0x3000+0x50
+
+# translate MAIN.hdr and copy to (md)0x3000
+call /%grub%/XLATE.g4b ()/%grub%/MAIN.hdr
+
+if not "%pwd%"=="" echo -e \npassword %pwd% >> (md)0x3000+0x50
+echo debug 0 >> (md)0x3000+0x50
+echo set MFOLDER=/_ISO/MAINMENU >> (md)0x3000+0x50
+
+# SET MENU DEFAULT AND TIMEOUT
+if exist /%grub%/menu_defaults.txt cat /%grub%/menu_defaults.txt >> (md)0x3000+0x50
+if exist /_ISO/menu_defaults.txt && cat /_ISO/menu_defaults.txt >> (md)0x3000+0x50 && echo $[0xdf]Using \_ISO\menu_defaults.txt for Main Menu default settings %redirp%
+
+# if GFX was set to suppress graphics mode then clear it as we are not using GFXMENU system really
+if /i "%GFX%"=="NONE" set GFX=
+
+#write 'set defaults' menu to menu (not supported by gfxmenu!)
+if  exist CD set DEFMENU=0
+if not "%GFX%"=="" set DEFMENU=0
+
+# fresh screen to get most items on without scrolling screen
+###clear
+
+# generate the menu.lst file and specify the  Main Folder that will be scanned for .mnu files
+#suppress new configfile by setting to NONE - so will add to existing menu in ramdrive
+set STARTMENU=NONE
+::set LBACKMENU=1
+echo Adding menu entries from files in /_ISO/MAINMENU... %redirp%
+echo %@time% menu.lst Enumerating all files in \_ISO\MAINMENU >> (md)0x9999+3
+/%grub%/AUTOMN.g4b .automenu /_ISO/MAINMENU
+echo %@time% menu.lst Starting XML and Helper drive search >> (md)0x9999+3
+set STARTMENU=
+
+#FASTLOAD
+# Write menu for fast load next time
+if not exist CD cat --locate=REFRESH /FASTLOAD.YES > nul && cat (md)0x3000+0x50 > /%grub%/FASTLOAD.MNU && echo YES > /FASTLOAD.YES && if not exist redir echo $[0xdf]NOTE: The Fastload Menu has been refreshed. && pause --wait=2 > nul && echo 
+set FL=
+
+# invalidate .xml files in the root of both drives - don't stop on errors
+echo Wiping E2B /AutoUnattend.xml and /Unattend.xml files %redirp%
+debug 1
+# don't abort if error
+errorcheck off
+
+# fill (rd) with 0's , 0x82d0 is rd-base mem address, Fn24 is memset - fill memory  <addr> <string> <size>
+#OLD map (md)0x300+200 (rd) > nul ;; read 0x82d0  > nul ;; call Fn.24  %@retval% 0x20  102400  > nul  
+call Fn.24  0x60000 0x20  102400 > nul ;; map (md)0x300+200 (rd) > nul
+# dd sometimes hangs if bad bios!
+if not exist CD if exist ()/AutoUnattend.xml dd if=(rd)+1 of=()/AutoUnattend.xml > nul
+if not exist CD if exist ()/AutoUnattend.xml dd if=()/_ISO/e2b/firadisk/empty.xml of=()/AutoUnattend.xml > nul
+if not exist CD if exist ()/Unattend.xml     dd if=(rd)+1 of=()/Unattend.xml > nul
+if not exist CD if exist ()/Unattend.xml     dd if=()/_ISO/e2b/firadisk/empty.xml of=()/Unattend.xml > nul
+if not exist NOHELPER echo -n Looking for /WINHELPER.USB on disks 1 %redirp%
+if not exist NOHELPER set AUX=
+if not exist NOHELPER if exist (hd1,0)/WINHELPER.USB root (hd1,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 0 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd0,0)/WINHELPER.USB root (hd0,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 2 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd2,0)/WINHELPER.USB root (hd2,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 3 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd3,0)/WINHELPER.USB root (hd3,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 4 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd4,0)/WINHELPER.USB root (hd4,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 5 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd5,0)/WINHELPER.USB root (hd5,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 6 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd6,0)/WINHELPER.USB root (hd6,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 7 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd7,0)/WINHELPER.USB root (hd7,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 8 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd8,0)/WINHELPER.USB root (hd8,0) > nul && set AUX=1
+if not exist NOHELPER if "%AUX%"=="" echo -n 9 %redirp%
+if not exist NOHELPER if "%AUX%"=="" if exist (hd9,0)/WINHELPER.USB root (hd9,0) > nul && set AUX=1
+#if not exist NOHELPER if "%AUX%"=="" echo -e \nINFORMATION: WINHELPER.USB not found. %redir%
+if not exist NOHELPER echo %redirp%
+if not exist NOHELPER if "%AUX%"=="1" echo -n Wiping /AutoUnattend.xml and /Unattend.xml files on WINHELPER.USB... %redirp%
+if not exist NOHELPER if "%AUX%"=="1" if exist ()/AutoUnattend.xml dd if=(rd)+1 of=()/AutoUnattend.xml > nul && echo -n A %redirp%
+if not exist NOHELPER if "%AUX%"=="1" if exist ()/AutoUnattend.xml dd if=(bd)/_ISO/e2b/firadisk/empty.xml of=()/AutoUnattend.xml > nul && echo -n a %redirp%
+if not exist NOHELPER if "%AUX%"=="1" if exist ()/Unattend.xml     dd if=(rd)+1 of=()/Unattend.xml > nul && echo -n U %redirp%
+if not exist NOHELPER if "%AUX%"=="1" if exist ()/Unattend.xml     dd if=(bd)/_ISO/e2b/firadisk/empty.xml of=()/Unattend.xml > nul && echo -n u %redirp%
+set AUX=
+set NOHELPER=
+root (bd) > nul
+errorcheck on
+debug 1
+echo %redirp%
+
+echo %@time% menu.lst Finished XML and Helper drive search >> (md)0x9999+3
+
+#cache the Main Menu in memory at 0xA000 (20MB)
+dd if=(md)0x3000+0x50 of=(md)0xA000+0x50 > nul
+
+#beep the speaker to say we are ready! use 1-3 beeps
+if exist beep if %beep%>=1 /%grub%/bios int=0x10 eax=0xe07 ebx=0x0 > null
+if exist beep if %beep%>=2 /%grub%/bios int=0x10 eax=0xe07 ebx=0x0 > null
+if exist beep if %beep%>=3 /%grub%/bios int=0x10 eax=0xe07 ebx=0x0 > null
+set beep=
+
+
+# set default extension for executables
+command --set-ext=.g4b > nul
+# set default path for executables
+command --set-path=/%grub% > nul
+
+echo -e %@time% menu.lst END >> (md)0x9999+3
+# test for ! key pressed (don't remove from kbd buffer)
+call Fn.20
+set /A key=%@retval%&0xff > nul
+if "%key%"=="0x21"  echo -e SHOWTIME\n======== && cat (md)0x9999+3 && pause > nul && pause Press a key to load the Main Menu...
+if not "%key%"=="0x21" if exist SHOWTIME echo -e SHOWTIME\n======== && cat (md)0x9999+3 && echo && pause Press a key to load the Main Menu...
+set key=
+
+# Load the new configfile
+echo Loading the Main menu... %redirp%
+# normal cursor
+call Fn.70 2
+
+cat --locate="\ntimeout " --replace=\n# (md)0xa000+0x50
+
+configfile (md)0x3000+0x50
+
+

@@ -1,0 +1,66 @@
+# Place ISO in \_ISO\MAINMENU\MNU or \_ISO\LINUX\MNU (and this .mnu file too)
+# http://rmprepusb.blogspot.co.uk/2014/05/add-kali-linux-v107-luks-encrypted.html
+# IMPORTANT: you MUST run WinContig (Ctrl+F2) before booting E2B.
+# https://www.parrotsec.org/doc/persistence.fx
+
+#    For persistence: (File Name=parrot-rw,  Volume Name=persistence)  <<< NOT casper-rw !!!!!!
+# 1. Click 'Create ext2/3/4 fs' in RMPrepUSB
+# 2. Set the FILENAME to parrot-rw
+# 3. Set the VOLUME LABEL to persistence  <------ VERY IMPORTANT: DO NOT CHANGE
+# 4. Set amount of space you would like allowed to persist
+# 5. Choose ext4
+
+# The persistent 'volume' needs the persistence.conf file in it!
+# Boot to parrot first boot menu option (do NOT use the parrot Encrypted Persistence menu entry!) 
+# and then type following 5 lines to enable persistence - then reboot
+#    su  (password=toor)
+#    mkdir -p /mnt/usb
+#    ls /dev/                           (to see which is the USB device - normally sdb - or use df command)
+#    mount /dev/sdb3 /mnt/usb           (will always be sdx3 for 3rd partition)
+#    echo "/ union" > /mnt/usb/persistence.conf
+#    umount /mnt/usb
+#
+# Now reboot and use Persistence menu entry
+
+# OR...
+# FOR LUKS Encryption use (replace /dev/sdb3 with USB drive name - always ends in 3)
+#    su  (password=toor)
+#    cryptsetup --verbose --verify-passphrase luksFormat /dev/sdb3
+#    cryptsetup luksOpen /dev/sdb3 my_usb
+#    mkfs.ext3 -L persistence /dev/mapper/my_usb
+#    e2label /dev/mapper/my_usb persistence
+#    mkdir -p /mnt/my_usb
+#    mount /dev/mapper/my_usb /mnt/my_usb
+#    echo "/ union" > /mnt/my_usb/persistence.conf
+#    umount /dev/mapper/my_usb
+#    cryptsetup luksClose /dev/mapper/my_usb
+#
+# Now reboot and choose Live Mode with Encrypted Persistence menu entry if LUKS used (use passphrase to unlock)
+
+
+iftitle [if exist $HOME$/Parrot-full-3.1.1_amd64.iso] Parrot with Persistent\n Uses /parrot-rw persistence file
+
+set ISO=$HOME$/Parrot-full-3.1.1_amd64.iso
+set PERS=/parrot-rw
+
+if "%E2BDEV%"=="" set E2BDEV=hd0 && pause E2BDEV forced to hd0!
+if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (bd)/menu.lst
+#enable parttype output
+partnew (%E2BDEV%,3) 0x0 %ISO%
+# make empty table entry in 3rd position in ptn table
+debug 1
+parttype (%E2BDEV%,2) | set check=
+debug off
+set check=%check:~-5,4%
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0 0 0
+if not "%check%"=="0x00" echo WARNING: PTN TABLE 3 IS ALREADY IN USE! && pause
+debug 1
+if not exist %PERS% echo WARNING: %PERS% persistence file not found! && pause
+errorcheck off
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0x0 %PERS%
+errorcheck on
+/%grub%/QRUN.g4b %ISO%
+boot
+
+
+

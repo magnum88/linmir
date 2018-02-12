@@ -1,0 +1,11 @@
+iftitle [if not exist /AUTORUN.INF] Unprotect \AUTORUN.INF (FAT32 only)\n Undo Panda Vaccination and delete or unhide AUTORUN.INF
+errorcheck off
+if not exist (hd0,0)/autorun.inf /%grub%/fat del (hd0,0)/autorun.inf > nul
+if exist (hd0,0)/AUTORUN_.INF /%grub%/fat ren (hd0,0)/AUTORUN_.INF AUTORUN.INF
+if exist (hd0,0)/AUTORUN.INF echo (hd0,0)/AUTORUN.INF now restored!
+if not exist (hd0,1)/autorun.inf /%grub%/fat del (hd0,1)/autorun.inf > nul
+if exist (hd0,1)/AUTORUN_.INF /%grub%/fat ren (hd0,1)/AUTORUN_.INF AUTORUN.INF
+if exist (hd0,1)/AUTORUN.INF echo (hd0,1)/AUTORUN.INF now restored!
+pause Press a key to reload the Main menu...
+configfile (md)0xa000+0x80 || configfile /menu.lst
+

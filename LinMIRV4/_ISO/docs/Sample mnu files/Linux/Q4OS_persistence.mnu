@@ -1,0 +1,47 @@
+# For persistence: (File Name=q4os-rw  Volume Name=persistence)
+# 1. click 'Create ext2 FS' in RMPrepUSB
+# 2. Set the FILENAME     to:  q4os-rw
+# 3. Set the VOLUME LABEL to:  persistence      <------ VERY IMPORTANT
+# 4. Set amount of space you would like allowed to persist
+
+#The persistence 'volume' needs a persistence.conf file added
+# Boot to linux, right-click - Open Terminal window here..., and then type following 5 lines in the terminal console
+#    sudo mkdir /mnt/usb
+#    df      (to see which is the USB device e.g. sd3 - partition 4 should always be listed - try also sudo fdisk -l)
+#    sudo mount /dev/sdb3 /mnt/usb      (always use 3)
+#    echo "/ union" > /mnt/usb/persistence.conf
+#    sudo umount /mnt/usb
+
+# now reboot 
+
+iftitle [if exist $HOME$/q4os-live-2.0.2-i686pae.iso] q4os-live-2.0.2-i686pae iso PERSISTENT\n Boot using .mnu file with persistence
+set ISO=$HOME$/q4os-live-2.0.2-i686pae.iso
+set PF=/q4os-rw
+
+if "%E2BDEV%"=="" set E2BDEV=hd0 && pause E2BDEV forced to hd0!
+if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (bd)/menu.lst
+#enable parttype output
+debug 1
+# make empty table entry in 3rd position in ptn table
+parttype (%E2BDEV%,2) | set check=
+debug off
+set check=%check:~-5,4%
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0 0 0
+if not "%check%"=="0x00" echo WARNING: PTN TABLE 3 IS ALREADY IN USE - PERSISTENCE MAY NOT WORK! && pause
+debug 1
+if not exist %PF% echo WARNING: %PF% persistence file not found! && pause
+errorcheck off
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0x0 %PF%
+errorcheck on
+#map ptn 4 to ISO
+partnew (%E2BDEV%,3) 0x0 %ISO%
+map %ISO% (0xff)
+map --hook
+root (0xff)
+# default username usually  user
+kernel /live/vmlinuz boot=live persistence components quiet splash label username=adminq
+
+
+initrd /live/initrd.img
+
+

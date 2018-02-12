@@ -1,0 +1,55 @@
+!BAT
+:: get password and print * for each character
+:: returns password in %pass%
+
+:: Usage: getpass.g4b [prompt]
+:: e.g.  getpass.g4b $[0104]Please\x20enter\x20password:\x20
+
+:: set cursor on and keep last state
+call Fn.70 1 ;; set CUR=%@retval%
+if "%1"=="" call :get_pass pass Password:\x20 || call :get_pass pass %1
+:: restore cursor state
+call Fn.70 %CUR% ;; set CUR=
+:: echo Pass: [%pass%]
+goto :eof
+
+:get_pass
+setlocal
+set baseaddr=0x60000
+set offset=%baseaddr%
+echo -e -n %2
+call :getchar %1
+echo
+write %offset% 0 > nul
+endlocal && call Fn.0 0 %baseaddr% | set %1=
+goto :eof
+
+:getchar
+call Fn.19
+set /A key=%@retval% > nul
+if %key%==0x1C0D goto :eof
+if %key%==0x11B goto :Esc
+::Support backspace
+if %key%==0xE08 goto :Back
+write --bytes=1 %offset% %key% > nul
+set /A offset=%offset%+1 > nul
+echo -n *
+goto %0
+
+:Back
+if %baseaddr%==%offset% goto %0
+set /A offset=%offset%-1 > nul
+call Fn.4 ;; set /A r=%@retval% > nul
+set /a x=%r%>>8 > nul
+set /a y=%r%&0xff > nul
+#echo %x% %y%
+if not %y%<=0 set /a y=%y%-1  > nul
+#echo %x% %y%
+call Fn.5 %y% %x%
+echo -n -e \x20
+call Fn.5 %y% %x%
+goto %0
+
+:Esc
+set offset=%baseaddr%
+goto :eof

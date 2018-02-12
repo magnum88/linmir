@@ -1,0 +1,23 @@
+#copy this file to \_ISO\MAINMENU\$$$$CONFIG folder
+#create new \_ISO\GUEST folder
+#see http://rmprepusb.blogspot.co.uk/2016/03/make-guest-mode-menu.html for more details
+#CAPS LOCK must be on to get MAINMENU
+#This example does not change the wallpaper
+
+set ASK=Y
+if exist DONEPWD set ASK=
+### show wallpaper
+if not exist DONEPWD call Fn.70 3
+if not exist DONEPWD clear
+echo
+echo -e -n Loading E2B...
+#Check if CAPS LOCK is on - use 0x20 for NUM-LOCK or 0x10 for SCROLL-LOCK, 0x08 for ALT, 0x04 for CTRL, 0x02 for L-SHIFT, 0x01 for R-SHIFT
+if not exist DONEPWD calc *0x417 & 0x40 > nul && set ASK=
+clear
+### set up sub-folder name
+if /i "%ASK%"=="Y" set MFOLDER=/_ISO/GUEST
+#HDG is the top heading for the new menu
+if /i "%ASK%"=="Y" set HDG=GUEST MENU
+if /i "%ASK%"=="Y" (bd)/%grub%/SubMenu.g4b
+set ASK=
+set DONEPWD=1

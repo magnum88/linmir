@@ -1,0 +1,11 @@
+# eset (old versions) need to extract casper folder to \sysrescue on E2B drive!  ISO cheat codes don't work!
+# you can add quiet and splash to the kernel parameters if you wish and remove the vga=ask
+# This does not seem to be persistent and creating an ext2 casper-rw file stops it from booting!
+# Should not be needed for eset-sysrescue.1.0.9.0.enu.iso which should just boot
+
+iftitle [if exist /sysrescue/casper/vmlinuz] Eset sysrescue (linux, flat file) \n Boot to Eset System Rescue
+kernel /sysrescue/casper/vmlinuz  boot=casper persistent live-media-path=/sysrescue/casper vga=ask  --
+initrd /sysrescue/casper/initrd.lz
+errorcheck off
+
+

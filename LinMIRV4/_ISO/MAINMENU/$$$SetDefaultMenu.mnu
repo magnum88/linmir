@@ -1,0 +1,10 @@
+﻿iftitle [if not exist DEFMENU && if exist /%grub%/menu_defaults.txt] $$STRh0MD
+set /p dask=$$STRh1MD
+echo default %dask% > /%grub%/menu_defaults.txt
+set /p task=$$STRh2MD
+if %task%<=0 set task=-1 
+echo timeout %task% >> /%grub%/menu_defaults.txt
+echo -e \x00 >> /%grub%/menu_defaults.txt 
+if exist /FASTLOAD.YES echo REFRESH > /FASTLOAD.YES 
+clear
+configfile /%grub%/menu.lst

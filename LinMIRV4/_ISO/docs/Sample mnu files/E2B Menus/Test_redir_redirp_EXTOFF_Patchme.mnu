@@ -1,0 +1,41 @@
+# Copy this file to \_ISO\MAINMENU or \_ISO\UTILITIES folder
+
+iftitle [if not exist redir || if exist redirp] Reduce E2B messages (redir)\n Set redir and do not set redirp\n Reduces the amount of E2B progress messages
+set redir=> nul
+set redirp=
+pause --wait=3 Reloading Main menu with redir set...
+configfile /%grub%/menu.lst
+
+iftitle [if not exist redir || if not exist redirp] Minimal E2B messages (redir+redirp)\n Set redir and redirp\n This keeps the E2B messages to a minimum (not recommended)
+set redir=> nul
+set redirp=> nul
+pause --wait=3 Reloading Main menu with redir and redirp set...
+configfile  /%grub%/menu.lst
+
+iftitle [if exist redir || if exist redirp] Show all E2B messages (default)\n redir and redirp are cleared\n This shows the most progress messages in E2B
+set redir=
+set redirp=
+pause --wait=3 Reloading Main menu (no redir or redirp)...
+configfile  /%grub%/menu.lst
+
+iftitle [if exist EXTOFF] Show file extensions in sub-menus (no EXTOFF)\n Display the full file name with extension in the menus.\n Note: This demo only works for sub-menus.
+set EXTOFF=
+configfile (md)0xa000+0x50
+
+iftitle [if not exist EXTOFF] Don't show file extensions in sub-menus (EXTOFF=1)\n Display the full file name without extension in the menus.\n Note: This demo only works for sub-menus.
+set EXTOFF=1
+configfile (md)0xa000+0x50
+
+title Patch grub4dos on this drive for silent boot\n Permanently patches the MBR and grldr files on this drive\n for silent booting
+# Silent MBR boot of stage 1.5 grub4dos (works for both 0.4.5c and 0.4.6) - one reboot is required for it to permanently take affect.
+if exist /_ISO/docs/PatchMyMBR call /_ISO/docs/PatchMyMBR > nul
+# Silent startup of grub4dos - no diagnostic/info messages (only works for 0.4.6a by changing debug msg=2 to debug msg=0) - permanently changes /grldr files (please use \_ISO\docs\patchme for patch if not using 0.4.6)
+cat --locate=\x02 --replace=\x00 --skip=0x2073 --length=1 /grldr > nul
+if exist /%grub%/grldr_046 cat --locate=\x02 --replace=\x00 --skip=0x2073 --length=1 /%grub%/grldr_046 > nul
+echo
+echo Grub4dos now patched!
+echo
+echo Reboot to see change!
+pause
+errorcheck off
+boot

@@ -1,0 +1,36 @@
+# Only the ISO file is required for this menu - 4th ptn on USB drive must be empty! 
+# Copy this file to /_ISO/LINUX/MNU folder and also the ISO file (or and subfolder, e.g. /_ISO/MAINMENU/MNU)
+# Change ISO name on lines 1 and 2
+
+iftitle [if exist $HOME$/Macpup_550.iso] Macpup\n Macpup boot from ISO (save on shutdown)
+
+set ISO=$HOME$/Macpup_550.iso
+
+if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (bd)/menu.lst
+if "%E2BDEV%"=="" set E2BDEV=hd0 && pause E2BDEV forced to hd0!
+partnew (%E2BDEV%,3) 0x00 %ISO% 
+map %ISO% (0xff) 
+map --hook 
+root (0xff) 
+set RAM=
+set PKEYS=
+
+#http://puppylinux.org/wikka/BootParametersPuppy
+
+# uncomment line below if want to load in RAM - will run Puppy totally in RAM and ignore saved sessions/storage file(s)
+###set RAM=pfix=ram
+
+# kbd language be br cf de dk es fi fr gr hu it jp no pl ru se uk us 
+#set PKEYS=pkeys=fr
+
+#pmedia types - usbflash usbhd usbcd ideflash idehd idecd idezip satahd satacd scsihd 
+#Specify boot device by interface and/or media-type. This is a search filter.
+#Omitting this parameter usually results in Puppy correctly locating boot files; however, it can be useful if you are having problems. 
+
+#INFO: None of these cheatcodes to boot directly from ISO don't work! We must use partnew or extract files!
+#bootfromiso=$HOME$/Macpup_550.iso bootfrom=$HOME$/Macpup_550.iso isoloop=$HOME$/Macpup_550.iso isofrom_system=$HOME$/Macpup_550.iso isoboot=$HOME$/Macpup_550.iso fromiso=$HOME$/Macpup_550.iso iso-scan/filename=$HOME$/Macpup_550.iso iso_filename=$HOME$/Macpup_550.iso findiso=$HOME$/Macpup_550.iso fromiso=$HOME$/Macpup_550.iso from=$HOME$/Macpup_550.iso
+
+#psavemark=1 fix=fsck  (causes save feature to be active)
+
+kernel /vmlinuz root=/dev/ram0 pmedia=idecd %RAM%  %PKEYS% psavemark=1 fix=fsck
+initrd /initrd.gz

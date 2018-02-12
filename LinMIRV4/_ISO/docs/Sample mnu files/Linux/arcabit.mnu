@@ -1,0 +1,11 @@
+# Extract contents of arca-rescue.iso to the root of the E2B USB drive
+# rename \boot to \arcaboot, do not move or rename \arcascan or \cde folders
+# Note: exFAT or NTFS E2B drives will not work! 
+# http://www.arcabit.pl/rescue_disk
+# http://rmprepusb.blogspot.co.uk/2014/12/add-polish-arcabit-rescue-cd-to-your.html
+
+
+title Arcabit AV Rescue Disk\n Boot Arcabit from  extracted files\n Updates will be persistent
+kernel /arcaboot/vmlinuz loglevel=3 cde desktop=flwm_topside tz=CET-1CEST,M3.5.0,M10.5.0/3
+initrd /arcaboot/core.gz
+

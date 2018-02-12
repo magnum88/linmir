@@ -1,0 +1,9 @@
+# Display as menu item if CPU is 32-bit or 64-bit
+
+iftitle [checkrange 2,3 is64bit]   --- INFORMATION: 64-bit CPU ---
+errorcheck off
+
+
+iftitle [checkrange 0,1 is64bit]   --- INFORMATION: 32-bit CPU ---
+errorcheck off
+

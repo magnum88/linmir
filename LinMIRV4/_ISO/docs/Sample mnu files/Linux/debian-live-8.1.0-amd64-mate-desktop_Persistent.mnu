@@ -1,0 +1,50 @@
+# Place this .mnu file and the Debian Live ISO in (_ISO\xxx\MNU), e.g. \_ISOMAINMENU\MNU or \_ISO\LINUX\MNU
+# IMPORTANT: you MUST run WinContig (Ctrl+F2) before booting E2B.
+
+# For persistence: (File Name=debian-rw  Volume Name=persistence)
+# 1. click 'Create ext2 FS' in RMPrepUSB
+# 2. Set the FILENAME     to:  debian-rw
+# 3. Set the VOLUME LABEL to:  persistence      <------ VERY IMPORTANT
+# 4. Set amount of space you would like allowed to persist  (4GB+)
+
+#The persistence 'volume' needs a persistence.conf file added
+# Boot to linux and then type following 5 lines in the terminal console (Applications - System Tools - Mate terminal)
+#    sudo mkdir /mnt/usb
+#    ls /dev/                (to see which is the USB device 3rd ptn - it will always be sd(something)3 - try also sudo fdisk -l)
+#    sudo mount /dev/sdb3 /mnt/usb
+#    echo "/ union" > /mnt/usb/persistence.conf
+#    umount /mnt/usb
+
+# now reboot linux
+
+iftitle [if exist $HOME$/debian-live-8.1.0-amd64-mate-desktop.iso] debian-live-8.1.0 iso PERSISTENT\n Boot using .mnu file with persistence
+
+set ISO=$HOME$/debian-live-8.1.0-amd64-mate-desktop.iso
+set PF=/debian-rw
+
+if "%E2BDEV%"=="" set E2BDEV=hd0 && pause E2BDEV forced to hd0!
+if exist CD echo WARNING: Cannot use partnew command! && pause && configfile (bd)/menu.lst
+#enable parttype output
+debug 1
+# make empty table entry in 3rd position in ptn table
+parttype (%E2BDEV%,2) | set check=
+debug off
+set check=%check:~-5,4%
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0 0 0
+if not "%check%"=="0x00" echo WARNING: PTN TABLE 3 IS ALREADY IN USE - PERSISTENCE MAY NOT WORK! && pause
+debug 1
+if not exist %PF% echo WARNING: %PF% persistence file not found! && pause
+errorcheck off
+if "%check%"=="0x00" partnew (%E2BDEV%,2) 0x0 %PF%
+errorcheck on
+#map ptn 4 to ISO
+partnew (%E2BDEV%,3) 0x0 %ISO%
+map %ISO% (0xff)
+map --hook
+root (0xff)
+
+#live-config for auto login?
+
+kernel /live/vmlinuz boot=live persistence components quiet splash label live-amd64-failsafe
+initrd /live/initrd.img
+

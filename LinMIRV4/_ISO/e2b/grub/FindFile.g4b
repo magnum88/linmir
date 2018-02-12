@@ -1,0 +1,156 @@
+!BAT
+:: GRUB4DOS batch script. www.easy2boot.com [SSi]
+:: Uses: Find the first file matching specified file extension or name+extension - returns FILE as full path.
+::
+:: Run this grub4dos batch file using the following 2 lines where TARGET can be a file name+extension or just an extension, e.g. fred.iso or .wim
+:: \grub\FindFile.g4b .findfile FOLDER  FILETOFIND [SILENT]
+::
+:: Examples:
+:: /%grub%/FindFile .findfile (hd1,0)/Recovery/WindowsRE .wim       SILENT
+:: /%grub%/FindFile .findfile (hd1,0)/Recovery           winre.wim
+::
+:: Returns: %FIND% = (hd1,0)/Recovery/WindowsRE/winre.wim
+::
+:: Note: Searching whole partition (e.g. (hd1,0)) may cause hang on a large volume.
+:: This script requires GRUB4DOS 2015-12-14 or later.
+:: Set LEVEL1=1 if only one folder to search
+
+:: version 2  2017-01-17
+
+::=============================================================================
+
+::set DD=0
+::Uncomment line below to show debug lines
+::set DD=1
+
+debug off
+checkrange 20151214:-1 read 0x8278 || echo Err.version && exit 1
+:: this batch file calls itself, so use the label as the place to jump to
+goto %~x1
+exit
+
+:.findfile
+
+::echo 0=%0 nx0=%~nx0 nx1=%~nx1 nx2=%~nx2 nx3=%~nx3 1=%1 x1=%~x1
+:: get the menu folder into DIR variable
+::echo Checking if .getfile is loaded - if not load it
+if not "%MOD%"=="1" delmod -l %~nx0 || insmod %0
+
+if "%2"=="" goto :endloop
+if "%3"=="" goto :endloop
+set TARGET=%3
+set FILE=
+set SILENT=%4
+if "%DD%"=="1" echo TARGET=%TARGET%
+ 
+errorcheck off
+set DIR=%2
+if not "%DIR:~0,1%"=="(" set DIR=()%DIR%
+#echo Searching %DIR%  %redir%
+echo set MFOLDER=%DIR% >> (md)0x3000+0x50
+#echo Looking for files starting at %DIR%  %redir%
+#ls %DIR%/ | call :cpa
+call :cpa
+
+:endloop
+set LL=
+set DD=
+set DIR=
+set hlp=
+set MDIR=
+set mem=
+set mem1=
+set s=
+set count=
+set LASTDIR=
+set LEVEL1=
+set TARGET=
+set SILENT=
+
+:: must set root back!
+root (bd)/ > nul
+delmod %~nx0 > nul
+
+debug 1
+exit
+
+:: ----------------------- SUBROUTINES ----------------------
+
+:.getfile
+if "%DD%"=="1" echo @getfile
+setlocal
+if "%DD%"=="1" echo Checking %DIR%/%1
+if "%1"=="" endlocal && set FILE=%FILE% && goto :EOF
+::If is a directory ignore it
+::ZZZcat --length=0 (bd)%DIR%/%1 || goto :EOF
+if "##"=="#%~x1#" goto :eof
+
+:: look for match
+if "%DD%"=="1" echo Looking for %TARGET% in %~dpnx1
+if "%TARGET:~0,1%"=="." if /i "#%TARGET%#"=="#%~x1#" set FILE=%~dpnx1
+if /i "%TARGET%"=="%~1" set FILE=%~dpnx1
+if not exist SILENT if exist FILE echo -e $[0x0e]Found %FILE%
+endlocal && set FILE=%FILE%
+goto :eof
+
+
+:: ----  SEARCH ALL FOLDERS -----
+
+:cpa
+if "%DD%"=="1" echo @CPA: Current Root: %DIR%
+if "%DD%"=="1" echo Change source root to %DIR%/
+
+:: must or || in case empty directory! Prevents hanging if use root without dir access!
+::echo -e $[0x0e]%DIR% %redir%
+
+::echo DIR=%DIR% LASTDIR=%LASTDIR%
+if not "%DIR%"=="%LASTDIR%" set LASTDIR=%DIR% && if not exist SILENT echo -e $[0x0e]%DIR% %redir%
+ls %DIR%/ > nul || echo -n %redir%
+root %DIR% > nul || echo -n %redir%
+
+ls | call :copyfiles && goto :eof
+
+:: drop through if error...
+
+echo ERROR: Must have been error - bad character in filename like = sign??
+
+:copyfiles
+if exist FILE goto :eof
+if "%DD%"=="1" echo @COPYFILES %1
+if "%1"=="" goto :eof
+
+::check for a directory
+#turn on echo for cat command
+debug 1
+if "%DD%"=="1" echo Checking %DIR%/%1 
+if "%1"=="" endlocal && set FILE=%FILE% && goto :EOF
+# If is a directory ignore it (bug if file modulo 4GB - so echo size)  v8 bugfix!
+# if NTFS get 0x0, if FAT32 get 'Error 2: Bad file or directory'
+cat --length=0 /%~1 > (md)0x220+1
+# Note: some odd filenames, e.g. "enabled=1" may cause error!
+#if exist /%1 cat --length=0 /%~1 > (md)0x220+1
+if exist LEVEL1 && goto :skipdir
+
+cat --locate="is 0x0" (md)0x220+1 > nul && goto  :sub-dir
+cat --locate="is 0x" (md)0x220+1 > nul || goto  :sub-dir
+
+:skipdir
+if "%DD%"=="1" echo DIR=%DIR% LASTDIR=%LASTDIR%
+if not "%DIR%"=="%LASTDIR%" set LASTDIR=%DIR% && if not exist SILENT echo -e $[0x0e]%DIR% %redir%
+
+::copy file
+if "%DD%"=="1" echo @COPY FILE
+call :.getfile %1
+if exist FILE goto :eof
+shift
+goto :copyfiles
+
+:sub-dir
+if "%DD%"=="1" echo @SUB_DIR %1
+setlocal
+set DIR=%DIR%/%1
+call :cpa
+endlocal && set FILE=%FILE%
+set LASTDIR=
+shift
+goto :copyfiles

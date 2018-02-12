@@ -1,0 +1,8 @@
+# Geek Squad MRI - for Removable USB drives only
+# Copy .ISO and .mnu file to \_ISO\MAINMENU\MNU folder (or other E2B standard menu folder)
+# If you have a Fixed Disk\HDD E2B drive, convert the ISO to a .imgPTN file using MakePartImage MPI Tool Kit
+
+title MRI 5.10.2\n Run MRI menu (WinPE only works if Removable E2B USB drive used)
+/%grub%/QRUN.g4b  force.isope01 $HOME$/MRI_5_10_2.ISO
+chainloader (0xff)
+boot

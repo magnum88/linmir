@@ -1,0 +1,28 @@
+!BAT
+setkey
+setkey y z 
+setkey z y 
+setkey Y Z 
+setkey Z Y 
+setkey equal parenright 
+setkey parenright parenleft 
+setkey parenleft asterisk 
+setkey doublequote at 
+setkey backquote equal 
+setkey plus bracketright 
+setkey minus slash 
+setkey slash ampersand 
+setkey ampersand percent 
+setkey percent caret 
+setkey underscore question 
+setkey question underscore 
+setkey semicolon less 
+setkey less numbersign 
+setkey numbersign backslash 
+setkey colon greater 
+setkey greater bar 
+setkey asterisk braceright 
+setkey caret backquote 
+setkey backslash minus
+echo QWERTZ KBD MAP %redir%
+

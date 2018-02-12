@@ -1,0 +1,21 @@
+# keep fd3 free in case used for Animation bitmaps
+map --unmap=0:2 > nul
+map --unmap=4:0xff > nul
+map --hook
+find --set-root /%grub%/E2B_GRUB.txt > nul
+if not "%GFX%"=="" gfxmenu /_ISO/%GFX%
+#clear TT for XP menu later
+set TT=
+write 0x8274 %AUTONUM% > nul
+if "%HCOLOUR%"=="" set HCOLOUR=0133
+if "%HEADING%"=="" set HEADING=\x20                EASY2BOOT V1 - MAIN MENU                   \x20
+if "%HELPTEXT%"=="" set HELPTEXT=Visit www.easy2boot.com
+if not "%CENTREHD%_%RTL"=="_" call /%grub%/centrehd.g4b HEADING
+if not exist HEADPOS set HEADPOS=0000
+set HP=0000 $[0004]                                                                \necho -n -e -P:
+write (md)0x220+1 !BAT\necho -n -e -P:%HP%%%^HEADPOS% $[\x25HCOLOUR\x25]%HPAD%\x25HEADING\x25\necho -n -P:%HBTM% $[\x25FCOLOUR\x25]%HELPTEXT%\0 > nul
+initscript (md)0x220+1
+set HP=
+
+#if exist HEADPOS     write (md)0x220+1 !BAT\necho -n -P:%HEADPOS% $[%HCOLOUR%]%HPAD%%HEADING%\necho -n -P:%HBTM% $[%FCOLOUR%]%HELPTEXT%\0 > nul
+#if not exist HEADPOS write (md)0x220+1 !BAT\necho -n -P:0000 $[%HCOLOUR%]%HPAD%%HEADING%\necho -n -P:%HBTM% $[%FCOLOUR%]%HELPTEXT%\0 > nul

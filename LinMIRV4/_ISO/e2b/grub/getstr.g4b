@@ -1,0 +1,23 @@
+!BAT
+:: %1 has string number = e.g. $$STRm031  (must be $$STR followed by exactly 4 characters)
+:: Returns STR with translated text
+:: Assumes strings are loaded into memory at (md)0x880
+
+::  strings in memory at (md)0x880
+set STR=%1
+if not "%STR:~0,5%"=="$$STR" echo BAD STRING "%STR%" - should start with $$STR && pause && goto :EOF
+
+:: now find STR in (md)0x880+0x80
+cat --locate="%STR%" --number=1 (md)0x880+0x80 > nul
+set /a ALOC=%?% > nul
+if "%ALOC%"=="0" echo $[0104]ERROR %STR% NOT FOUND IN STRINGS.TXT FILE! && pause
+if "%ALOC%"=="0" goto :eof
+set /a ALOC=%ALOC%+10 > nul
+:: get end of line
+cat --locate=\x0a --skip=%ALOC% --number=1 (md)0x880+0x80 > nul
+set /a LL=%?%-%ALOC%-1 > nul
+if "%DD%"=="1" echo -n %STR%
+cat --skip=%ALOC% --length=%LL% (md)0x880+0x80 | set STR=
+if "%DD%"=="1" echo -e \x20is now replaced with "%STR%"
+set ALOC=
+set LL=

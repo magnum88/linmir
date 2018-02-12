@@ -1,0 +1,19 @@
+﻿!BAT
+debug 0
+call :setroot 0 1 127 128
+exit
+
+:setroot
+if /i "%NTBOOT:~,6%"=="(hd%~3" && call :map_root %~4 "%NTBOOT:~6%" && exit
+if /i "%NTBOOT:~,6%"=="(hd%~4" && call :map_root %~3 "%NTBOOT:~6%" && exit
+if /i "%NTBOOT:~,4%"=="(hd%~1" && call :map_root %~2 "%NTBOOT:~4%" && exit
+if /i "%NTBOOT:~,4%"=="(hd%~2" && call :map_root %~1 "%NTBOOT:~4%" && exit
+exit
+
+:map_root
+cat --length=0 %NTBOOT% && exit
+set NTBOOT=(hd%~1%~2
+root %NTBOOT% > nul || echo -n
+root () > nul || echo -n
+echo %NTBOOT% > (md)0x20000+1
+exit

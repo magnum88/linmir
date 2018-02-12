@@ -1,0 +1,152 @@
+title $$STRmldk
+debug 1
+errorcheck off
+pager on
+echo 
+find
+debug 0
+echo -e $[0107]=========== hd0 =========================
+set d=0
+echo && geometry (hd%d%)
+set dd=(hd%d%,0)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,1)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,2)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,3)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,4)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,5)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,6)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,7)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,8)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+
+echo -e $[0107]=========== hd1 =========================
+set d=1
+echo && geometry (hd%d%)
+set dd=(hd%d%,0)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,1)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,2)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,3)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,4)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,5)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,6)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,7)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,8)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+
+echo -e $[0107]=========== hd2 =========================
+set d=2
+echo && geometry (hd%d%)
+set dd=(hd%d%,0)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,1)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,2)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,3)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,4)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,5)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,6)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,7)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,8)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+
+
+echo -e $[0107]=========== hd3 =========================
+set d=3
+echo && geometry (hd%d%)
+set dd=(hd%d%,0)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,1)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,2)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,3)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,4)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,5)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,6)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,7)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,8)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+
+
+echo -e $[0107]=========== hd4 =========================
+set d=4
+echo && geometry (hd%d%)
+set dd=(hd%d%,0)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,1)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,2)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,3)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,4)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,5)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,6)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,7)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,8)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+
+
+echo -e $[0107]=========== hd5 =========================
+set d=5
+echo && geometry (hd%d%)
+set dd=(hd%d%,0)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,1)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,2)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,3)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,4)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,5)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,6)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,7)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+set dd=(hd%d%,8)
+ls %dd%/ > nul && echo && echo -e $[0106] Contents of %dd%: && ls %dd%/ && echo
+
+pause
+pager off
+map --status
+pause
+errorcheck off
+debug off
+configfile (md)0x3000+0x50
+boot
+
+

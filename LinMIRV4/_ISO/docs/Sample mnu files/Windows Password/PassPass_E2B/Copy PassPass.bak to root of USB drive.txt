@@ -1,0 +1,4 @@
+Copy the files to \_ISO\MAINMENU\MNU (or any 3rd level folder)
+Copy the PassPass.bak file to \ (root) of E2B drive
+
+http://www.sherlock.reboot.pro/passpass-bypass-the-password/

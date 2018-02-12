@@ -1,0 +1,13 @@
+﻿# EXAMPLE .MNU FILE FOR 1ST LOGICAL PARTITION (E2B drive can have ONE PRIMARY + Multiple Logical partitions)
+# You can add payload files under \_ISO onto any number of logical partitions and they will be included in the menu
+# Add this file to the /_ISO/MAINMENU folder
+# (hd0,4) is first logical ptn, (hd0,5) is 2nd logical partition, etc.
+# EDIT lines 1 and 3 to match the name of your folder that contains the payload files and partition - e.g. (hd0,4)/_ISO
+# If using a GFX Menu do not use hotkeys in the menu title
+# http://www.easy2boot.com/make-an-easy2boot-usb-drive/using-other-partitions-or-drives/
+
+iftitle [ls (hd0,4)/_ISO/ANTIVIRUS/ > (md)0x9F00+1 && checkrange 1:-1 read 0x13E0000 > nul] ^Ctrl+2 1st LOGICAL PARTITION Menu [Ctrl+2]\n Run payload files in \\_ISO folder
+set LBACKMENU=(bd)/%grub%/menu.lst
+(bd)/%grub%/QAUTO.g4b .automenu (hd0,4)/_ISO
+debug 0
+configfile (md)0x3000+0x50

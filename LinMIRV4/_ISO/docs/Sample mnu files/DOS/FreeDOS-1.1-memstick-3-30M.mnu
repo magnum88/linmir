@@ -1,0 +1,26 @@
+#http://www.chtaube.eu/computers/freedos/bootable-usb/
+# extract the .img file - copy this menu and the .img file to \_ISO\DOS\MNU folder
+#http://rmprepusb.blogspot.co.uk/2015/09/add-freedos-usb-img-files-to-easy2boot.html
+
+title FreeDOS-1.1-memstick-3-30M \n Boot from a FreeDos USB disk image
+set IMAGE=$HOME$/FreeDOS-1.1-memstick-3-30M.img
+errorcheck off
+map (hd1) (hd2)
+map (hd0) (hd1)
+errorcheck on
+map %IMAGE% (hd0) || map --mem %IMAGE% (hd0)
+map --hook
+root (hd0,0) || rootnoverify (hd0,0)
+set KERNEL=
+if exist /fdos/kernel.sys set KERNEL=/fdos/kernel.sys
+if exist /kernel.sys set KERNEL=/kernel.sys
+if "%KERNEL%"=="" pause ERROR: Cannot find KERNEL.SYS boot file!
+echo FDISK DISK NUMBERS: && echo
+echo DISK 1 = FREEDOS IMAGE FILE && geometry (hd0) && echo
+echo DISK 2 = USB DRIVE && geometry (hd1) && echo
+geometry (hd2) > nul && echo DISK 3 = FIRST INTERNAL HDD && geometry (hd2) && echo
+echo
+echo Info: Not all FreeDOS boot options may work.
+echo
+pause Press a key to continue...
+chainloader %KERNEL%

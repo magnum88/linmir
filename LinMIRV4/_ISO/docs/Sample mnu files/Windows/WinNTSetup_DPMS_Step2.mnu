@@ -1,0 +1,46 @@
+# To install XP to a USB3 system with SATA HDD:
+# http://www.easy2boot.com/add-payload-files/windows-install-isos/winntsetup/
+# Add this .mnu file to \_ISO\MAINMENU or \_ISO\WINPE
+# Edit the XPISO entry to match your ISO in the \_ISO\WINDOWS\XP folder
+# Copy WinNTSetup files to the E2B drive (e.g. \_ISO\docs\WINNTSETUP)
+# Boot using E2B to a Windows 8.1 or Windows 10 Installation ISO to run WinPE (or use any WinPE ISO)
+# At first screen, press SHIFT+F10 and run WinNTSetup.exe (either x86 or x64 version)
+# Format target HDD (e.g. using diskpart) and select correct XP ISO file from \_ISO\WINDOWS\XP folder
+# Reboot back to E2B drive and run this menu entry. It will pick the correct SATA driver for XP.
+# Allow to reboot from HDD to finish installation
+
+iftitle [if exist (hd1,0)/ntldr if exist (hd1,0)/$WIN_NT$.~LS] Use after WinNTSetup to add SATA\\RAID drivers \n Use this after installing XP files using WinNTSetup.\n If any firadisk load errors, press ESC key (typ. 9 times)
+set XPISO=XPPROSP3.iso
+set MFOLDER=/_ISO/WINDOWS/XP
+
+if not exist %MFOLDER%/%XPISO% echo ERROR: %MFOLDER%/%XPISO% DOES NOT EXIST && configfile (md)0x3000+0x50
+
+echo
+echo About to run XP+DPMS to load correct F6 floppy image
+echo Accept all defaults, there is no need to load the ISO into memory
+echo
+pause Press ENTER to continue...
+echo
+/%grub%/XPStep1.g4b
+
+errorcheck off
+root (hd0,0)
+if not exist /ntldr set ERR=1 && pause ERROR: \\NTLDR not found on (hd0,0) 
+if not exist /$WIN_NT$.~LS set ERR=1 && pause ERROR: \\$WIN_NT$.~LS folder not found on (hd0,0)
+if "%ERR%"=="1" reboot
+
+#get rid of iso
+map --unmap=0xff > nul
+map --rehook > nul
+#map --status
+#pause
+clear
+echo
+echo Do not rebot and run XP Setup - Stage 2.
+echo Do NOT press F6 in Setup.
+echo If the Firadisk files fail to load, press ESC=Skip file (typically 9 times)
+echo Allow the system to reboot to Hard Disk after files have been copied
+pause Ready to run Setup...
+chainloader /ntldr
+boot
+

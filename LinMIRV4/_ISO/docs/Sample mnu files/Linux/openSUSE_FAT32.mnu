@@ -1,0 +1,30 @@
+# Only works for FAT32 E2B volumes (not NTFS)
+# Copy ISO file and this file to \_ISO\LINUX\MNU folder
+# Edit first two lines as required
+
+iftitle [if exist $HOME$/openSUSE-Edu-li-f-e.x86_64-42.1.1.iso] openSUSE \n Boot from openSUSE ISO
+set ISO=$HOME$/openSUSE-Edu-li-f-e.x86_64-42.1.1.iso
+# Must be FAT32 partition
+uuid () > nul 
+set MYUUID =%?%
+map %ISO% (0xff)
+map --hook
+root (0xff)
+echo
+set OPT=showopts
+echo 0 = Show Options (default)
+echo 1 = Mate
+echo 2 = Classic
+echo 3 = Gnome
+echo 4 = Live Install
+set /p A=Choose an option (0-4) : 
+echo
+if "%A%"=="1" set OPT=showopts mate
+if "%A%"=="2" set OPT=showopts classic
+if "%A%"=="3" set OPT=showopts gnome
+if "%A%"=="4" set OPT=liveinstall showopts
+
+set SRC=isofrom=/dev/disk/by-uuid/%MYUUID%:/%ISO% isofrom_device=/dev/disk/by-uuid/%MYUUID% isofrom_system=/%ISO%
+kernel /boot/x86_64/loader/linux %SRC% splash=silent quiet %OPT%
+initrd /boot/x86_64/loader/initrd 
+

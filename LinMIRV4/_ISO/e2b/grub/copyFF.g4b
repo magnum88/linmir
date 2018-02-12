@@ -1,0 +1,59 @@
+!BAT
+debug off
+#errorcheck off
+errorcheck on
+# stop 'hit Q to continue' messages
+pager off
+#512MB = 0x100000
+#850MB = 0x1A0000
+#1GB = 0x200000
+set FD=%1
+map --mem (md)0x300+%2 %FD%
+map --hook
+debug 1
+clear
+echo Copy CD contents to virtual drive %1 size=%2
+# load fat utility as a module for quick operation
+insmod (bd)/%grub%/fat
+fat mkfs %FD%
+debug -1
+pause --wait=3
+debug off
+root (0xff)
+set cd=
+errorcheck off
+call :cpa
+echo Finished!
+goto :eof
+
+:cpa
+clear
+echo Copying files in folder: %cd%
+::Change source root
+root (0xff)%cd%/
+ls | call :copyfiles
+echo Finished folder %cd%
+goto :eof
+
+:copyfiles
+if "%1"=="" goto :eof
+::If is a directory
+cat --length=0 /%1 || goto :sub-dir
+
+::copy file
+## DOESN'T WORK ON ALL FILES! fat utility bug! ###fat copy /%1 %FD%%%cd%/ > nul || echo Error: %cd%/%1
+echo Copying ()%cd%/%1 to %FD%%%cd%/ 
+fat copy ()%cd%/%1 %FD%%%cd%/ > nul || echo Error: %cd%/%1
+shift
+goto :copyfiles
+
+
+:sub-dir
+setlocal
+errorcheck off
+fat mkdir %FD%%%cd%/%1 || pause Error: making directory %cd%/%1 (long name or full?)
+set cd=%cd%/%1
+call :cpa
+endlocal
+shift
+goto :copyfiles

@@ -1,0 +1,12 @@
+# Use isoboot.g4b to boot an ISO
+# if using Parted Magic and want Save Session (persistence) to work - make sure the \pmagic\pmodules folder on the E2B USB drive contains a xxxx.SQFS file.
+# The file can be of 0 bytes in size as long as the filename is the same as is inside the ISO file you are using.
+
+iftitle [if exist $HOME$/pmagic_2014_09_29.iso] Parted Magic 2014_09_29 (LIVE)\n Boot Parted Magic with Save Session option.
+# Example if on different partition
+# set ISOC=(hd0,1)$HOME$/pmagic_2014_09_29.iso
+
+# Typical use
+set ISOC=$HOME$/pmagic_2014_09_29.iso
+/%grub%/isoboot.g4b
+boot

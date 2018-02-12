@@ -1,0 +1,12 @@
+title Power Off (ACPI+SCI)\n Turn off via ACPI (enables System Control Interrupts first)
+/%grub%/g4d_off --force-sci
+boot
+
+title Power Off (no ACPI)\n Turn off without using ACPI
+halt --no-acpi
+boot
+
+title Power Off (no APM)\n Turn off without using APM
+halt --no-apm
+boot
+

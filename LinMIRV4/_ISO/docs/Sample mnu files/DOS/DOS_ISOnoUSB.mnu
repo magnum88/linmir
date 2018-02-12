@@ -1,0 +1,60 @@
+:: Easy2Boot .mnu file for FreeDos source cd 1.1 2.88MB Boot floppy
+:: The E2B USB drive will be removed and will not be visible to the BIOS or FreeDos except as floppy disk A:
+:: Useful if you don't want DOS to see the USB drive as a hard disk
+:: INSTRUCTIONS
+:: 1. Download FreeDOS full 1.1 ISO file from http://www.freedos.org/download/ (or other bootable DOS ISO)
+:: 2. Copy this .mnu file plus .iso to \_ISO\DOS\MNU folder
+:: USB will be mapped as fd0 (and accessible if FAT)
+
+iftitle [if exist $HOME$/fd11src.iso] FreeDos CD 1.1\nFull FreeDos CD
+set ISO=$HOME$/fd11src.iso
+set HDDS=
+if not exist HDDS geometry (hd10) > nul && set HDDS=10
+if not exist HDDS geometry (hd9) > nul && set HDDS=9
+if not exist HDDS geometry (hd8) > nul && set HDDS=8
+if not exist HDDS geometry (hd7) > nul && set HDDS=7
+if not exist HDDS geometry (hd6) > nul && set HDDS=6
+if not exist HDDS geometry (hd5) > nul && set HDDS=5
+if not exist HDDS geometry (hd4) > nul && set HDDS=4
+if not exist HDDS geometry (hd3) > nul && set HDDS=3
+if not exist HDDS geometry (hd2) > nul && set HDDS=2
+if not exist HDDS geometry (hd1) > nul && set HDDS=1
+if not exist HDDS pause No hard disk found! && configfile (md)0xa000+0x50
+map --mem %ISO% (0xff)
+#map the first partition of the USB disk as a floppy disk
+map (hd0,0)+1 (fd0)
+#map the whole UFD as a virtual cd
+map (hd0) (hd32)
+#map the real hard disk as hard disk -1
+if %HDDS%>=1 map (hd1) (hd0)
+if %HDDS%>=2 map (hd2) (hd1)
+if %HDDS%>=3 map (hd3) (hd2)
+if %HDDS%>=4 map (hd4) (hd3)
+if %HDDS%>=5 map (hd5) (hd4)
+if %HDDS%>=6 map (hd6) (hd5)
+if %HDDS%>=7 map (hd7) (hd6)
+if %HDDS%>=8 map (hd8) (hd7)
+if %HDDS%>=9 map (hd9) (hd8)
+if %HDDS%>=10 map (hd10) (hd9)
+# set one floppy disk
+map --floppies=1
+# sets number of HDDs in system - 1
+map --harddrives=%HDDS%
+map --hook
+root (0xff) || rootnoverify (0xff)
+echo
+echo USB drive now appears as Floppy Disk 0:
+echo
+ls (fd0)/
+echo
+#map --status
+echo
+echo Hard Disks in system = %HDDS%
+echo
+errorcheck off
+#pause --wait=4
+set ask=
+set /p ask=Type C to Continue (C) : 
+if /i not "%ask%"=="C" map --unhook && map --unmap=0:0xff && root (bd) && boot
+chainloader (0xff)
+

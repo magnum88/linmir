@@ -1,0 +1,30 @@
+# see http://rmprepusb.blogspot.co.uk/2013/10/run-openelec-live-from-your-easy2boot.html for details
+# FAT32 or NTFS E2B drive
+# Make a FAT32 disk image using instructions from the blog post
+
+title OpenElec LIVE \n This runs OpenElec from an image file
+debug 1
+parttype (hd0,3) | set check=
+set check=%check:~-5,4%
+# make empty table entry in 3rd position in ptn table
+if not "%check%"=="0x00" set /p A=Partition 4 in use! && configfile (md)0xa000+0x50
+
+# Write a permanent new entry into the E2B partition table pointing to the OpenElec partition
+if not exist CD partnew (hd0,3) 0x0 $HOME$/OpenElec_LIVE.img
+if not exist CD root (hd0,3)
+if not exist CD chainloader (hd0,3)/grldr
+boot
+
+#http://rmprepusb.blogspot.co.uk/2013/10/how-to-add-openelec-installer-to.html
+title OpenElec Installer \n This installs OpenElec to a drive
+debug 1
+parttype (hd0,3) | set check=
+set check=%check:~-5,4%
+# make empty table entry in 3rd position in ptn table
+if not "%check%"=="0x00" set /p A=Partition 4 in use! && configfile (md)0xa000+0x50
+
+# Write a new entry into the E2B partition table pointing to the OpenElec partition
+if not exist CD partnew (hd0,3) 0x0 $HOME$/OpenElec.img
+if not exist CD root (hd0,3)
+if not exist CD chainloader (hd0,3)/grldr
+boot

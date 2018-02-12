@@ -1,0 +1,23 @@
+# Copy \_ISO\docs\MyThemes\$Default E2B Menu.cfg to \_ISO\MyE2B.cfg (MyE2B.cfg must be >1KB and larger than largest xxx.cfg file)
+
+title Change Theme\n Choose a new E2B Theme
+if not exist /_ISO/MyE2B.cfg echo ERROR: Please create a large \_ISO\MyE2B.cfg file && pause && configfile (md)0xa000+0x50
+set CHOSEN=
+errorcheck on
+debug normal
+graphicsmode 3
+clear
+echo Pick a Theme...
+call /%grub%/PickaFile.g4b /_ISO/docs/MyThemes .cfg
+if "%CHOSEN%"=="" set DONEMENU= && configfile ()/%grub%/menu.lst
+echo
+echo Overwriting \_ISO\MyE2B.cfg file with \_ISO\docs\MyThemes\%CHOSEN%...
+# fill (rd) with 0's , 0x82d0 is rd-base mem address, Fn24 is memset - fill memory  <addr> <string> <size>
+# OLD map (md)0x300+200 (rd) > nul ;; read 0x82d0 > nul ;; call Fn.24  %@retval% 0x20  102400 > nul
+call Fn.24  0x60000 0x20  102400 > nul ;; map (md)0x300+200 (rd) > nul
+dd if=(rd)+1 of=()/_ISO/MYE2B.cfg > nul
+if exist ()/_ISO/docs/MyThemes/%CHOSEN% dd if=()/_ISO/docs/MyThemes/%CHOSEN% of=()/_ISO/MyE2B.cfg > nul
+if exist ()/_ISO/docs/MyThemes/%CHOSEN% chainloader /grldr
+set CHOSEN=
+set STR=
+boot

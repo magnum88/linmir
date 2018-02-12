@@ -1,0 +1,189 @@
+!BAT
+if "%1"=="FF" goto :FF
+
+:: Usage: Grab.g4b  [TEST] | [1-n]
+:: e.g. grab.g4b 1  will output screen to grab1.txt, if no number then grab.txt - max=grab(n).txt file already present
+:: 0x5C0 = B800:0 is the VGA character buffer, first byte=character, 2nd byte=attribute
+delmod grab.g4b > nul
+insmod %0 > nul
+
+set ask=
+set gm=
+set /a gm=23<<2+*0x8304&0xffffffff > nul
+set /A gm=*%gm%&0xffffffff > nul
+if "%gm%"=="0x0" goto :g3
+echo -e %0 - Copies screen text to a file (use '%0 TEST' to test).\nERROR: Must be in "graphicsmode 3" first!
+echo Current graphics mode is %gm%
+set /p ask=Clear screen and set to graphicsmode 3 now (Y/[N]) : 
+if /i "%ask%"=="Y" graphicsmode 3 && clear && echo -e Done - type %0 when you want to capture the screen text.
+if not /i "%ask%"=="Y" set ask= && set gm=
+goto :EOF
+
+:g3
+set ask=
+set gm=
+:: use debug off command to suppress locations from being displayed
+debug off
+pager off
+:: load wenv and this batch file into memory - Note: once loaded int memory, edits to this file will not take affect until grub4dos is rebooted!
+insmod /%grub%/wenv > nul
+
+:: graphics memory buffer at b800:0
+set SLOC=0x5c0
+
+:: We must be in mode 3 for this!
+graphicsmode 3
+
+:: initialise ram drive with zeros
+#echo -e -n \x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00 > (md)0x2000+8
+#OLD map (md)0x300+200 (rd) > nul ;; read 0x82d0 > nul ;; call Fn.24  %@retval% 0x0  102400 > nul  
+#echo -n > (md)0x300+200 ;; map (md)0x300+200 (rd) > nul
+#dd if=(rd)+1 of=(md)0x2000+8 > nul
+#dd if=(rd)+1 of=(md)0x2100+8 > nul
+#dd if=(rd)+1 of=(md)0x2200+8 > nul
+
+echo -n > (md)0x2000+8
+echo -n > (md)0x2100+8
+echo -n > (md)0x2200+8
+
+if NOT "%1"=="TEST" goto :CC
+:: Fill screen with test pattern
+clear
+echo -n A BEGIN ghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n B abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n C abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n D abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n E abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n F abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n G abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n H abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n I abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n J abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n K abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n L abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n M abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n N abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n O abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n P abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n Q abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n R abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n S abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n T abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n U abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n V abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n W abcdefghijklmnopqrstuvwxyz1234567890ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
+echo -n X abcdefghijklmnop TEST QUOTE " - TEST BACKSLASH \ TEST SPACES  TEST FWD SLASH /
+
+:CC
+:: 512 bytes = 256 chars
+:: 80x25=2000  / 256 = 7.8125
+
+errorcheck off
+set NUM=
+if "%1"=="" set NUM=
+if %1>=1 set NUM=%1
+errorcheck on
+if "%1"=="TEST" set NUM=
+
+if "%1"=="1" set NUM=1 > nul
+if "%1"=="2" set NUM=2 > nul
+if "%1"=="3" set NUM=3 > nul
+if "%1"=="4" set NUM=4 > nul
+if "%1"=="5" set NUM=5 > nul
+if "%1"=="6" set NUM=6 > nul
+if "%1"=="7" set NUM=7 > nul
+if "%1"=="8" set NUM=8 > nul
+errorcheck off
+set COL=0 > nul
+
+#copy to buffer
+dd if=(md)%SLOC%+8 of=(md)0x2100+8 > nul
+
+set SLOC=0x2100 > nul
+
+wenv for /L %a in (0,16,496) do exec %0 FF %a
+set /a SLOC=%SLOC%+1 > nul
+wenv for /L %a in (0,16,496) do exec %0 FF %a
+set /a SLOC=%SLOC%+1 > nul
+wenv for /L %a in (0,16,496) do exec %0 FF %a
+set /a SLOC=%SLOC%+1 > nul
+wenv for /L %a in (0,16,496) do exec %0 FF %a
+set /a SLOC=%SLOC%+1 > nul
+wenv for /L %a in (0,16,496) do exec %0 FF %a
+set /a SLOC=%SLOC%+1 > nul
+wenv for /L %a in (0,16,496) do exec %0 FF %a
+set /a SLOC=%SLOC%+1 > nul
+wenv for /L %a in (0,16,496) do exec %0 FF %a
+set /a SLOC=%SLOC%+1 > nul
+wenv for /L %a in (0,16,416) do exec %0 FF %a
+
+
+:: add a nul to end the string
+echo -e \x00 >> (md)0x2000+8
+:: display the screen capture
+:: cat (md)0x2000+8 && pause /%grub%/grab%NUM%.txt
+
+cat --locate=\x00\x00 --replace=\x20\x20 (md)0x2000+8 > nul
+
+if exist /%grub%/grab%NUM%.txt dd if=(md)0x2000+8 of=()/%grub%/grab%NUM%.txt
+
+pager on
+echo
+echo ---------------------------------------------------
+if exist /%grub%/grab%NUM%.txt clear && echo && echo && cat /%grub%/grab%NUM%.txt
+echo
+echo ---------------------------------------------------
+if exist /%grub%/grab%NUM%.txt echo Screen text was saved to /%grub%/grab%NUM%.txt (must be in graphicsmode 3 to work!)
+if not exist /%grub%/grab%NUM%.txt echo Error: grab%NUM%.txt not found so screen captured in RAM only - use  cat (md)0x2000+8 to view.
+
+delmod %n0
+delmod %nx0
+pager off
+goto :EOF
+
+
+:FF
+
+# get rid of "  quotes
+#convert spaces to ¬
+#also /  0x5c needs converting
+cat --hex --length=16 --skip=%2 (md)%SLOC%+1 > (md)0x2200+1
+cat --locate=\x20 --length=80 --skip=%2 --replace=\xbf (md)0x2200+1 > nul
+cat --locate=\x22 --length=80 --skip=%2 --replace=\xbe (md)0x2200+1 > nul
+cat --locate=\x5c --length=80 --skip=%2 --replace=\xbd (md)0x2200+1 > nul
+
+set /A x1=*0x44004d & 0xff && wenv set x1=\${x1:1:4}
+set /A x2=*0x44004b & 0xff && wenv set x2=\${x2:1:4}
+set /A x3=*0x440049 & 0xff && wenv set x3=\${x3:1:4}
+set /A x4=*0x440047 & 0xff && wenv set x4=\${x4:1:4}
+set /A x5=*0x440045 & 0xff && wenv set x5=\${x5:1:4}
+set /A x6=*0x440043 & 0xff && wenv set x6=\${x6:1:4}
+set /A x7=*0x440041 & 0xff && wenv set x7=\${x7:1:4}
+set /A x8=*0x44003f & 0xff && wenv set x8=\${x8:1:4}
+
+#wenv set x1=${a:-16:1} > nul
+#wenv set x2=${a:-14:1} > nul
+#wenv set x3=${a:-12:1} > nul
+#wenv set x4=${a:-10:1} > nul
+#wenv set x5=${a:-8:1} > nul
+#wenv set x6=${a:-6:1} > nul
+#wenv set x7=${a:-4:1} > nul
+#wenv set x8=${a:-2:1} > nul
+
+echo -e -n %x8%%%x7%%%x6%%%x5%%%x4%%%x3%%%x2%%%x1% >> (md)0x2000+8
+# put back spaces
+cat --locate=\xbf --replace=\x20 (md)0x2000+8 > nul
+# put back "
+cat --locate=\xbe --replace=\x22 (md)0x2000+8 > nul
+# put back \
+cat --locate=\xbd --replace=\x5c (md)0x2000+8 > nul
+
+#cat --locate=\x00\x00 --replace=\x20\x20 (md)0x2000+8 > nul
+
+set /a COL=%COL% + 8  > nul
+if %COL%==80 echo -e -n \r\n >> (md)0x2000+8
+if %COL%==80 set COL=0  > nul
+
+goto :EOF
+
+

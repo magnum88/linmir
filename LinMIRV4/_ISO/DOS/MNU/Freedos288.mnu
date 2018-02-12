@@ -1,0 +1,6 @@
+iftitle [if exist %MFOLDER%/MNU/Freedos288.ima.gz] $$STRm0FD
+map --mem %MFOLDER%/MNU/Freedos288.ima.gz (fd0)
+map --hook
+root (fd0)
+chainloader /kernel.sys || chainloader +1
+
